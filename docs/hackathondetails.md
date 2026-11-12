@@ -86,6 +86,10 @@ Organizer note: all outputs on slide 2 must be generated; brownie points for mor
 
 Suggested flow (slide 1): load GNM head → shape and expression keys → gaze shifts L/R/U/D → eyelid closure coordinated with gaze → UV texture transfer or baking → separate iris generation → render audit for seams. Toolkit: Blender, `bpy`, OpenCV, open 3D assets. Slide 2 still shows "Submission Due: Oct 28" (stale).
 
+**What "GNM" is (verified 12 Nov):** Google's Generative aNthropometric Model, https://github.com/google/GNM, Apache 2.0. Head mesh with eyeballs (separate cornea), teeth, tongue; eye and neck joints; 253 identity and 383 expression components; official UDIM UV layout (skin 1001, eyes 1002–1005, teeth 1006, tongue 1007). **No skin or iris texture is shipped**, which is why textures carry 60 points.
+
+**Reference videos:** both by Chris Jones, "Eye Piece" and "Flexpressions": extreme eye close-ups with eyelid skin sliding over the eyeball, wet highlights, lashes and constant micro-movement.
+
 **Open conflict:** the launch spec (`eyes.move(h, v)` API, 35 cm target, 40 cm camera, 10-frame clockwise sequence, per-frame JSON) is not mentioned in the update. Plan: deliver both, since the launch spec is cheap once the rig exists.
 
 ## Track 2 — EchoGesture: Sign Language Prediction on Edge Device
