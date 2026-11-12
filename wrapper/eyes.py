@@ -57,7 +57,7 @@ def move(h, v):
     keys = head.data.shape_keys.key_blocks
     for side in SIDES.values():
         yaw, pitch = _angles(arm, side, h, v)
-        scene.set_gaze(arm, side, yaw, pitch)
+        scene.pose_eye(head, arm, side, yaw, pitch)
         for name, value in motion.lids(yaw, pitch).items():
             keys[f"{name}_{side}"].value = value
     bpy.context.view_layer.update()

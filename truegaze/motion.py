@@ -16,6 +16,7 @@ import numpy as np
 
 EYE_HALF_SPAN = 0.031  # m, eye centre to face midline (GNM template)
 DEFAULT_DISTANCE = 0.6  # m, fixation distance for conversational gaze
+BULGE_YAW, BULGE_PITCH = 32.0, 24.0  # gaze angles (deg) at which the lid-bulge keys were fitted
 PUPIL_REST = -0.9  # pupil key at rest: GNM's template pupil is dilated (5.4 mm), this gives about 3.8 mm
 
 
@@ -56,6 +57,15 @@ def lids(yaw, pitch):
     return {"upper_lid_up": float(np.clip(pitch / 25, 0, 1)), "upper_lid_down": float(np.clip(-pitch / 30, 0, 1)),
             "lower_lid_up": float(np.clip(-pitch / 60, 0, 0.3) + 0.1 * np.clip(abs(yaw) / 30, 0, 1)),
             "brow_raise": float(np.clip(pitch / 30, 0, 0.8))}
+
+
+def bulge(side, yaw, pitch):
+    """Weights of one eye's four lid-bulge keys for its gaze (degrees). The cornea only reaches the
+    lid at larger angles, so the lift grows slowly at first: weight = (angle / limit) squared."""
+    toward_nose = -yaw if side == "left" else yaw
+    w = lambda angle, limit: float(np.clip(angle / limit, 0, 1) ** 2)
+    return {f"bulge_in_{side}": w(toward_nose, BULGE_YAW), f"bulge_out_{side}": w(-toward_nose, BULGE_YAW),
+            f"bulge_up_{side}": w(pitch, BULGE_PITCH), f"bulge_down_{side}": w(-pitch, BULGE_PITCH)}
 
 
 class Clip:

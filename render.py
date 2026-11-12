@@ -28,8 +28,10 @@ def keyframe(head, arm, frames):
     n = len(frames["blink"])
     for f in range(n):
         for side in SIDES:
-            scene.set_gaze(arm, side, frames[f"{side}_yaw"][f], frames[f"{side}_pitch"][f])
+            scene.pose_eye(head, arm, side, frames[f"{side}_yaw"][f], frames[f"{side}_pitch"][f])
             arm.pose.bones[f"{side}_eye"].keyframe_insert("rotation_quaternion", frame=f + 1)
+            for where in ("in", "out", "up", "down"):
+                keys[f"bulge_{where}_{side}"].keyframe_insert("value", frame=f + 1)
             for name in ("blink", "upper_lid_up", "upper_lid_down", "lower_lid_up", "brow_raise"):
                 keys[f"{name}_{side}"].value = frames[name][f]
                 keys[f"{name}_{side}"].keyframe_insert("value", frame=f + 1)

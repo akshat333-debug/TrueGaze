@@ -20,7 +20,7 @@ POSES = {"neutral": (0, 0, 0), "left": (25, 0, 0), "right": (-25, 0, 0), "up": (
          "half_blink": (0, 0, 0.5), "blink": (0, 0, 1.0)}
 for name, (yaw, pitch, blink) in POSES.items():
     for side in ("left", "right"):
-        scene.set_gaze(arm, side, yaw, pitch)
+        scene.pose_eye(head, arm, side, yaw, pitch)
         keys[f"blink_{side}"].value = blink
     bpy.context.scene.render.filepath = str(ROOT / "renders" / "tmp" / f"spike_{name}.png")
     bpy.ops.render.render(write_still=True)

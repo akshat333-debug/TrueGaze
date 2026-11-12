@@ -11,7 +11,7 @@ from mathutils import Matrix, Vector
 
 from . import materials
 from .gnm import GNM, PUPIL, to_blender
-from .motion import PUPIL_REST
+from .motion import PUPIL_REST, bulge
 
 ROOT = Path(__file__).resolve().parent.parent
 CAMERA_DISTANCE = 0.40  # m in front of the eye midpoint (launch spec)
@@ -62,6 +62,11 @@ def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
         key = head.shape_key_add(name=name)
         key.slider_min = -1.0  # controls are linear, so negative values are valid
         key.data.foreach_set("co", to_blender(m.template + np.tensordot(coef, m.expression_basis, 1)).ravel())
+    bulge = np.load(ROOT / "assets" / "bulge.npz")  # lid skin lifting over the cornea as the eye turns
+    for name in (k for k in bulge.files if k != "index"):
+        moved = m.template.copy()
+        moved[bulge["index"]] += bulge[name]
+        head.shape_key_add(name=name).data.foreach_set("co", to_blender(moved).ravel())
     key = head.shape_key_add(name="pupil")  # GNM's own iris component: positive dilates
     key.slider_min = -2.0
     key.value = PUPIL_REST
@@ -138,3 +143,12 @@ def set_gaze(arm, side, yaw_deg, pitch_deg):
     pivot = Matrix.Translation(rest.to_translation())
     # shortcut: assumes neck and head are at rest, switch to parent-relative maths when the head moves
     bone.matrix = pivot @ turn @ pivot.inverted() @ rest
+
+
+def pose_eye(head, arm, side, yaw_deg, pitch_deg):
+    """Turns one eye and sets everything that depends only on its gaze: the lid bulge over the cornea."""
+    set_gaze(arm, side, yaw_deg, pitch_deg)
+    keys = head.data.shape_keys.key_blocks
+    for name, value in bulge(side, yaw_deg, pitch_deg).items():
+        keys[name].value = value
+    return keys

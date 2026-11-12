@@ -41,6 +41,7 @@ python3 -m pytest tests -q
 
 - **Head** (`truegaze/gnm.py`, `truegaze/scene.py`): GNM v3 read directly from Google's weights with NumPy and rebuilt in Blender: mesh, GNM's own UDIM UV layout, a four-bone rig. Eyeballs rotate about their real centres.
 - **Eyelid and brow controls** (`tools/fit_controls.py`): GNM's eye expressions are 200 unnamed statistical components. We solve for blink, lid raise/lower and brow raise/lower as combinations of them, with a constraint that the lid never sinks into the eyeball. The controls live in GNM's own expression space, so they work on any GNM head.
+- **Lid bulge** (`tools/fit_bulge.py`): the cornea stands 1.6 mm proud of the eyeball. As the eye turns, the lid skin over it lifts, as on a real eye; without this the cornea cut into the lid.
 - **Textures** (`truegaze/textures.py`): each set has 4K skin colour, roughness and pore-height maps, and a 2K map per eye with sclera, veins, iris fibres, collarette and limbal ring. Left and right irises share colours but have their own patterns, as real eyes do.
 - **Shading** (`truegaze/materials.py`): skin with subsurface scattering; a clear cornea that refracts, so the iris has depth and shifts with view angle.
 - **Lashes, brows, tear line** (`tools/make_hair.py`): about 2,800 hair strands and a wet bead along each lid edge. They are rebuilt for every control, so lashes turn with the lid when it closes.

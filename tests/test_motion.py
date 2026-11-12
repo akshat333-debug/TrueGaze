@@ -60,3 +60,11 @@ def test_left_means_screen_left_by_default():
 def test_unknown_input_rejected():
     with pytest.raises(ValueError):
         preset("Up")
+
+
+def test_bulge_keys_match_gaze_direction():
+    from truegaze.motion import BULGE_YAW, bulge
+    left = bulge("left", -BULGE_YAW, 0)    # left eye turned to the character's right = toward the nose
+    assert left["bulge_in_left"] == 1 and left["bulge_out_left"] == 0
+    assert bulge("right", -BULGE_YAW, 0)["bulge_out_right"] == 1
+    assert bulge("left", 0, 12)["bulge_up_left"] == pytest.approx(0.25) and bulge("left", 0, 0)["bulge_down_left"] == 0

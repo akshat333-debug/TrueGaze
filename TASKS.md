@@ -38,7 +38,8 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 ### 13 Nov — lashes, brows, tear line, launch-spec API, .blend, audits
 - Done: `tools/make_hair.py` (about 2,800 strands + tear line in `assets/hair.npz`, shape keys per control, driven from the head's keys); per-set hair colour in `textures/<set>/info.json`; skin texture now shaded under brows and along the lash line; iris has wavy fibres, collarette, furrows, pupil frill. `wrapper/eyes.py` (move/reset/render, 10-frame sequence, `metadata.json`, direction check 5/5). `render.py --all` and `--blend`. `apply_textures.py` (stock or random-identity GNM head). `tools/seam_audit.py` (+ `uv_maps/` sheets). README rewritten. 13 tests pass.
 - Facts found: GNM lid margin ring is the wet inner edge; lash roots must sit 0.9–1.6 mm further out. Only front-of-face UV seams are along the inner lip line. The pale cheek streak was plain specular sheen from the softbox (gone with specular off); skin is now rougher (0.62) with lower specular (0.3).
-- Order matters: `tools/fit_controls.py` → `tools/make_hair.py` → `python3 -m truegaze.textures` (textures read brow/lash positions from `assets/hair.npz`).
+- Lid bulge added (`tools/fit_bulge.py`, D-014): the cornea was cutting up to 1.5 mm into the lids at large gaze angles.
+- Order matters: `tools/fit_controls.py` → `tools/fit_bulge.py` and `tools/make_hair.py` → `python3 -m truegaze.textures` (textures read brow/lash positions from `assets/hair.npz`).
 - Gotchas: never edit a running chain script; on 8 GB RAM run one Blender at a time. EEVEE draft shows lashes and blink fine.
 - Next: photo-based skin albedo (biggest remaining realism gap), lid bulge over the cornea, final-quality videos on a faster GPU, Dockerfile + fresh-clone test, deck and demo video, commit `textures/` at the 17 Nov checkpoint.
 ### 13 Nov — first textures and shading

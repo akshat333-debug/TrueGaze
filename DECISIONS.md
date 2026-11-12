@@ -55,3 +55,7 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 ### D-013 · 13 Nov · Seams are measured, not assumed
 - `tools/seam_audit.py` finds every UV seam edge of the skin and compares texture colour on both sides. GNM's skin has 142 seam edges; the only ones on the front of the face run along the inner lip line.
 - The generator fades random detail out near seams and keeps region colours unblurred there, because neither can match across a seam otherwise. Front-of-face step is now 6/255 (was 12). Remaining larger steps are inside the mouth and on the back of the head.
+
+### D-014 · 13 Nov · Lid bulge as four fitted keys per eye
+- Measured: at 32° sideways or 24° vertical gaze the cornea cut up to 1.5 mm into 30–150 lid vertices. `tools/fit_bulge.py` pushes that skin out just enough and smooths it into a mound; `motion.bulge()` weights the keys by (angle / limit)², because the cornea only reaches the lid at larger angles.
+- Fitted on the open lid only. During a blink with the eye turned the fit is approximate (blinks last 0.3 s). Lashes do not ride the bulge (under 1.5 mm).
