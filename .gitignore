@@ -3,3 +3,5 @@ __pycache__/
 *.blend1
 renders/tmp/
 assets/cache/
+*.mp4
+!outputs/videos/*.mp4

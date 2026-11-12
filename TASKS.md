@@ -35,6 +35,10 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 13 Nov — reference video studied
+- Done: "Eye Piece" (Chris Jones) analysed; notes and gap list in `docs/reference_eye_piece.md`. Biggest gaps vs reference: lighting, cornea refraction, wet lid margin, lashes/brows, skin micro-detail.
+- Gotchas: the reference MP4 sits in the repo root but is git-ignored (`*.mp4`, except `outputs/videos/`). Never commit it.
+- Next: textures (skin, iris, sclera) plus the dark-studio hero light rig.
 ### 12 Nov — motion engine and first videos
 - Done: brow raise/lower controls; `truegaze/motion.py` (saccade main sequence + overshoot, vergence, lid-follow, blinks incl. gaze-evoked, drift + micro-saccades, pupil hippus, Bell's dip); `tests/test_motion.py` (10 pass); `render.py` with the 3 inputs, caption stamp and MP4 output; pupil shape key from GNM's iris component. Draft Left video checked: eyes go to viewer's left, blinks look right. Frames in `docs/draft_left_day1.png`.
 - Cornea is now a Fresnel glass shell without refraction so it works in EEVEE; B should add refraction for Cycles in `materials.py`.
