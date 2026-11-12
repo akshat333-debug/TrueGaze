@@ -5,7 +5,8 @@
   blender --background --python render.py -- --input "Generate Motion" --seed 3 --quality final
 
 Options: --input Left|Right|"Generate Motion", --seed N, --frame screen|subject (whose left "Left" means),
---quality draft|final, --texture 01..08, --out path.mp4
+--quality draft|final, --texture 01..08, --out path.mp4, --all (all three inputs),
+--blend path.blend (save the animated scene instead of rendering)
 """
 import argparse
 import sys
@@ -18,6 +19,7 @@ sys.path.insert(0, str(ROOT))
 from truegaze import motion, scene  # noqa: E402
 
 FPS = 30
+INPUTS = ["Left", "Right", "Generate Motion"]
 SIDES = ("left", "right")
 
 
@@ -38,14 +40,23 @@ def keyframe(head, arm, frames):
 
 def main(argv):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--input", required=True, choices=["Left", "Right", "Generate Motion"])
+    ap.add_argument("--input", choices=INPUTS)
+    ap.add_argument("--all", action="store_true", help="render all three inputs")
+    ap.add_argument("--blend", help="save the animated scene to this .blend instead of rendering")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--frame", default="screen", choices=["screen", "subject"])
     ap.add_argument("--quality", default="draft", choices=["draft", "final"])
     ap.add_argument("--texture", default="01", help="texture set name in textures/")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
+    if bool(a.all) == bool(a.input) or (a.all and (a.out or a.blend)):
+        ap.error("give either --input or --all; --out and --blend need a single --input")
+    for name in INPUTS if a.all else [a.input]:
+        a.input = name
+        render(a)
 
+
+def render(a):
     head, arm = scene.build(a.texture)
     n = keyframe(head, arm, motion.render_clip(motion.preset(a.input, a.seed, a.frame), FPS))
     sc = bpy.context.scene
@@ -62,6 +73,13 @@ def main(argv):
         setattr(sc.render, f"use_stamp_{flag}", False)
     sc.render.use_stamp_note = True
     sc.render.stamp_note_text = f"Input: {a.input}" + (" (viewer's side)" if a.frame == "screen" and a.input != "Generate Motion" else "")
+    if a.blend:  # the .blend deliverable: animation on the Timeline, textures inside the file
+        sc.frame_set(1)
+        bpy.ops.file.pack_all()
+        Path(a.blend).parent.mkdir(parents=True, exist_ok=True)
+        bpy.ops.wm.save_as_mainfile(filepath=str(Path(a.blend).resolve()), compress=True)
+        print("WROTE", a.blend)
+        return
     sc.render.image_settings.file_format = "FFMPEG"
     sc.render.ffmpeg.format, sc.render.ffmpeg.codec = "MPEG4", "H264"
     sc.render.ffmpeg.constant_rate_factor = "HIGH"

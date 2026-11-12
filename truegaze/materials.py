@@ -31,7 +31,7 @@ def skin(folder):
     bump.inputs["Distance"].default_value = 0.0006  # m: pores are a fraction of a millimetre deep
     nt.links.new(_image(nt, folder / "height.1001.jpg", data=True).outputs["Color"], bump.inputs["Height"])
     nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
-    bsdf.inputs["Specular IOR Level"].default_value = 0.35
+    bsdf.inputs["Specular IOR Level"].default_value = 0.3
     bsdf.inputs["Subsurface Weight"].default_value = 0.3
     bsdf.inputs["Subsurface Radius"].default_value = (1.0, 0.35, 0.2)
     bsdf.inputs["Subsurface Scale"].default_value = 0.004

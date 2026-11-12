@@ -51,6 +51,13 @@ def eye_angles(direction_yaw, direction_pitch, distance=DEFAULT_DISTANCE):
     return out
 
 
+def lids(yaw, pitch):
+    """Lid and brow shape-key weights that go with a gaze direction (degrees): lids follow the eye."""
+    return {"upper_lid_up": float(np.clip(pitch / 25, 0, 1)), "upper_lid_down": float(np.clip(-pitch / 30, 0, 1)),
+            "lower_lid_up": float(np.clip(-pitch / 60, 0, 0.3) + 0.1 * np.clip(abs(yaw) / 30, 0, 1)),
+            "brow_raise": float(np.clip(pitch / 30, 0, 0.8))}
+
+
 class Clip:
     """Timeline of gaze shifts and blinks. Times in seconds."""
 
@@ -124,10 +131,8 @@ def render_clip(clip, fps=30):
         for side, (y, p) in eye_angles(yaw, pitch, dist).items():
             out[f"{side}_yaw"][i], out[f"{side}_pitch"][i] = y, p
         out["blink"][i] = closure
-        out["upper_lid_up"][i] = np.clip(pitch / 25, 0, 1)
-        out["upper_lid_down"][i] = np.clip(-pitch / 30, 0, 1)
-        out["lower_lid_up"][i] = np.clip(-pitch / 60, 0, 0.3) + 0.1 * np.clip(abs(yaw) / 30, 0, 1)
-        out["brow_raise"][i] = np.clip(pitch / 30, 0, 0.8)
+        for name, value in lids(yaw, pitch).items():
+            out[name][i] = value
         out["pupil"][i] = PUPIL_REST + 0.2 * math.sin(2 * math.pi * 0.35 * ti) + 0.1 * math.sin(2 * math.pi * 0.9 * ti + 1)
     return out
 

@@ -41,3 +41,17 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 - This is the floor that guarantees the "5–10 UV maps" output. Photo-based skin albedo (Route A transfer or Route B diffusion) replaces `color.1001` per set only where it beats the generated one in side-by-side renders.
 - Texture files are plain per-tile images named with GNM's UDIM numbers (`color.1001.jpg`), so they drop onto any GNM head.
 - `textures/` stays out of git until the 17 Nov checkpoint to avoid bloating history while the look changes.
+
+### D-011 · 13 Nov · Lashes, brows and tear line are generated mesh strands with their own shape keys
+- GNM has no hair. Blender's hair systems are hard to drive from a headless script and do not follow shape keys reliably, so strands are thin mesh tubes built by `tools/make_hair.py` into `assets/hair.npz`.
+- For every eyelid control the lashes are rebuilt from the moved lid margin, and the difference is stored as a shape key. Drivers copy the head's key values (no Python in the driver), so the `.blend` plays without script permissions.
+- Lash follicles sit 0.9–1.6 mm out from the wet lid edge: GNM's lid has real thickness, and rooting them at the inner edge buried the roots.
+
+### D-012 · 13 Nov · Launch-spec mapping
+- `eyes.move(h, v)`: both eyes aim at one point on a plane 35 cm in front of the eye midpoint; h and v in [-1, 1] move it up to 5 cm (the spec's motion bound). h > 0 is the viewer's right, v > 0 is up: with h = sin θ, v = cos θ this starts at the top and runs clockwise as the viewer sees it.
+- Eye rotation is reported as XYZ Euler degrees in the world frame relative to straight ahead; pupil centres in pixels of the 1024×1024 render. Units are written into `metadata.json`.
+- The direction check (Left/Right/Up/Down/Reset) is measured from projected pupil positions, not from the commanded angles.
+
+### D-013 · 13 Nov · Seams are measured, not assumed
+- `tools/seam_audit.py` finds every UV seam edge of the skin and compares texture colour on both sides. GNM's skin has 142 seam edges; the only ones on the front of the face run along the inner lip line.
+- The generator fades random detail out near seams and keeps region colours unblurred there, because neither can match across a seam otherwise. Front-of-face step is now 6/255 (was 12). Remaining larger steps are inside the mouth and on the back of the head.

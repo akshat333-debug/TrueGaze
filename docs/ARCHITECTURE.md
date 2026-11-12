@@ -32,11 +32,13 @@ render.py --input Left|Right|"Generate Motion"  ->  frames -> MP4, stills, metad
 | `truegaze/materials.py` | skin, eye and refracting cornea shaders, one material per UDIM tile | B | works |
 | `truegaze/textures.py` | generates texture sets in GNM's UV layout (`python3 -m truegaze.textures`) | B | baseline |
 | `tools/stills.py` | front and close stills per texture set | B | works |
+| `tools/make_hair.py` | lashes, brows, tear line with per-control shape keys (`assets/hair.npz`) | A | works |
+| `wrapper/eyes.py` | launch-spec API `move/reset/render`, 10-frame sequence, metadata, direction check | C | works |
+| `apply_textures.py` | wraps a set on a stock or random-identity GNM head | C | works |
+| `tools/seam_audit.py` | measures colour steps across UV seams; writes `uv_maps/` sheets | B | works |
 | `truegaze/motion.py` | gaze, saccades, vergence, lids, blinks, brows, pupil | A | done, tested |
 | `truegaze/eyes.py`, `wrapper/eyes.py` | `move(h, v)`, `reset()`, `render()` | C | todo |
-| `textures/` | skin transfer, iris synthesis, detail maps, seam audit | B | todo |
 | `render.py` | 3 inputs to MP4, caption, draft/final | C | done (draft) |
-| `apply_textures.py` | portability proof | C | todo |
 | `tests/`, `Dockerfile` | checks and reproducible run | C | todo |
 
 ## Conventions

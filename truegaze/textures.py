@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 from scipy.interpolate import LinearNDInterpolator
 from scipy.ndimage import gaussian_filter, zoom
 
@@ -53,7 +53,7 @@ def save(array, path):
 
 # ---------- skin (tile 1001) ----------
 
-def skin_masks(m, n):
+def skin_masks(m, n, seam):
     """Face regions painted into UV space, from GNM's vertex groups. Dict of (n, n) arrays in 0..1."""
     regions = {
         "lips": m.group("upper_lip") | m.group("lower_lip"),
@@ -67,25 +67,51 @@ def skin_masks(m, n):
     uv, first = np.unique(m.quad_uvs[sel].reshape(-1, 2), axis=0, return_index=True)
     vertex = m.quads[sel].ravel()[first]
     values = np.stack([g[vertex] for g in regions.values()], axis=1).astype(np.float32)
-    small = 512  # regions are smooth, so interpolate small and enlarge
+    small = min(n, 1024)  # interpolate at reduced size and enlarge; finer than this changes nothing visible
     c = (np.arange(small) + 0.5) / small
     grid = LinearNDInterpolator(uv, values, fill_value=0)(*np.meshgrid(c, 1 - c))
     # groups are on/off per vertex; blur so regions fade into each other (lips and wet tissue stay crisper)
-    return {k: gaussian_filter(np.clip(zoom(grid[..., i], n / small, order=1), 0, 1), n / (600 if k in ("lips", "inside") else 130))
-            for i, k in enumerate(regions)}
+    # ...except on seams, where the unblurred value is kept: it is the same on both sides of the seam
+    out = {}
+    for i, k in enumerate(regions):
+        sharp = np.clip(zoom(grid[..., i], n / small, order=1), 0, 1)
+        out[k] = sharp + (1 - seam) * (gaussian_filter(sharp, n / (600 if k in ("lips", "inside") else 130)) - sharp)
+    return out
+
+
+def seam_mask(m, n):
+    """1 on the skin's UV seams, fading to 0 a few millimetres away. Random detail is faded out there:
+    it cannot match on both sides of a seam, and a mismatch shows as a line on the head."""
+    sel = m.quad_tiles() == 1001
+    edges = {}
+    for v, uv in zip(m.quads[sel], m.quad_uvs[sel]):
+        for k in range(4):
+            a, b = int(v[k]), int(v[(k + 1) % 4])
+            edges.setdefault((min(a, b), max(a, b)), []).append((uv[k], uv[(k + 1) % 4]))
+    small = n // 4
+    img = Image.new("L", (small, small))
+    draw = ImageDraw.Draw(img)
+    for sides in edges.values():
+        if len(sides) == 1 or np.abs(np.add(*sides[0]) - np.add(*sides[1])).max() > 1e-5:
+            for p, q in sides:
+                draw.line([(p[0] * small, (1 - p[1]) * small), (q[0] * small, (1 - q[1]) * small)], fill=255, width=2)
+    sigma = small / 150
+    blurred = gaussian_filter(np.asarray(img, np.float32) / 255, sigma) * sigma * 2.5
+    return np.clip(zoom(blurred, n / small, order=1), 0, 1)
 
 
 def skin(m, n, tone, seed):
     """Returns colour (n, n, 3), roughness (n, n), height (n, n), all 0..1."""
     rng = np.random.default_rng(seed)
-    k = skin_masks(m, n)
     tone = np.array(tone, np.float32)
     dark = 1 - tone.mean()  # darker skin shows less redness
+    seam = seam_mask(m, n)
+    k, detail = skin_masks(m, n, seam), 1 - seam
 
     color = np.ones((n, n, 3), np.float32) * tone
-    color *= (1 + 0.025 * noise(n, n // 24, rng) + 0.015 * noise(n, n // 160, rng))[..., None]
+    color *= (1 + detail * (0.025 * noise(n, n // 24, rng) + 0.015 * noise(n, n // 160, rng)))[..., None]
     blotch = noise(n, n // 60, rng)  # uneven blood flow
-    red = 0.025 * blotch + 0.10 * k["cheeks"] + 0.08 * k["nose"] + 0.06 * k["orbital"]
+    red = 0.025 * blotch * detail + 0.10 * k["cheeks"] + 0.08 * k["nose"] + 0.06 * k["orbital"]
     color *= 1 + red[..., None] * np.array([0.6, -0.5, -0.6]) * (0.4 + 0.6 * (1 - dark))
     color *= 1 - k["under_eye"][..., None] * np.array([0.10, 0.10, 0.06])
     color *= 1 - 0.08 * k["orbital"][..., None]
@@ -96,7 +122,7 @@ def skin(m, n, tone, seed):
     # freckles and small moles
     spots = gaussian_filter(rng.random((n, n), np.float32), 1.5)
     spots = smoothstep(np.quantile(spots[::8, ::8], 0.997), spots.max(), spots)
-    color *= 1 - 0.35 * spots[..., None] * (1 - k["lips"][..., None])
+    color *= 1 - 0.35 * (spots * detail)[..., None] * (1 - k["lips"][..., None])
 
     # pores: small dents, plus fine creases, stronger on nose and cheeks
     white = rng.standard_normal((n, n)).astype(np.float32)
@@ -108,8 +134,8 @@ def skin(m, n, tone, seed):
     bumps = (0.6 * pores + 0.25 * creases) * amount * (1 - k["inside"]) + 0.08 * noise(n, n // 400, rng)
     height = 0.5 + 0.12 * bumps
 
-    rough = 0.56 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.04 * k["orbital"] - 0.30 * k["inside"]
-    rough = rough + 0.05 * noise(n, n // 200, rng) - 0.10 * bumps * 0.3
+    rough = 0.62 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.04 * k["orbital"] - 0.30 * k["inside"]
+    rough = rough + 0.03 * noise(n, n // 200, rng) - 0.10 * bumps * 0.3
     return color, rough, height
 
 
