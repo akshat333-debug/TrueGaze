@@ -17,6 +17,8 @@ Rubric (12 Nov deck): **texture photorealism 60**, kinematic accuracy 20, code a
 ## Strategy in one paragraph
 Build our own small, dependency-light pipeline: export GNM once to a compact file, build the Blender scene from a script, and put most effort into **skin + iris textures and eye-region shading** (60 pts), a **physiologically modelled motion engine** (20 pts + brownie), and **one-command reproducibility with textures that drop onto a stock GNM head** (20 pts). Close-up framing on the eye region, like the reference videos, hides what GNM lacks (hair) and shows what is judged.
 
+> **Update 12 Nov (D-009):** Day-1 spike passed. GNM is read directly with NumPy inside Blender, so `tools/export_gnm.py` and `assets/gnm_head.npz` below are replaced by `truegaze/gnm.py` and a small `assets/controls.npz`.
+
 ## Architecture
 ```
 TrueGaze/

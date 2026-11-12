@@ -1,13 +1,12 @@
 # Architecture
 
-Status 12 Nov: design only, nothing built yet. Update the status line of each part as it lands.
+Status 12 Nov: reader, eyelid control fit and scene builder work (Day-1 spike). Flat stand-in colours, no textures or motion engine yet.
 
 ## Flow
 ```
 Google GNM Head v3 weights (Apache 2.0, auto-download)
-        | tools/export_gnm.py   (outside Blender, Python 3.13 venv)
-        v
-assets/gnm_head.npz  -- template, UDIM UVs, joints, skin weights, identity presets, expression directions
+        | truegaze/gnm.py       (NumPy reader, runs inside Blender; weights cached in assets/cache/)
+        | tools/fit_controls.py -> assets/controls.npz (named eyelid controls as GNM expression coefficients)
         | truegaze/scene.py     (inside Blender 4.5 LTS, Python 3.11)
         v
 Blender scene: mesh + shape keys + armature (eye_L, eye_R, neck) + materials + cameras + lights
@@ -22,12 +21,15 @@ render.py --input Left|Right|"Generate Motion"  ->  frames -> MP4, stills, metad
 - UDIM tiles: 1001 skin, 1002 left eye interior, 1003 left cornea, 1004 right eye interior, 1005 right cornea, 1006 teeth, 1007 tongue.
 - Controls: 253 identity, 383 expression (100 left eye, 100 right eye, 150 lower face, 32 tongue, 1 iris), joint rotations for neck and each eyeball.
 - No skin or iris texture is shipped.
+- v3.0 pose correctives are zero: template + identity + expression, then linear blend skinning over 4 joints (neck, head, left_eye, right_eye).
 
 ## Parts
 | part | job | owner | status |
 |---|---|---|---|
-| `tools/export_gnm.py` | GNM to compact npz | A | todo |
-| `truegaze/scene.py`, `materials.py` | build scene and shaders | A / B | todo |
+| `truegaze/gnm.py` | read GNM weights, UDIM tiles | A | done |
+| `tools/fit_controls.py` | blink and lid controls | A | done (brows, lid-follow todo) |
+| `truegaze/scene.py` | mesh, shape keys, rig, camera, lights | A | done (flat colours) |
+| `truegaze/materials.py` | skin, sclera, iris, cornea shaders | B | todo |
 | `truegaze/motion.py` | gaze, saccades, vergence, lids, blinks, brows, pupil | A | todo |
 | `truegaze/eyes.py`, `wrapper/eyes.py` | `move(h, v)`, `reset()`, `render()` | C | todo |
 | `textures/` | skin transfer, iris synthesis, detail maps, seam audit | B | todo |

@@ -3,9 +3,9 @@
 Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + motion, **B** textures + shading, **C** pipeline, tests, docs, deck, video. Full plan: `docs/PLAN.md`.
 
 ## Next up (13 Nov — Day 1 spike)
-- [ ] A: `tools/export_gnm.py`; GNM head in Blender; eyes rotate about their centres; find a clean eyelid close
+- [x] A: GNM head in Blender; eyes rotate about their centres; clean eyelid close found (12 Nov, **GO on GNM**)
 - [ ] B: export GNM UV templates per tile; collect CC0 source skins, log in `docs/ASSETS.md`
-- [ ] C: `render.py` skeleton renders a grey head to MP4 headless
+- [ ] C: `render.py` skeleton renders a grey head to MP4 headless (stills work via `tools/spike.py`)
 - [ ] All: install Blender 4.5.16 LTS (done on Akshat's Mac)
 - [ ] All: watch the two reference videos, note traits to imitate
 
@@ -35,6 +35,12 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 12 Nov — Day-1 spike passed
+- Done: `truegaze/gnm.py` (NumPy reader, auto-download + checksum), `tools/fit_controls.py` (named eyelid controls as GNM expression coefficients, saved to `assets/controls.npz`), `truegaze/scene.py` (mesh, UDIM UVs, shape keys, 4-bone rig, camera at 40 cm, lights), `tools/spike.py`. Renders show eyes turning left/right/up/down and a full blink with no eyeball poking through.
+- Facts found: GNM v3.0 pose correctives are all zero, so the model is plain skinning and a Blender armature reproduces it exactly. Lid margin = vertices in both `eye_sockets` and `skin_exterior` (80 per eye). Blink fit: max coefficient 2.9 (normal range ±3), lid gap 0.12 mm.
+- Next: lids must follow gaze (looking up hides the iris under the lid now); brow controls; `motion.py`; textures. Stand-in flat colours look washed out, expected until textures land.
+- Gotchas: about 14 s per 1024×512 frame at 48 samples on the M3, so a 10 s video at 30 fps is over an hour: use draft settings while iterating. `assets/cache/` (53 MB weights) is not committed.
+- Run: `python3 tools/fit_controls.py` then `/Applications/Blender.app/Contents/MacOS/Blender --background --python tools/spike.py` (images in `renders/tmp/`)
 ### 12 Nov — plan
 - Done: plan in `docs/PLAN.md`; GNM identified as Google's Apache-2.0 head model; Blender installed at `/Applications/Blender.app` (Python 3.11, Metal GPU found).
 - Next: Day 1 spike above. Go/no-go on GNM by end of 13 Nov.

@@ -30,3 +30,8 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 ### D-008 · 12 Nov · Required outputs before brownie features
 - By 17 Nov every required output exists end to end at draft quality. Extras (lid bulge, lashes, tear line, head follow) only after that.
 
+### D-009 · 12 Nov · GO on GNM; no export step (amends D-004)
+- Spike passed: head builds in Blender, eyes rotate, eyelids close cleanly. The MPFB fallback is dropped.
+- GNM's weights are a plain `.npz` and v3.0 has zero pose correctives, so `truegaze/gnm.py` reads the official file directly with NumPy inside Blender. No Python 3.13 environment, no TensorFlow, no `export_gnm.py`.
+- Our controls are stored as coefficient vectors in GNM's own expression space (`assets/controls.npz`, a few KB), so they work on any GNM head, which supports the portability score.
+
