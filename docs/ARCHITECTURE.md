@@ -1,6 +1,6 @@
 # Architecture
 
-Status 12 Nov: reader, eyelid/brow controls, scene, motion engine and `render.py` work. Flat stand-in colours; no textures yet.
+Status 12 Nov: reader, eyelid/brow controls, scene, motion engine and `render.py` work. 13 Nov: generated texture sets (skin, left/right iris) and shaders are wired in; skin is a procedural baseline, photo-based skin still to come.
 
 ## Flow
 ```
@@ -29,7 +29,9 @@ render.py --input Left|Right|"Generate Motion"  ->  frames -> MP4, stills, metad
 | `truegaze/gnm.py` | read GNM weights, UDIM tiles | A | done |
 | `tools/fit_controls.py` | blink and lid controls | A | done (brows, lid-follow todo) |
 | `truegaze/scene.py` | mesh, shape keys, rig, camera, lights | A | done (flat colours) |
-| `truegaze/materials.py` | skin, sclera, iris, cornea shaders | B | todo |
+| `truegaze/materials.py` | skin, eye and refracting cornea shaders, one material per UDIM tile | B | works |
+| `truegaze/textures.py` | generates texture sets in GNM's UV layout (`python3 -m truegaze.textures`) | B | baseline |
+| `tools/stills.py` | front and close stills per texture set | B | works |
 | `truegaze/motion.py` | gaze, saccades, vergence, lids, blinks, brows, pupil | A | done, tested |
 | `truegaze/eyes.py`, `wrapper/eyes.py` | `move(h, v)`, `reset()`, `render()` | C | todo |
 | `textures/` | skin transfer, iris synthesis, detail maps, seam audit | B | todo |

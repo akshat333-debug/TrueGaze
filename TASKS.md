@@ -35,6 +35,13 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 13 Nov — first textures and shading
+- Done: `truegaze/textures.py` makes 8 texture sets in GNM's UV layout (4K skin colour/roughness/height in tile 1001; 2K eye colour for 1002 left and 1004 right, each eye its own iris and vein pattern). `truegaze/materials.py` assigns one material per UDIM tile; cornea refracts in Cycles. Dark-studio lighting (softbox key + weak fill). Pupil now rests at about 3.8 mm (`PUPIL_REST`; GNM's template pupil is dilated). `tools/stills.py` renders a front and a close still per set. `render.py --texture 01..08`. 12 tests pass.
+- Facts found: eye tiles are polar (eye axis at centre; pupil edge r=0.050, iris edge r=0.185 in UV, non-linear vs real radius). Skin tile: eyes are only 0.14 UV apart, so 4K gives about 0.11 mm per texel at the eyes.
+- Honest state: eyes read fairly well; skin is a clean procedural baseline and still looks CG. Biggest missing realism: lashes, brows, wet lid margin, photo-based skin albedo (Route A/B in the plan).
+- Gotchas: `textures/` is git-ignored until the 17 Nov checkpoint (69 MB, still changing). After cloning run `python3 -m truegaze.textures` (about 3 min) before any render.
+- Next: lashes and brows (hair curves), wet lid margin, then photo-based skin; Right and Generate Motion draft videos; `.blend` export.
+- Run: `python3 -m truegaze.textures` then `/Applications/Blender.app/Contents/MacOS/Blender --background --python tools/stills.py -- 01 --samples 48`
 ### 13 Nov — reference video studied
 - Done: "Eye Piece" (Chris Jones) analysed; notes and gap list in `docs/reference_eye_piece.md`. Biggest gaps vs reference: lighting, cornea refraction, wet lid margin, lashes/brows, skin micro-detail.
 - Gotchas: the reference MP4 sits in the repo root but is git-ignored (`*.mp4`, except `outputs/videos/`). Never commit it.

@@ -9,61 +9,15 @@ import bpy
 import numpy as np
 from mathutils import Matrix, Vector
 
+from . import materials
 from .gnm import GNM, PUPIL, to_blender
+from .motion import PUPIL_REST
 
 ROOT = Path(__file__).resolve().parent.parent
 CAMERA_DISTANCE = 0.40  # m in front of the eye midpoint (launch spec)
 
-# stand-in colours until textures exist: name -> (base colour, roughness)
-FLAT = {"skin": ((0.80, 0.56, 0.45), 0.45), "sclera": ((0.92, 0.90, 0.88), 0.25),
-        "iris": ((0.30, 0.17, 0.08), 0.4), "pupil": ((0.0, 0.0, 0.0), 0.5),
-        "teeth": ((0.85, 0.82, 0.75), 0.3), "tongue": ((0.70, 0.30, 0.30), 0.4)}
 
-
-def _flat_material(name):
-    mat = bpy.data.materials.new(name)
-    mat.use_nodes = True
-    bsdf = mat.node_tree.nodes["Principled BSDF"]
-    bsdf.inputs["Base Color"].default_value = (*FLAT[name][0], 1)
-    bsdf.inputs["Roughness"].default_value = FLAT[name][1]
-    if name == "skin":
-        bsdf.inputs["Subsurface Weight"].default_value = 0.25
-        bsdf.inputs["Subsurface Radius"].default_value = (1.0, 0.35, 0.2)
-        bsdf.inputs["Subsurface Scale"].default_value = 0.004
-    return mat
-
-
-def _cornea_material():
-    """Clear shell with Fresnel reflections. Works in EEVEE and Cycles alike.
-
-    shortcut: no refraction, so the iris is not magnified by the cornea; materials.py should add it for Cycles.
-    """
-    mat = bpy.data.materials.new("cornea")
-    mat.use_nodes = True
-    mat.surface_render_method = "BLENDED"
-    nt = mat.node_tree
-    nt.nodes.remove(nt.nodes["Principled BSDF"])
-    fresnel, mix = nt.nodes.new("ShaderNodeFresnel"), nt.nodes.new("ShaderNodeMixShader")
-    clear, gloss = nt.nodes.new("ShaderNodeBsdfTransparent"), nt.nodes.new("ShaderNodeBsdfGlossy")
-    fresnel.inputs["IOR"].default_value = 1.376
-    gloss.inputs["Roughness"].default_value = 0.02
-    nt.links.new(fresnel.outputs["Fac"], mix.inputs["Fac"])
-    nt.links.new(clear.outputs["BSDF"], mix.inputs[1])
-    nt.links.new(gloss.outputs["BSDF"], mix.inputs[2])
-    nt.links.new(mix.outputs["Shader"], nt.nodes["Material Output"].inputs["Surface"])
-    return mat
-
-
-def _face_materials(m):
-    """Material name of each quad."""
-    names = np.full(len(m.quads), "skin", dtype=object)
-    for mat, groups in [("cornea", ("eye_exteriors",)), ("sclera", ("scleras",)), ("iris", ("irises",)),
-                        ("pupil", ("pupils",)), ("teeth", ("teeth_and_gums",)), ("tongue", ("tongue",))]:
-        names[m.group(*groups)[m.quads].all(axis=1)] = mat
-    return names
-
-
-def build(controls_path=ROOT / "assets" / "controls.npz"):
+def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
     """Clears the file and builds head, rig, camera and lights. Returns (head object, armature object)."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
     m = GNM()
@@ -73,11 +27,7 @@ def build(controls_path=ROOT / "assets" / "controls.npz"):
     uv = mesh.uv_layers.new(name="UDIM")
     offsets = (m.quad_tiles() - 1001)[:, None, None] * np.array([1.0, 0.0])
     uv.data.foreach_set("uv", (m.quad_uvs + offsets).ravel())
-    face_mats = _face_materials(m)
-    order = ["skin", "sclera", "iris", "pupil", "cornea", "teeth", "tongue"]
-    for name in order:
-        mesh.materials.append(_cornea_material() if name == "cornea" else _flat_material(name))
-    mesh.polygons.foreach_set("material_index", [order.index(n) for n in face_mats])
+    materials.assign(mesh, m.quad_tiles(), texture_set)
     mesh.polygons.foreach_set("use_smooth", [True] * len(m.quads))
     head = bpy.data.objects.new("Head", mesh)
     bpy.context.scene.collection.objects.link(head)
@@ -88,7 +38,8 @@ def build(controls_path=ROOT / "assets" / "controls.npz"):
         key.slider_min = -1.0  # controls are linear, so negative values are valid
         key.data.foreach_set("co", to_blender(m.template + np.tensordot(coef, m.expression_basis, 1)).ravel())
     key = head.shape_key_add(name="pupil")  # GNM's own iris component: positive dilates
-    key.slider_min = -1.0
+    key.slider_min = -2.0
+    key.value = PUPIL_REST
     key.data.foreach_set("co", to_blender(m.template + m.expression_basis[PUPIL]).ravel())
 
     arm_data = bpy.data.armatures.new("rig")
@@ -124,7 +75,8 @@ def build(controls_path=ROOT / "assets" / "controls.npz"):
     scene.camera = cam
     scene["eye_mid"] = eye_mid
 
-    for name, loc, energy, size in [("key", (0.35, -0.5, 0.35), 30, 0.4), ("fill", (-0.45, -0.4, 0.05), 8, 0.6)]:
+    # dark studio: one softbox key from the side and above (its reflection is the eye highlight), weak fill
+    for name, loc, energy, size in [("key", (0.32, -0.38, 0.30), 6, 0.30), ("fill", (-0.45, -0.40, 0.0), 0.5, 0.8)]:
         light = bpy.data.objects.new(name, bpy.data.lights.new(name, "AREA"))
         light.data.energy, light.data.size = energy, size
         light.location = eye_mid + Vector(loc)
@@ -132,10 +84,11 @@ def build(controls_path=ROOT / "assets" / "controls.npz"):
         scene.collection.objects.link(light)
     world = bpy.data.worlds.new("world")
     world.use_nodes = True
-    world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.05, 0.05, 0.055, 1)
+    world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.01, 0.01, 0.012, 1)
     scene.world = world
 
     scene.render.engine = "CYCLES"
+    scene.view_settings.look = "AgX - Medium High Contrast"
     scene.render.resolution_x = scene.render.resolution_y = 1024
     scene.cycles.samples = 48
     scene.cycles.use_denoising = True

@@ -5,7 +5,7 @@
   blender --background --python render.py -- --input "Generate Motion" --seed 3 --quality final
 
 Options: --input Left|Right|"Generate Motion", --seed N, --frame screen|subject (whose left "Left" means),
---quality draft|final, --out path.mp4
+--quality draft|final, --texture 01..08, --out path.mp4
 """
 import argparse
 import sys
@@ -42,10 +42,11 @@ def main(argv):
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--frame", default="screen", choices=["screen", "subject"])
     ap.add_argument("--quality", default="draft", choices=["draft", "final"])
+    ap.add_argument("--texture", default="01", help="texture set name in textures/")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
 
-    head, arm = scene.build()
+    head, arm = scene.build(a.texture)
     n = keyframe(head, arm, motion.render_clip(motion.preset(a.input, a.seed, a.frame), FPS))
     sc = bpy.context.scene
     sc.frame_start, sc.frame_end, sc.render.fps = 1, n, FPS

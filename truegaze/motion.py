@@ -16,6 +16,7 @@ import numpy as np
 
 EYE_HALF_SPAN = 0.031  # m, eye centre to face midline (GNM template)
 DEFAULT_DISTANCE = 0.6  # m, fixation distance for conversational gaze
+PUPIL_REST = -0.9  # pupil key at rest: GNM's template pupil is dilated (5.4 mm), this gives about 3.8 mm
 
 
 def saccade_duration(amplitude_deg):
@@ -127,7 +128,7 @@ def render_clip(clip, fps=30):
         out["upper_lid_down"][i] = np.clip(-pitch / 30, 0, 1)
         out["lower_lid_up"][i] = np.clip(-pitch / 60, 0, 0.3) + 0.1 * np.clip(abs(yaw) / 30, 0, 1)
         out["brow_raise"][i] = np.clip(pitch / 30, 0, 0.8)
-        out["pupil"][i] = 0.3 * math.sin(2 * math.pi * 0.35 * ti) + 0.15 * math.sin(2 * math.pi * 0.9 * ti + 1)
+        out["pupil"][i] = PUPIL_REST + 0.2 * math.sin(2 * math.pi * 0.35 * ti) + 0.1 * math.sin(2 * math.pi * 0.9 * ti + 1)
     return out
 
 

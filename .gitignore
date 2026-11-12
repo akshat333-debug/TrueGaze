@@ -5,3 +5,4 @@ renders/tmp/
 assets/cache/
 *.mp4
 !outputs/videos/*.mp4
+textures/
