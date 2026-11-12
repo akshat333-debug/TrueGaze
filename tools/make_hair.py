@@ -137,7 +137,16 @@ def brows(m, side, rng, normals):
     def centres(V):
         return rest + ((V - T)[near] * weight[..., None]).sum(1)[:, None]
 
+    centres.root_uv = (skin_uv(m)[near] * weight[..., None]).sum(1)
     return centres, 0.03 * MM * np.linspace(1, 0.2, K_BROW) * rng.uniform(0.8, 1.3, (n, 1))
+
+
+def skin_uv(m):
+    """UV position of every vertex in the skin tile (seams are far from the brows and lids)."""
+    sel = m.quad_tiles() == 1001
+    uv = np.zeros((len(m.template), 2))
+    uv[m.quads[sel].ravel()] = m.quad_uvs[sel].reshape(-1, 2)
+    return uv
 
 
 def vertex_normals(m):
@@ -155,12 +164,17 @@ if __name__ == "__main__":
     rng = np.random.default_rng(7)
     normals = vertex_normals(m)
     parts = []  # (centres function, radii, tube sides, material)
+    brow_uv, lash_uv = [], []
     for side in ("left", "right"):
         for upper in (True, False):
             lid = Lid(m, side, upper)
             parts.append((*lashes(lid, rng), 3, 0))
+            ring = skin_uv(m)[lid.idx]  # densely resampled, so the lash line is a line and not a row of dots
+            fine = np.linspace(0, len(ring) - 1, 12 * len(ring))
+            lash_uv.append(np.stack([np.interp(fine, np.arange(len(ring)), ring[:, i]) for i in range(2)], axis=1))
             parts.append((*tear_line(lid), 6, 1))
         parts.append((*brows(m, side, rng, normals), 3, 0))
+        brow_uv.append(parts[-1][0].root_uv)
 
     verts, quads, mats, rest = [], [], [], []
     offset = 0
@@ -170,7 +184,9 @@ if __name__ == "__main__":
         verts.append(v), quads.append(q + offset), mats.append(np.full(len(q), mat)), rest.append(c)
         offset += len(v)
     out = {"verts": np.concatenate(verts).astype(np.float32), "quads": np.concatenate(quads).astype(np.int32),
-           "material": np.concatenate(mats).astype(np.int8)}
+           "material": np.concatenate(mats).astype(np.int8),
+           # where hair grows, in skin UV space: the skin texture is darkened there (follicles, lash line)
+           "brow_uv": np.concatenate(brow_uv).astype(np.float32), "lash_uv": np.concatenate(lash_uv).astype(np.float32)}
     assert np.isfinite(out["verts"]).all()
     for name, coef in np.load(ROOT / "assets" / "controls.npz").items():
         V = m.template + np.tensordot(coef, m.expression_basis, 1)

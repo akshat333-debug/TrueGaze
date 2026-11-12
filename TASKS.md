@@ -12,10 +12,10 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 ## 14–16 Nov
 - [x] A: lid follow + brow raise/lower controls, armature, 40 cm camera (12 Nov)
 - [x] A: `motion.py` gaze, saccades, vergence, lids follow gaze, blinks, brows, pupil, with 10 tests (12 Nov)
-- [ ] B: first transferred skin on the head; iris generator; cornea/sclera/wetness shading
+- [x] B: first transferred skin on the head; iris generator; cornea/sclera/wetness shading (13 Nov; skin is generated, not transferred yet)
 - [ ] B: Route B trial on Kaggle; 4 skin sets with normal/roughness; seam audit tool
-- [ ] C: `eyes.move/reset/render`, 10-frame sequence, per-frame JSON
-- [ ] C: direction and calibration tests; Left / Right draft videos
+- [x] C: `eyes.move/reset/render`, 10-frame sequence, per-frame JSON
+- [x] C: direction and calibration tests; Left / Right draft videos
 
 ## 17 Nov — checkpoint
 - [ ] Every required output exists end to end at draft quality (D-008); 8 texture sets; `render.py --all`; `.blend` with timeline animation
@@ -35,6 +35,12 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 13 Nov — lashes, brows, tear line, launch-spec API, .blend, audits
+- Done: `tools/make_hair.py` (about 2,800 strands + tear line in `assets/hair.npz`, shape keys per control, driven from the head's keys); per-set hair colour in `textures/<set>/info.json`; skin texture now shaded under brows and along the lash line; iris has wavy fibres, collarette, furrows, pupil frill. `wrapper/eyes.py` (move/reset/render, 10-frame sequence, `metadata.json`, direction check 5/5). `render.py --all` and `--blend`. `apply_textures.py` (stock or random-identity GNM head). `tools/seam_audit.py` (+ `uv_maps/` sheets). README rewritten. 13 tests pass.
+- Facts found: GNM lid margin ring is the wet inner edge; lash roots must sit 0.9–1.6 mm further out. Only front-of-face UV seams are along the inner lip line. The pale cheek streak was plain specular sheen from the softbox (gone with specular off); skin is now rougher (0.62) with lower specular (0.3).
+- Order matters: `tools/fit_controls.py` → `tools/make_hair.py` → `python3 -m truegaze.textures` (textures read brow/lash positions from `assets/hair.npz`).
+- Gotchas: never edit a running chain script; on 8 GB RAM run one Blender at a time. EEVEE draft shows lashes and blink fine.
+- Next: photo-based skin albedo (biggest remaining realism gap), lid bulge over the cornea, final-quality videos on a faster GPU, Dockerfile + fresh-clone test, deck and demo video, commit `textures/` at the 17 Nov checkpoint.
 ### 13 Nov — first textures and shading
 - Done: `truegaze/textures.py` makes 8 texture sets in GNM's UV layout (4K skin colour/roughness/height in tile 1001; 2K eye colour for 1002 left and 1004 right, each eye its own iris and vein pattern). `truegaze/materials.py` assigns one material per UDIM tile; cornea refracts in Cycles. Dark-studio lighting (softbox key + weak fill). Pupil now rests at about 3.8 mm (`PUPIL_REST`; GNM's template pupil is dilated). `tools/stills.py` renders a front and a close still per set. `render.py --texture 01..08`. 12 tests pass.
 - Facts found: eye tiles are polar (eye axis at centre; pupil edge r=0.050, iris edge r=0.185 in UV, non-linear vs real radius). Skin tile: eyes are only 0.14 UV apart, so 4K gives about 0.11 mm per texel at the eyes.

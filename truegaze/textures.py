@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image, ImageDraw
 from scipy.interpolate import LinearNDInterpolator
-from scipy.ndimage import gaussian_filter, zoom
+from scipy.ndimage import gaussian_filter, map_coordinates, zoom
 
 from .gnm import GNM
 
@@ -100,7 +100,7 @@ def seam_mask(m, n):
     return np.clip(zoom(blurred, n / small, order=1), 0, 1)
 
 
-def skin(m, n, tone, seed):
+def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012)):
     """Returns colour (n, n, 3), roughness (n, n), height (n, n), all 0..1."""
     rng = np.random.default_rng(seed)
     tone = np.array(tone, np.float32)
@@ -119,6 +119,14 @@ def skin(m, n, tone, seed):
     color += k["lips"][..., None] * (lip - color) * 0.85
     wet = np.array([0.72, 0.36, 0.34]) * (0.6 + 0.4 * tone.mean())
     color += k["inside"][..., None] * (wet - color)
+    # hair roots: brow skin is shaded by follicles, and the lash line reads as a dark edge on the lid
+    roots = np.load(ROOT / "assets" / "hair.npz")
+    for uv, strength, blur in ((roots["brow_uv"], 0.30, n / 500), (roots["lash_uv"], 0.35, n / 1400)):
+        dots = np.zeros((n, n), np.float32)
+        np.add.at(dots, (np.clip(((1 - uv[:, 1]) * n).astype(int), 0, n - 1), np.clip((uv[:, 0] * n).astype(int), 0, n - 1)), 1)
+        dots = gaussian_filter(dots, blur)
+        dots = np.clip(dots / np.quantile(dots[dots > dots.max() * 0.02], 0.6), 0, 1)
+        color += (strength * dots)[..., None] * (np.array(hair, np.float32) * 2 + 0.25 * tone - color)
     # freckles and small moles
     spots = gaussian_filter(rng.random((n, n), np.float32), 1.5)
     spots = smoothstep(np.quantile(spots[::8, ::8], 0.997), spots.max(), spots)
@@ -162,7 +170,11 @@ def eye(n, radii, outer, inner, seed):
         g = gaussian_filter(rng.standard_normal((nr, nt)), (blur_r, blur_t), mode=("nearest", "wrap"))
         g /= g.std()
         t = np.clip((r - pupil_r) / (iris_r - pupil_r), 0, 1)
-        return g[(t * (nr - 1)).astype(int), ((theta + np.pi) / (2 * np.pi) * nt).astype(int) % nt]
+        g = np.concatenate([g, g[:, :1]], axis=1)  # repeat the first column so the lookup wraps around smoothly
+        return map_coordinates(g, [t * (nr - 1), ((theta + bend + np.pi) / (2 * np.pi) % 1) * nt], order=1, mode="nearest")
+
+    bend = 0.0
+    bend = 0.045 * polar(10, 40, 1.5, 2.5)  # fibres wander sideways on their way out, they are not ruler-straight
 
     # sclera: off-white, pinker toward the corners, thin red veins that fade before the iris
     sclera = np.array([0.64, 0.63, 0.62]) * (1 + 0.03 * noise(n, n // 6, rng))[..., None]
@@ -194,7 +206,11 @@ def eye(n, radii, outer, inner, seed):
     iris = np.array(inner) + mix[..., None] * (np.array(outer) - np.array(inner))
     fibres = 0.6 * polar(40, 900, 9, 1.3) + 0.4 * polar(90, 1800, 14, 0.9)
     crypts = smoothstep(1.3, 2.2, polar(30, 160, 2.5, 1.5)) * smoothstep(0.15, 0.35, t) * (1 - smoothstep(0.6, 0.85, t))
-    shade = (1 + 0.42 * fibres) * (1 - 0.40 * crypts) * (1 - 0.70 * smoothstep(0.78, 1.0, t)) * (0.75 + 0.25 * smoothstep(0, 0.12, t))
+    ring = 0.30 + 0.05 * wavy                                       # collarette: a paler zigzag ring a third of the way out
+    collarette = np.exp(-((t - ring) / 0.035) ** 2)
+    furrows = sum(np.exp(-((t - c - 0.02 * wavy) / 0.018) ** 2) for c in (0.62, 0.76, 0.88))  # contraction furrows
+    ruff = 1 - 0.6 * (1 - smoothstep(0.0, 0.05, t))                  # dark pigment frill at the pupil edge
+    shade = (1 + 0.36 * fibres) * (1 - 0.40 * crypts) * (1 + 0.22 * collarette) * (1 - 0.10 * furrows) * ruff * (1 - 0.70 * smoothstep(0.78, 1.0, t))
     iris = iris * np.clip(shade, 0.05, 2.2)[..., None]
 
     edge = 0.018  # soft limbus: the iris edge is never a hard line
@@ -207,7 +223,7 @@ def make_set(name, size=4096, eye_size=2048, out=ROOT / "textures"):
     m = GNM()
     folder = Path(out) / name
     folder.mkdir(parents=True, exist_ok=True)
-    color, rough, height = skin(m, size, tone, seed)
+    color, rough, height = skin(m, size, tone, seed, hair)
     save(color, folder / "color.1001.jpg")
     save(rough, folder / "roughness.1001.jpg")
     save(height, folder / "height.1001.jpg")
