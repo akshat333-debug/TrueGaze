@@ -59,3 +59,11 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 ### D-014 · 13 Nov · Lid bulge as four fitted keys per eye
 - Measured: at 32° sideways or 24° vertical gaze the cornea cut up to 1.5 mm into 30–150 lid vertices. `tools/fit_bulge.py` pushes that skin out just enough and smooths it into a mound; `motion.bulge()` weights the keys by (angle / limit)², because the cornea only reaches the lid at larger angles.
 - Fitted on the open lid only. During a blink with the eye turned the fit is approximate (blinks last 0.3 s). Lashes do not ride the bulge (under 1.5 mm).
+
+### D-015 · 13 Nov · Photo-based skin from MakeHuman's CC0 skins, transferred in 3D (amends D-010)
+- Why: the self-audit named skin as the largest gap in the 60-point texture score. MakeHuman's skins are photo-quality, CC0, cover light/dark, male/female, young/middle-aged/old, and have the same detail density as our 4K map (about 0.11 mm per texel at the eyes).
+- How: `tools/transfer_skin.py` fits the GNM head to MakeHuman's head (eye centres → rigid → smooth deformation, with eyelid edges, lip line and nose tip pinned) and stores, per GNM vertex, its place in MakeHuman's UV map. Result: median 0.5 mm, 95% under 1.7 mm from the MakeHuman surface. `truegaze/textures.py` then resamples any MakeHuman skin into GNM's layout.
+- Still ours on top: wet tissue colour, lash line and brow follicle shading, roughness, pore relief (now also taken from the photo's fine detail), both irises, sclera.
+- Where the two heads cannot be matched the generated skin fills in, generated in the photo's own tone so no edge shows.
+- No real, identifiable person: MakeHuman skins are composite artist textures released to the public domain.
+- Downloads are pinned by SHA-256 in `truegaze/textures.py`; the tuxfamily server is plain HTTP, so the checksum is what protects a fresh clone.

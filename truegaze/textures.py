@@ -8,7 +8,9 @@ Numbers are GNM's UDIM tiles. Eye tiles are polar: eye axis at the centre, pupil
   python3 -m truegaze.textures 01 --size 2048
 """
 import argparse
+import hashlib
 import json
+import urllib.request
 from pathlib import Path
 
 import numpy as np
@@ -20,17 +22,48 @@ from .gnm import GNM
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# name: skin albedo, iris outer colour, iris inner colour (around the pupil), hair colour, seed
+# name: fallback skin tone, iris outer colour, iris inner colour (around the pupil), hair colour, seed,
+# MakeHuman skin photo (CC0) that gives the skin its colour
 SETS = {
-    "01": ((0.78, 0.57, 0.46), (0.25, 0.36, 0.42), (0.45, 0.40, 0.28), (0.1, 0.06, 0.035), 1),   # light skin, blue-grey eyes
-    "02": ((0.62, 0.42, 0.30), (0.30, 0.17, 0.07), (0.45, 0.25, 0.08), (0.03, 0.02, 0.012), 2),   # medium skin, brown eyes
-    "03": ((0.36, 0.22, 0.15), (0.14, 0.07, 0.03), (0.25, 0.12, 0.04), (0.012, 0.009, 0.007), 3),   # dark skin, dark brown eyes
-    "04": ((0.82, 0.62, 0.52), (0.28, 0.38, 0.20), (0.55, 0.38, 0.12), (0.16, 0.08, 0.04), 4),   # fair skin, green eyes
-    "05": ((0.70, 0.50, 0.36), (0.36, 0.26, 0.10), (0.50, 0.30, 0.08), (0.04, 0.025, 0.015), 5),   # olive skin, hazel eyes
-    "06": ((0.50, 0.32, 0.22), (0.22, 0.11, 0.04), (0.38, 0.18, 0.05), (0.015, 0.01, 0.008), 6),   # brown skin, brown eyes
-    "07": ((0.85, 0.66, 0.58), (0.38, 0.45, 0.50), (0.60, 0.55, 0.40), (0.2, 0.14, 0.08), 7),   # pale skin, grey eyes
-    "08": ((0.66, 0.46, 0.34), (0.42, 0.26, 0.06), (0.60, 0.36, 0.08), (0.05, 0.03, 0.018), 8),   # tan skin, amber eyes
+    "01": ((0.78, 0.57, 0.46), (0.25, 0.36, 0.42), (0.45, 0.40, 0.28), (0.1, 0.06, 0.035), 1, "young_lightskinned_male_diffuse"),   # light skin, blue-grey eyes
+    "02": ((0.62, 0.42, 0.30), (0.30, 0.17, 0.07), (0.45, 0.25, 0.08), (0.03, 0.02, 0.012), 2, "middleage_lightskinned_male_diffuse"),   # medium skin, brown eyes
+    "03": ((0.36, 0.22, 0.15), (0.14, 0.07, 0.03), (0.25, 0.12, 0.04), (0.012, 0.009, 0.007), 3, "young_darkskinned_male_diffuse"),   # dark skin, dark brown eyes
+    "04": ((0.82, 0.62, 0.52), (0.28, 0.38, 0.20), (0.55, 0.38, 0.12), (0.16, 0.08, 0.04), 4, "young_lightskinned_female_diffuse"),   # fair skin, green eyes
+    "05": ((0.70, 0.50, 0.36), (0.36, 0.26, 0.10), (0.50, 0.30, 0.08), (0.04, 0.025, 0.015), 5, "young_lightskinned_male_diffuse2"),   # olive skin, hazel eyes
+    "06": ((0.50, 0.32, 0.22), (0.22, 0.11, 0.04), (0.38, 0.18, 0.05), (0.015, 0.01, 0.008), 6, "young_darkskinned_female_diffuse"),   # brown skin, brown eyes
+    "07": ((0.85, 0.66, 0.58), (0.38, 0.45, 0.50), (0.60, 0.55, 0.40), (0.2, 0.14, 0.08), 7, "old_lightskinned_male_diffuse"),   # pale skin, grey eyes
+    "08": ((0.66, 0.46, 0.34), (0.42, 0.26, 0.06), (0.60, 0.36, 0.08), (0.05, 0.03, 0.018), 8, "middleage_darkskinned_male_diffuse"),   # tan skin, amber eyes
 }
+
+
+# MakeHuman assets (CC0, see docs/ASSETS.md) with their SHA-256, fetched on first use
+MAKEHUMAN_SKINS = "http://download.tuxfamily.org/makehuman/assets/1.2/base/skins/textures/"
+MAKEHUMAN_MESH = "https://raw.githubusercontent.com/makehumancommunity/makehuman/master/makehuman/data/3dobjs/"
+MAKEHUMAN = {
+    "base.obj": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c",
+    "middleage_darkskinned_male_diffuse.png": "ced478cfdd2b86391f0f92a4408b287ad70adb0dd0e9271ba606d0b028b47c6b",
+    "middleage_lightskinned_male_diffuse.png": "3f94f3f6a5cab92dedf5cce392a87332312fc435f1cb44c6e7b897daef9a5fbb",
+    "old_lightskinned_male_diffuse.png": "dfb2310ed3e0ad024ea7a3ad321215e2e9e2994cca64043d9f3d07c6543ec847",
+    "young_darkskinned_female_diffuse.png": "96aa4a96b247fc90d371587bb88e6ae3bfc77e83f5126f17e6bbb713aa200470",
+    "young_darkskinned_male_diffuse.png": "e3f0dbb634e4c68561338f0087f7a122444e84ec56df102212f1222aa12e4d50",
+    "young_lightskinned_female_diffuse.png": "b2a6ac8cd4f9febdb447368e29c76cd68410bb66e46d9dcfa2d5f75126eea8fc",
+    "young_lightskinned_male_diffuse.png": "862a26e335e958b70534cb5f0d7c47ef30ab148a56c42b3e9da969cf76f12963",
+    "young_lightskinned_male_diffuse2.png": "03efe1f6b0ae52429649dcefc9dcaef6058032f874a251169cc3e2ed473c3874",
+}
+
+
+def makehuman_file(name):
+    """Local path of a MakeHuman asset, downloading and verifying it on first use."""
+    path = ROOT / "assets" / "cache" / "makehuman" / name
+    if not path.exists():
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".part")
+        urllib.request.urlretrieve((MAKEHUMAN_MESH if name.endswith(".obj") else MAKEHUMAN_SKINS) + name, tmp)
+        if hashlib.sha256(tmp.read_bytes()).hexdigest() != MAKEHUMAN[name]:
+            tmp.unlink()
+            raise RuntimeError(f"{name} failed the checksum; download again")
+        tmp.rename(path)
+    return path
 
 
 def smoothstep(a, b, x):
@@ -100,13 +133,43 @@ def seam_mask(m, n):
     return np.clip(zoom(blurred, n / small, order=1), 0, 1)
 
 
-def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012)):
+def photo_skin(m, n, name):
+    """A MakeHuman skin photo pulled into GNM's UV layout through assets/skin_transfer.npz.
+    Returns the picture (n, n, 3) and how far to trust it per texel (0..1; 0 where the two heads
+    could not be matched, or where MakeHuman's own UV layout is cut)."""
+    t = np.load(ROOT / "assets" / "skin_transfer.npz")
+    sel = m.quad_tiles() == 1001
+    src = t["uv"][m.quads[sel]]
+    ok = t["valid"][m.quads[sel]].all(axis=1) & (np.ptp(src, axis=1).max(axis=1) < 0.05)
+    uv = m.quad_uvs[sel][ok]
+    small = min(n, 1024)
+    c = (np.arange(small) + 0.5) / small
+    grid = LinearNDInterpolator(uv.reshape(-1, 2), src[ok].reshape(-1, 2), fill_value=0)(*np.meshgrid(c, 1 - c))
+    cover = Image.new("L", (small, small))
+    draw = ImageDraw.Draw(cover)
+    for q in uv:
+        draw.polygon([(u * small, (1 - v) * small) for u, v in q], fill=255)
+    cover = np.clip(gaussian_filter(np.asarray(cover, np.float32) / 255, small / 200) * 3 - 2, 0, 1)  # pull in from the edges
+    img = np.asarray(Image.open(makehuman_file(name + ".png")).convert("RGB"), np.float32) / 255
+    size = img.shape[0]
+    rows = (1 - zoom(grid[..., 1].astype(np.float32), n / small, order=1)) * size - 0.5
+    cols = zoom(grid[..., 0].astype(np.float32), n / small, order=1) * size - 0.5
+    picture = np.stack([map_coordinates(img[..., i], [rows, cols], order=1, mode="nearest") for i in range(3)], axis=-1)
+    return picture, zoom(cover, n / small, order=1)
+
+
+def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     """Returns colour (n, n, 3), roughness (n, n), height (n, n), all 0..1."""
     rng = np.random.default_rng(seed)
-    tone = np.array(tone, np.float32)
-    dark = 1 - tone.mean()  # darker skin shows less redness
     seam = seam_mask(m, n)
     k, detail = skin_masks(m, n, seam), 1 - seam
+    if photo:  # the generated skin below takes the photo's own tone, so the two blend without an edge
+        picture, cover = photo_skin(m, n, photo)
+        tone = np.median(picture[(cover > 0.95) & (k["cheeks"] > 0.5)], axis=0)
+    else:
+        cover = np.zeros((n, n), np.float32)
+    tone = np.array(tone, np.float32)
+    dark = 1 - tone.mean()  # darker skin shows less redness
 
     color = np.ones((n, n, 3), np.float32) * tone
     color *= (1 + detail * (0.025 * noise(n, n // 24, rng) + 0.015 * noise(n, n // 160, rng)))[..., None]
@@ -117,6 +180,8 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012)):
     color *= 1 - 0.08 * k["orbital"][..., None]
     lip = tone * np.array([0.95, 0.60, 0.62])
     color += k["lips"][..., None] * (lip - color) * 0.85
+    if photo:
+        color += cover[..., None] * (picture - color)
     wet = np.array([0.72, 0.36, 0.34]) * (0.6 + 0.4 * tone.mean())
     color += k["inside"][..., None] * (wet - color)
     # hair roots: brow skin is shaded by follicles, and the lash line reads as a dark edge on the lid
@@ -130,7 +195,7 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012)):
     # freckles and small moles
     spots = gaussian_filter(rng.random((n, n), np.float32), 1.5)
     spots = smoothstep(np.quantile(spots[::8, ::8], 0.997), spots.max(), spots)
-    color *= 1 - 0.35 * (spots * detail)[..., None] * (1 - k["lips"][..., None])
+    color *= 1 - 0.35 * (spots * detail * (1 - cover))[..., None] * (1 - k["lips"][..., None])
 
     # pores: small dents, plus fine creases, stronger on nose and cheeks
     white = rng.standard_normal((n, n)).astype(np.float32)
@@ -140,6 +205,10 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012)):
     creases = -np.abs(creases / creases.std())
     amount = 0.55 + 0.45 * np.clip(k["nose"] + k["cheeks"], 0, 1) - 0.4 * k["lips"]
     bumps = (0.6 * pores + 0.25 * creases) * amount * (1 - k["inside"]) + 0.08 * noise(n, n // 400, rng)
+    if photo:  # the photo's own fine detail (pores, lines) also becomes relief, so shine follows what is drawn
+        luma = picture.mean(axis=2)
+        fine = luma - gaussian_filter(luma, n / 4096 * 4)
+        bumps = bumps + 0.8 * cover * fine / (fine.std() + 1e-9) * (1 - k["inside"])
     height = 0.5 + 0.12 * bumps
 
     rough = 0.62 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.04 * k["orbital"] - 0.30 * k["inside"]
@@ -219,15 +288,15 @@ def eye(n, radii, outer, inner, seed):
 
 
 def make_set(name, size=4096, eye_size=2048, out=ROOT / "textures"):
-    tone, outer, inner, hair, seed = SETS[name]
+    tone, outer, inner, hair, seed, photo = SETS[name]
     m = GNM()
     folder = Path(out) / name
     folder.mkdir(parents=True, exist_ok=True)
-    color, rough, height = skin(m, size, tone, seed, hair)
+    color, rough, height = skin(m, size, tone, seed, hair, photo)
     save(color, folder / "color.1001.jpg")
     save(rough, folder / "roughness.1001.jpg")
     save(height, folder / "height.1001.jpg")
-    (folder / "info.json").write_text(json.dumps({"hair": hair}))  # read by materials.py
+    (folder / "info.json").write_text(json.dumps({"hair": hair, "skin_photo": f"MakeHuman {photo} (CC0)"}))  # read by materials.py
     radii = eye_radii(m)
     save(eye(eye_size, radii, outer, inner, seed * 100 + 1), folder / "color.1002.jpg")  # left
     save(eye(eye_size, radii, outer, inner, seed * 100 + 2), folder / "color.1004.jpg")  # right
