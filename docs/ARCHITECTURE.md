@@ -1,6 +1,6 @@
 # Architecture
 
-Status 12 Nov: reader, eyelid control fit and scene builder work (Day-1 spike). Flat stand-in colours, no textures or motion engine yet.
+Status 12 Nov: reader, eyelid/brow controls, scene, motion engine and `render.py` work. Flat stand-in colours; no textures yet.
 
 ## Flow
 ```
@@ -30,10 +30,11 @@ render.py --input Left|Right|"Generate Motion"  ->  frames -> MP4, stills, metad
 | `tools/fit_controls.py` | blink and lid controls | A | done (brows, lid-follow todo) |
 | `truegaze/scene.py` | mesh, shape keys, rig, camera, lights | A | done (flat colours) |
 | `truegaze/materials.py` | skin, sclera, iris, cornea shaders | B | todo |
-| `truegaze/motion.py` | gaze, saccades, vergence, lids, blinks, brows, pupil | A | todo |
+| `truegaze/motion.py` | gaze, saccades, vergence, lids, blinks, brows, pupil | A | done, tested |
 | `truegaze/eyes.py`, `wrapper/eyes.py` | `move(h, v)`, `reset()`, `render()` | C | todo |
 | `textures/` | skin transfer, iris synthesis, detail maps, seam audit | B | todo |
-| `render.py`, `apply_textures.py` | one-command outputs, portability proof | C | todo |
+| `render.py` | 3 inputs to MP4, caption, draft/final | C | done (draft) |
+| `apply_textures.py` | portability proof | C | todo |
 | `tests/`, `Dockerfile` | checks and reproducible run | C | todo |
 
 ## Conventions

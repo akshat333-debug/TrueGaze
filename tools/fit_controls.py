@@ -117,6 +117,17 @@ def fit_eye(m, side):
         moved = T + np.tensordot(coef, m.expression_basis[comps], 1)
         gap = np.mean([moved[i, 1] for i in up]) - np.mean([moved[i, 1] for i in low])
         report[name] = (round(float(np.abs(coef).max()), 2), round(gap * 1000, 2), bad)
+    # brows: lift or lower the brow region, keep the lid margins where they are
+    brow = np.flatnonzero(m.group(f"{side}_brow_region"))
+    for name, lift in {"brow_raise": 0.004, "brow_lower": -0.002}.items():
+        want = {int(i): np.array([0.0, lift, 0.0]) for i in brow}
+        want.update({int(i): np.zeros(3) for i in np.r_[up, low]})
+        coef, bad = solve(m, comps, want, ball, region)
+        full = np.zeros(383)
+        full[comps] = coef
+        controls[f"{name}_{side}"] = full
+        got = np.tensordot(coef, m.expression_basis[comps][:, brow, 1], 1).mean()
+        report[name] = (round(float(np.abs(coef).max()), 2), round(got * 1000, 2), bad)
     return controls, report
 
 

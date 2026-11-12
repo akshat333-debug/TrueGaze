@@ -9,7 +9,7 @@ import bpy
 import numpy as np
 from mathutils import Matrix, Vector
 
-from .gnm import GNM, to_blender
+from .gnm import GNM, PUPIL, to_blender
 
 ROOT = Path(__file__).resolve().parent.parent
 CAMERA_DISTANCE = 0.40  # m in front of the eye midpoint (launch spec)
@@ -34,20 +34,23 @@ def _flat_material(name):
 
 
 def _cornea_material():
-    """Clear refractive shell; shadow rays pass through so the iris is not darkened."""
+    """Clear shell with Fresnel reflections. Works in EEVEE and Cycles alike.
+
+    shortcut: no refraction, so the iris is not magnified by the cornea; materials.py should add it for Cycles.
+    """
     mat = bpy.data.materials.new("cornea")
     mat.use_nodes = True
+    mat.surface_render_method = "BLENDED"
     nt = mat.node_tree
-    bsdf = nt.nodes["Principled BSDF"]
-    bsdf.inputs["Transmission Weight"].default_value = 1.0
-    bsdf.inputs["Roughness"].default_value = 0.02
-    bsdf.inputs["IOR"].default_value = 1.376
-    out = nt.nodes["Material Output"]
-    mix, clear, path = nt.nodes.new("ShaderNodeMixShader"), nt.nodes.new("ShaderNodeBsdfTransparent"), nt.nodes.new("ShaderNodeLightPath")
-    nt.links.new(path.outputs["Is Shadow Ray"], mix.inputs["Fac"])
-    nt.links.new(bsdf.outputs["BSDF"], mix.inputs[1])
-    nt.links.new(clear.outputs["BSDF"], mix.inputs[2])
-    nt.links.new(mix.outputs["Shader"], out.inputs["Surface"])
+    nt.nodes.remove(nt.nodes["Principled BSDF"])
+    fresnel, mix = nt.nodes.new("ShaderNodeFresnel"), nt.nodes.new("ShaderNodeMixShader")
+    clear, gloss = nt.nodes.new("ShaderNodeBsdfTransparent"), nt.nodes.new("ShaderNodeBsdfGlossy")
+    fresnel.inputs["IOR"].default_value = 1.376
+    gloss.inputs["Roughness"].default_value = 0.02
+    nt.links.new(fresnel.outputs["Fac"], mix.inputs["Fac"])
+    nt.links.new(clear.outputs["BSDF"], mix.inputs[1])
+    nt.links.new(gloss.outputs["BSDF"], mix.inputs[2])
+    nt.links.new(mix.outputs["Shader"], nt.nodes["Material Output"].inputs["Surface"])
     return mat
 
 
@@ -84,6 +87,9 @@ def build(controls_path=ROOT / "assets" / "controls.npz"):
         key = head.shape_key_add(name=name)
         key.slider_min = -1.0  # controls are linear, so negative values are valid
         key.data.foreach_set("co", to_blender(m.template + np.tensordot(coef, m.expression_basis, 1)).ravel())
+    key = head.shape_key_add(name="pupil")  # GNM's own iris component: positive dilates
+    key.slider_min = -1.0
+    key.data.foreach_set("co", to_blender(m.template + m.expression_basis[PUPIL]).ravel())
 
     arm_data = bpy.data.armatures.new("rig")
     arm = bpy.data.objects.new("Rig", arm_data)
