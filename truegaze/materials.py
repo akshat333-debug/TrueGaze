@@ -1,4 +1,5 @@
 """Shaders for the GNM head. One material per UDIM tile, reading a texture set from textures/<name>/."""
+import json
 from pathlib import Path
 
 import bpy
@@ -75,6 +76,15 @@ def cornea():
     link(clear.outputs["BSDF"], cycles_mix.inputs[2])
     out2.target = "CYCLES"
     link(cycles_mix.outputs["Shader"], out2.inputs["Surface"])
+    return mat
+
+
+def hair(texture_set):
+    """Lash and brow colour comes from the texture set's info.json."""
+    color = json.loads((ROOT / "textures" / texture_set / "info.json").read_text())["hair"]
+    mat, _, bsdf = _principled("hair")
+    bsdf.inputs["Base Color"].default_value = (*color, 1)
+    bsdf.inputs["Roughness"].default_value = 0.35
     return mat
 
 

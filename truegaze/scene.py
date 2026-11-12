@@ -17,6 +17,31 @@ ROOT = Path(__file__).resolve().parent.parent
 CAMERA_DISTANCE = 0.40  # m in front of the eye midpoint (launch spec)
 
 
+def _hair(head, arm, texture_set):
+    """Lashes, brows and tear line from assets/hair.npz. Its shape keys copy the head's through drivers."""
+    d = np.load(ROOT / "assets" / "hair.npz")
+    mesh = bpy.data.meshes.new("hair")
+    mesh.from_pydata(to_blender(d["verts"]).tolist(), [], d["quads"].tolist())
+    mesh.materials.append(materials.hair(texture_set))
+    mesh.materials.append(bpy.data.materials["cornea"])  # the tear line is the same clear wet material
+    mesh.polygons.foreach_set("material_index", d["material"].astype(int).tolist())
+    mesh.polygons.foreach_set("use_smooth", [True] * len(d["quads"]))
+    obj = bpy.data.objects.new("Hair", mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    obj.shape_key_add(name="Basis")
+    for name in (k[5:] for k in d.files if k.startswith("move_")):
+        key = obj.shape_key_add(name=name)
+        key.slider_min = -1.0
+        key.data.foreach_set("co", to_blender(d["verts"] + d[f"move_{name}"]).ravel())
+        driver = key.driver_add("value").driver
+        driver.type = "AVERAGE"  # plain copy, no Python, so the .blend opens without a script warning
+        target = driver.variables.new().targets[0]
+        target.id_type, target.id = "KEY", head.data.shape_keys
+        target.data_path = f'key_blocks["{name}"].value'
+    obj.parent = arm  # shortcut: assumes neck and head bones stay at rest, skin it to the head bone when the head moves
+    return obj
+
+
 def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
     """Clears the file and builds head, rig, camera and lights. Returns (head object, armature object)."""
     bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -64,6 +89,7 @@ def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
             group.add(np.flatnonzero(weights == w).tolist(), float(w), "REPLACE")
     head.modifiers.new("rig", "ARMATURE").object = arm
     head.parent = arm
+    _hair(head, arm, texture_set)
 
     eye_mid = Vector(joints[2:4].mean(axis=0))
     cam = bpy.data.objects.new("Camera", bpy.data.cameras.new("Camera"))

@@ -8,6 +8,7 @@ Numbers are GNM's UDIM tiles. Eye tiles are polar: eye axis at the centre, pupil
   python3 -m truegaze.textures 01 --size 2048
 """
 import argparse
+import json
 from pathlib import Path
 
 import numpy as np
@@ -19,16 +20,16 @@ from .gnm import GNM
 
 ROOT = Path(__file__).resolve().parent.parent
 
-# name: skin albedo, iris outer colour, iris inner colour (around the pupil), seed
+# name: skin albedo, iris outer colour, iris inner colour (around the pupil), hair colour, seed
 SETS = {
-    "01": ((0.78, 0.57, 0.46), (0.25, 0.36, 0.42), (0.45, 0.40, 0.28), 1),   # light skin, blue-grey eyes
-    "02": ((0.62, 0.42, 0.30), (0.30, 0.17, 0.07), (0.45, 0.25, 0.08), 2),   # medium skin, brown eyes
-    "03": ((0.36, 0.22, 0.15), (0.14, 0.07, 0.03), (0.25, 0.12, 0.04), 3),   # dark skin, dark brown eyes
-    "04": ((0.82, 0.62, 0.52), (0.28, 0.38, 0.20), (0.55, 0.38, 0.12), 4),   # fair skin, green eyes
-    "05": ((0.70, 0.50, 0.36), (0.36, 0.26, 0.10), (0.50, 0.30, 0.08), 5),   # olive skin, hazel eyes
-    "06": ((0.50, 0.32, 0.22), (0.22, 0.11, 0.04), (0.38, 0.18, 0.05), 6),   # brown skin, brown eyes
-    "07": ((0.85, 0.66, 0.58), (0.38, 0.45, 0.50), (0.60, 0.55, 0.40), 7),   # pale skin, grey eyes
-    "08": ((0.66, 0.46, 0.34), (0.42, 0.26, 0.06), (0.60, 0.36, 0.08), 8),   # tan skin, amber eyes
+    "01": ((0.78, 0.57, 0.46), (0.25, 0.36, 0.42), (0.45, 0.40, 0.28), (0.1, 0.06, 0.035), 1),   # light skin, blue-grey eyes
+    "02": ((0.62, 0.42, 0.30), (0.30, 0.17, 0.07), (0.45, 0.25, 0.08), (0.03, 0.02, 0.012), 2),   # medium skin, brown eyes
+    "03": ((0.36, 0.22, 0.15), (0.14, 0.07, 0.03), (0.25, 0.12, 0.04), (0.012, 0.009, 0.007), 3),   # dark skin, dark brown eyes
+    "04": ((0.82, 0.62, 0.52), (0.28, 0.38, 0.20), (0.55, 0.38, 0.12), (0.16, 0.08, 0.04), 4),   # fair skin, green eyes
+    "05": ((0.70, 0.50, 0.36), (0.36, 0.26, 0.10), (0.50, 0.30, 0.08), (0.04, 0.025, 0.015), 5),   # olive skin, hazel eyes
+    "06": ((0.50, 0.32, 0.22), (0.22, 0.11, 0.04), (0.38, 0.18, 0.05), (0.015, 0.01, 0.008), 6),   # brown skin, brown eyes
+    "07": ((0.85, 0.66, 0.58), (0.38, 0.45, 0.50), (0.60, 0.55, 0.40), (0.2, 0.14, 0.08), 7),   # pale skin, grey eyes
+    "08": ((0.66, 0.46, 0.34), (0.42, 0.26, 0.06), (0.60, 0.36, 0.08), (0.05, 0.03, 0.018), 8),   # tan skin, amber eyes
 }
 
 
@@ -176,7 +177,7 @@ def eye(n, radii, outer, inner, seed):
 
 
 def make_set(name, size=4096, eye_size=2048, out=ROOT / "textures"):
-    tone, outer, inner, seed = SETS[name]
+    tone, outer, inner, hair, seed = SETS[name]
     m = GNM()
     folder = Path(out) / name
     folder.mkdir(parents=True, exist_ok=True)
@@ -184,6 +185,7 @@ def make_set(name, size=4096, eye_size=2048, out=ROOT / "textures"):
     save(color, folder / "color.1001.jpg")
     save(rough, folder / "roughness.1001.jpg")
     save(height, folder / "height.1001.jpg")
+    (folder / "info.json").write_text(json.dumps({"hair": hair}))  # read by materials.py
     radii = eye_radii(m)
     save(eye(eye_size, radii, outer, inner, seed * 100 + 1), folder / "color.1002.jpg")  # left
     save(eye(eye_size, radii, outer, inner, seed * 100 + 2), folder / "color.1004.jpg")  # right
