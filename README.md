@@ -50,6 +50,8 @@ Final quality (`--quality final`) renders single frames with Cycles and joins th
 - **Eyelid and brow controls** (`tools/fit_controls.py`): GNM's eye expressions are 200 unnamed statistical components. We solve for blink, lid raise/lower and brow raise/lower as combinations of them, with a constraint that the lid never sinks into the eyeball. The controls live in GNM's own expression space, so they work on any GNM head.
 - **Soft tissue** (`tools/fit_bulge.py`): the eye sits in a socket (GNM's puffy template lids are sunk by up to 2.9 mm); the lid skin lifts over the cornea as the eye turns; and skin near the lid edge is dragged up to 1.4 mm round with the eyeball, so the skin around a moving eye stretches and slides.
 - **Hero view**: `--view hero` (and a hero still per set) frames one eye from its outer side with hard raking light and shallow focus, like the reference videos.
+- **Expression wrinkles**: forehead lines deepen as the brows rise and crow's feet as the lids close, from a wrinkle map faded in by the same controls that move the face.
+- **Iris light pooling**: the cornea gathers side light onto the far side of the iris; computed in the iris shader (an approximation, not traced caustics).
 - **Making-of looks**: `--style clay` and `--style wire` on `render.py` and `tools/stills.py` render the same animation as grey shape or with the mesh drawn on top.
 - **Skin transfer** (`tools/transfer_skin.py`): MakeHuman's CC0 skins are drawn for a different head. We fit the GNM head to MakeHuman's in 3D (eyelid edges, lip line and nose tip pinned; median error 0.5 mm) and resample each skin into GNM's UV layout.
 - **Textures** (`truegaze/textures.py`): each set has 4K skin colour (photo-based), roughness and pore-height maps, and a 2K map per eye with sclera, veins, iris fibres, collarette and limbal ring. Left and right irises share colours but have their own patterns, as real eyes do.
@@ -60,4 +62,4 @@ Final quality (`--quality final`) renders single frames with Cycles and joins th
 
 ## Docs
 
-Plan: `docs/PLAN.md` · design: `docs/ARCHITECTURE.md` · decisions: `DECISIONS.md` · asset licences: `docs/ASSETS.md` · task board: `TASKS.md`.
+Render plan: `docs/RENDER_PLAN.md` · plan: `docs/PLAN.md` · design: `docs/ARCHITECTURE.md` · decisions: `DECISIONS.md` · asset licences: `docs/ASSETS.md` · task board: `TASKS.md`.

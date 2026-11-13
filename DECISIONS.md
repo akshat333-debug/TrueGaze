@@ -91,3 +91,10 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 - Read the 49 eye-related posts by Chris Jones in the Blender Artists "Human Progress" thread. Table of what he does and what we changed: `docs/reference_eye_piece.md`, third pass.
 - Taken: stronger lid drag (30%), non-linear blink through a fitted half-closed shape (`blink_mid`), caruncle, softer blue-grey limbus, iris with thick cords, crypts and relief, shinier lids and a wet pink lid edge with lashes rooted outside it, less SSS, uneven sclera surface, catchlight in the hero view.
 - Not taken, on purpose: caustics (he lost months to them), plica semilunaris, tension maps.
+
+### D-020 · 13 Nov · Iris light pooling, plica, expression wrinkles (asked for by Akshat; extends D-019)
+- **Light pooling** is computed in the iris shader from the key-light direction, not path-traced: real caustics need path guiding (CPU only, far too slow here). Stated as an approximation wherever it is shown.
+- **Plica** is its free edge only, a fine ridge. A flat ribbon was tried and rejected: it stood off the curved eyeball like a panel.
+- **Expression wrinkles** use the reference author's final method: a wrinkle height map revealed by shape-key-driven weights, no tension maps. Drivers are plain averages, so the `.blend` needs no script permission.
+- Eyeball scattering switched to Christensen-Burley, skin to random-walk (skin), finest skin relief to Voronoi cells, all from the author's notes.
+- Render plan: `docs/RENDER_PLAN.md`.

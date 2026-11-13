@@ -36,6 +36,10 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 13 Nov — light pooling, plica, expression wrinkles; render chain started (D-020)
+- Done: iris light pooling (shader), plica ridge, `wrinkle.1001` map with drivers (forehead lines on brow raise, crow's feet on lid closure), Burley eye scattering, Voronoi micro relief. All 8 sets regenerated (`textures/` is now 104 MB); seam audit, 14 tests and motion evaluation pass.
+- Running: the chain in `docs/RENDER_PLAN.md` (about 8.7 h, resumable; log `renders/tmp/chain.log`).
+- Checked only in stills so far: wrinkles, pooling, plica, new blink, stronger drag. Watch them in motion when the videos finish.
 ### 13 Nov — third critique pass, from the reference author's forum notes (D-019)
 - Done: `blink_mid` control (lid follows the eyeball through a blink), lid drag 30%, caruncle, iris rework with relief, soft blue-grey limbus, wet pink lid edge, shinier lids, uneven sclera surface, hero catchlight. All 8 sets regenerated; seam audit, 14 tests and motion evaluation pass.
 - Running: full chain again (stills, wire/clay, sequence, `.blend`, wire video, hero final, three finals; `renders/tmp/chain.log`, about 9 h, resumable).

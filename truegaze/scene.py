@@ -99,6 +99,7 @@ def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
     head.modifiers.new("rig", "ARMATURE").object = arm
     head.parent = arm
     _hair(head, arm, texture_set)
+    materials.drive_wrinkles(head)
 
     eye_mid = Vector(joints[2:4].mean(axis=0))
     cam = bpy.data.objects.new("Camera", bpy.data.cameras.new("Camera"))
@@ -117,6 +118,7 @@ def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
         light.location = eye_mid + Vector(loc)
         light.rotation_euler = (eye_mid - light.location).to_track_quat("-Z", "Y").to_euler()
         scene.collection.objects.link(light)
+    materials.set_key_direction(Vector((0.32, -0.38, 0.30)).normalized())  # the key light above; the iris shader needs it
     world = bpy.data.worlds.new("world")
     world.use_nodes = True
     world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.01, 0.01, 0.012, 1)
@@ -157,6 +159,7 @@ def hero_view(arm, side="left"):
         light.location = eye + Vector(offset)
         light.rotation_euler = (eye - light.location).to_track_quat("-Z", "Y").to_euler()
         light.data.energy, light.data.size = energy, size
+    materials.set_key_direction((bpy.data.objects["key"].location - eye).normalized())
     # a dim softbox beside the camera: it adds little light, its reflection is the window highlight on the cornea
     catch = bpy.data.objects.new("catch", bpy.data.lights.new("catch", "AREA"))
     catch.data.energy, catch.data.size = 0.5, 0.35

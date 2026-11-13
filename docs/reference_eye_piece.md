@@ -68,3 +68,17 @@ Source: https://blenderartists.org/t/human-progress/1143224 (2,282 posts; the 49
 Not done from this pass: plica semilunaris (thin flap behind the caruncle), separate SSS colour map, wrinkle/tension maps that change with expression, sculpted iris displacement.
 
 "Flexpressions" (the second reference) was not watched: no local copy and it shows whole-face expressions, outside this track's eye focus. Macro photo study was limited to the author's own close-up renders above; the Wikimedia search returned nothing usable.
+
+## Fourth pass, 13 Nov: the three items left out, and the rest of the thread
+
+All 682 posts by the author were downloaded; beyond the 49 eye posts, the 112 with technical content (skin, hair, wrinkles, lighting, render settings) were read.
+
+| Item | How he does it | How we did it | Honest difference |
+|---|---|---|---|
+| Light pooling in the iris | real refracted caustics; months of trouble, usable only once path guiding arrived | computed in the iris shader: for each iris point, how far it lies on the side away from the key light, as a crescent near the rim (`materials.eye`, `set_key_direction`) | an approximation of where the light gathers, not traced light; follows the key light only |
+| Plica semilunaris | a thin modelled flap, "the most time I've spent per millimetre" | its visible free edge as a fine curved ridge beside the caruncle, following both lids (`tools/make_hair.py`) | no membrane surface behind the edge |
+| Wrinkles that change with expression | two sculpted wrinkle height maps, revealed by masks "driven directly by the shape key values" (he gave up on tension maps for the face) | same scheme: `wrinkle.1001` map (red = forehead lines, green = crow's feet and under-eye lines) faded in by drivers on brow raise and lid closure (`materials.drive_wrinkles`) | lines are drawn by rule, not sculpted; two expression groups, not fifty |
+
+Also taken from the wider thread: Christensen-Burley scattering for the eyeball (random walk "creates a grey outline at the limbus"), random-walk skin mode for skin, Voronoi cells for the finest skin relief ("the finest bump is Voronoi"), and his remark that darker skin is "less translucent and more reflective" (already true of our sets through roughness and tone).
+
+Noted but not applicable: his hair cannot follow shader displacement (ours is bump only, so no gap opens); motion blur with hair was unusably slow for him (ours costs 22 s per frame).

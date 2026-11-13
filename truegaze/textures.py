@@ -1,6 +1,6 @@
 """Generates texture sets in GNM's UV layout. NumPy + SciPy + Pillow, no Blender.
 
-One set = textures/<name>/: color.1001 (skin), roughness.1001, height.1001 (pores, used as bump),
+One set = textures/<name>/: color.1001 (skin), roughness.1001, height.1001 (pores, used as bump), wrinkle.1001 (expression lines),
 color.1002 (left eye: sclera + iris + pupil), color.1004 (right eye, its own iris pattern).
 Numbers are GNM's UDIM tiles. Eye tiles are polar: eye axis at the centre, pupil, iris, then sclera.
 
@@ -160,7 +160,7 @@ def photo_skin(m, n, name):
 
 
 def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
-    """Returns colour (n, n, 3), roughness (n, n), height (n, n), all 0..1."""
+    """Returns colour (n, n, 3), roughness (n, n), height (n, n) and expression wrinkles (n, n, 3), all 0..1."""
     rng = np.random.default_rng(seed)
     seam = seam_mask(m, n)
     k, detail = skin_masks(m, n, seam), 1 - seam
@@ -239,6 +239,32 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     veins = np.clip(veins / (veins.max() + 1e-9), 0, 1) * (0.25 + 0.75 * tone.mean())  # dark skin hides them more
     color *= 1 - veins[..., None] * np.array([0.11, 0.07, 0.02])    # blue-green: red is absorbed most
     color *= 1 - 0.12 * crease[..., None]
+    # expression wrinkles, stored apart so the shader can fade them in: red = forehead lines (brows raised),
+    # green = crow's feet and lines under the eye (eyes squeezed shut)
+    forehead, squint = Image.new("L", (n, n)), Image.new("L", (n, n))
+    brow = roots["brow_uv"]
+    span = np.linspace(brow[:, 0].min() - 0.015, brow[:, 0].max() + 0.015, 80)
+    for i in range(5):
+        wave = sum(rng.uniform(0.0008, 0.002) * np.sin(span * rng.uniform(40, 160) + rng.uniform(0, 6)) for _ in range(3))
+        arch = 0.006 * np.abs(np.sin((span - span.mean()) / np.ptp(span) * 2 * np.pi))  # lines arch over each brow
+        v = brow[:, 1].max() + 0.012 + 0.011 * i + wave + arch
+        start = 0
+        while start < 78:  # broken into strokes: real forehead lines are not unbroken from temple to temple
+            stop = min(start + int(rng.uniform(18, 50)), 80)
+            ImageDraw.Draw(forehead).line(to_px(np.stack([span[start:stop], v[start:stop]], axis=1)), fill=int(rng.uniform(140, 255)), width=max(1, n // 1500))
+            start = stop + int(rng.uniform(1, 5))
+    for upper, lower in roots["lid_uv"].reshape(2, 2, 64, 2):
+        centre, corner = (upper.mean(axis=0) + lower.mean(axis=0)) / 2, (upper[-1] + lower[-1]) / 2
+        out = (corner - centre) / np.linalg.norm(corner - centre)
+        for angle in np.radians(np.linspace(-42, 42, 6) + rng.normal(0, 4, 6)):
+            way = np.array([out[0] * np.cos(angle) - out[1] * np.sin(angle), out[0] * np.sin(angle) + out[1] * np.cos(angle)])
+            reach = np.linspace(0.004, rng.uniform(0.018, 0.03), 12)[:, None]
+            ImageDraw.Draw(squint).line(to_px(corner + way * reach + out * 0.004 * np.sin(reach * 90)), fill=int(rng.uniform(150, 255)), width=max(1, n // 1500))
+        for drop in (0.35, 0.6):  # bunching under the lower lid
+            ImageDraw.Draw(squint).line(to_px(lower[6:-4] + (lower[6:-4] - centre) * drop), fill=170, width=max(1, n // 1500))
+    wrinkles = np.stack([np.clip(gaussian_filter(np.asarray(img, np.float32) / 255, n / 2200) * 2.2, 0, 1) for img in (forehead, squint)]
+                        + [np.zeros((n, n), np.float32)], axis=-1)
+    wrinkles[..., 1] *= 0.5  # an ordinary blink only hints at crow's feet
     # freckles and small moles
     spots = gaussian_filter(rng.random((n, n), np.float32), 1.5)
     spots = smoothstep(np.quantile(spots[::8, ::8], 0.997), spots.max(), spots)
@@ -261,7 +287,7 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     rough = 0.52 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.13 * k["orbital"] - 0.42 * k["inside"] - 0.30 * water
     rough = rough + 0.05 * noise(n, n // 200, rng) - 0.07 * bumps  # pores are duller than the skin between them
     rough = np.clip(rough, 0.08, 1.0)  # wet tissue is glossy, never a perfect mirror
-    return color, rough, height
+    return color, rough, height, wrinkles
 
 
 # ---------- eye (tiles 1002 and 1004) ----------
@@ -351,10 +377,11 @@ def make_set(name, size=4096, eye_size=2048, out=ROOT / "textures"):
     m = GNM()
     folder = Path(out) / name
     folder.mkdir(parents=True, exist_ok=True)
-    color, rough, height = skin(m, size, tone, seed, hair, photo)
+    color, rough, height, wrinkles = skin(m, size, tone, seed, hair, photo)
     save(color, folder / "color.1001.jpg")
     save(rough, folder / "roughness.1001.jpg")
     save(height, folder / "height.1001.jpg")
+    save(wrinkles, folder / "wrinkle.1001.jpg")
     (folder / "info.json").write_text(json.dumps({"hair": hair, "skin_photo": f"MakeHuman {photo} (CC0)"}))  # read by materials.py
     radii = eye_radii(m)
     save(eye(eye_size, radii, outer, inner, seed * 100 + 1), folder / "color.1002.jpg")  # left

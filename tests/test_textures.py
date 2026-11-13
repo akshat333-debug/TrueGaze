@@ -15,7 +15,8 @@ def test_eye_has_black_pupil_and_distinct_left_right():
 
 
 def test_skin_maps_are_valid_and_lips_are_redder():
-    color, rough, height = skin(GNM(), 256, (0.78, 0.57, 0.46), seed=1)
-    for a in (color, rough, height):
+    color, rough, height, wrinkles = skin(GNM(), 256, (0.78, 0.57, 0.46), seed=1)
+    assert wrinkles[..., 0].max() > 0.3 and wrinkles[..., 1].max() > 0.3  # forehead lines and crow's feet exist
+    for a in (color, rough, height, wrinkles):
         assert np.isfinite(a).all() and a.min() >= -0.05 and a.max() <= 1.05
     assert color[..., 0].mean() > color[..., 2].mean()
