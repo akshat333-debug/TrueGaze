@@ -35,6 +35,8 @@ python3 tools/seam_audit.py
 python3 -m pytest tests -q
 ```
 
+Final quality (`--quality final`) renders single frames with Cycles and joins them with `ffmpeg`; a stopped run resumes. About 10 s per frame on an M3.
+
 `render.py` options: `--seed N` (different natural blinks and micro-movements), `--frame screen|subject` (whose left "Left" means; default is the viewer's), `--quality draft|final`, `--texture 01..08`.
 
 ## How it works

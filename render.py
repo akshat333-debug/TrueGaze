@@ -9,6 +9,8 @@ Options: --input Left|Right|"Generate Motion", --seed N, --frame screen|subject 
 --blend path.blend (save the animated scene instead of rendering)
 """
 import argparse
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -68,7 +70,11 @@ def render(a):
     if a.quality == "draft":
         sc.render.engine = "BLENDER_EEVEE_NEXT"
     else:
-        sc.cycles.samples = 64
+        if not shutil.which("ffmpeg"):
+            raise SystemExit("final quality needs ffmpeg on the PATH to join the frames")
+        sc.cycles.samples = 48
+        sc.cycles.use_adaptive_sampling, sc.cycles.adaptive_threshold = True, 0.03  # stop early where the image is clean
+        sc.render.use_persistent_data = True  # keep textures loaded between frames
     sc.render.use_stamp = True  # caption naming the input, so the judge knows what was asked
     for flag in ("date", "time", "render_time", "frame", "frame_range", "memory", "hostname", "camera",
                  "lens", "scene", "marker", "filename", "sequencer_strip"):
@@ -82,13 +88,23 @@ def render(a):
         bpy.ops.wm.save_as_mainfile(filepath=str(Path(a.blend).resolve()), compress=True)
         print("WROTE", a.blend)
         return
-    sc.render.image_settings.file_format = "FFMPEG"
-    sc.render.ffmpeg.format, sc.render.ffmpeg.codec = "MPEG4", "H264"
-    sc.render.ffmpeg.constant_rate_factor = "HIGH"
     out = Path(a.out or ROOT / "outputs" / "videos" / f"{a.input.replace(' ', '_')}.mp4")
     out.parent.mkdir(parents=True, exist_ok=True)
-    sc.render.filepath = str(out)
-    bpy.ops.render.render(animation=True)
+    if a.quality == "final":
+        # hours of rendering: write single frames and skip the ones already there, so a stopped run resumes
+        frames = ROOT / "renders" / "tmp" / "final" / f"{out.stem}_{a.texture}_{a.seed}_{a.frame}"
+        sc.render.image_settings.file_format = "PNG"
+        sc.render.use_overwrite = False
+        sc.render.filepath = str(frames) + "/"
+        bpy.ops.render.render(animation=True)
+        subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", str(FPS), "-i", str(frames / "%04d.png"),
+                        "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "17", str(out)], check=True)
+    else:
+        sc.render.image_settings.file_format = "FFMPEG"
+        sc.render.ffmpeg.format, sc.render.ffmpeg.codec = "MPEG4", "H264"
+        sc.render.ffmpeg.constant_rate_factor = "HIGH"
+        sc.render.filepath = str(out)
+        bpy.ops.render.render(animation=True)
     print("WROTE", out)
 
 

@@ -35,6 +35,10 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 13 Nov — final-quality video renders
+- `render.py --quality final` now writes single PNG frames to `renders/tmp/final/<input>_<texture>_<seed>_<frame>/` and skips frames that exist, so a stopped run resumes where it left off; ffmpeg (must be on the PATH) joins them into `outputs/videos/`. Cycles 48 samples with adaptive sampling and persistent data: about 10 s per 1280×720 frame on the M3, so about 2.5 h for all three videos.
+- Run: `caffeinate -i /Applications/Blender.app/Contents/MacOS/Blender --background --python render.py -- --all --quality final` (log in `renders/tmp/final.log`). To redo a video from scratch delete its frame folder first.
+- Gotcha: frames from an older look are reused if the folder is left in place after changing textures, lighting or motion.
 ### 13 Nov — photo-based skin
 - Done: `tools/transfer_skin.py` fits GNM to MakeHuman's head (median 0.5 mm) and writes `assets/skin_transfer.npz`; `truegaze/textures.py` pulls MakeHuman's CC0 skins into GNM's layout for all 8 sets (D-015). Licence verified at the source and logged in `docs/ASSETS.md`. Seam audit passes (front ≤ 6/255) after fading the photo out on seams. Draft videos reviewed: Left, Right, Generate Motion all move the right way, blinks and lashes fine.
 - Tweaks: fill light 0.5 → 1.2 W (the shadow-side eye was too dark in videos); video lens 130 → 118 so brows are not cut off; inner-lip pink patch removed.
