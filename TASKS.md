@@ -26,6 +26,7 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 - [ ] C: Dockerfile, fresh-clone test, `apply_textures.py`, final renders, deck, demo video
 
 ## 21 Nov — freeze and submit
+- [ ] **Before making the repo public:** the reference video `Eye Piece - Chris Jones (1080p, h264).mp4` (third-party, committed 13 Nov at Akshat's request while the repo is private) must be removed **from history too**, not only deleted: `git filter-repo --path "Eye Piece - Chris Jones (1080p, h264).mp4" --invert-paths` then force-push, or publish from a fresh repo without it. A plain delete leaves it downloadable from old commits.
 - [ ] Regenerate everything from a clean clone; README final; repo public; submit form. 22 Nov is buffer only.
 
 ## Done
