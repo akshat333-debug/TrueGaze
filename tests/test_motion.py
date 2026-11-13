@@ -27,7 +27,7 @@ def test_vergence_near_target_turns_eyes_inward():
 def test_blink_is_fast_close_slow_open():
     assert blink_profile(0.0) == 0 and blink_profile(0.11) == 1
     assert blink_profile(0.08) > blink_profile(0.08 + 0.13 + 0.03)  # closing faster than opening
-    assert blink_profile(0.34) == 0
+    assert blink_profile(0.38) == 0
 
 
 def test_large_saccade_triggers_blink():

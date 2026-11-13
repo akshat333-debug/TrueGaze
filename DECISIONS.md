@@ -81,3 +81,8 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 - New `hero` view (one eye, 66° to its outer side, hard key, shallow focus) for stills and `render.py --view hero`. The front view stays the default because the brief asks to show both eyes moving.
 - Reference frames are never committed; comparisons are made locally.
 - Known and accepted: no caustic light pooling in the iris, no caruncle geometry, upper lid does not fold into itself.
+
+### D-018 · 13 Nov · Motion numbers checked against sources; constants moved; motion blur
+- `tools/evaluate_motion.py` measures the engine the lab way (saccade duration = time above 30 deg/s) and compares with published ranges. Sources were looked up on 13 Nov; two bands that could not be confirmed (peak/mean velocity, fixation wander) are reported as notes and cannot fail the run.
+- Found and fixed: (1) the saccade constant "21 ms + 2.2 ms/deg" could not be confirmed; published fits span 20–30 ms + 2–2.7 ms/deg, so it is now 25 + 2.4 (middle of the range). (2) minimum-jerk saccades were too peaked (1.88 × mean velocity); the profile is now a blend with a cosine (1.68). (3) blink opening lengthened to 240 ms so closing is about 50% faster than opening, as measured on people. (4) spontaneous blink rate was 22/min, above the published 11–19; interval widened, now about 17/min.
+- Final-quality video uses motion blur (half-frame shutter): a 30 fps camera smears a 40–100 ms saccade, and without it fast eye jumps look like a cut. Cost: about 22 s per frame instead of 15 s.

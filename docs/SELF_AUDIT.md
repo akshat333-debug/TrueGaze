@@ -30,7 +30,7 @@ Recommendation: B for 2–3 hero sets, keep generated skin as the floor for the 
 - Saccade main sequence, overshoot, vergence, lid-follow, blink shape, gaze-evoked blinks, drift, micro-saccades, pupil fluctuation: all unit-tested (`tests/test_motion.py`).
 - Eyes rotate about GNM's real eye joints; lids never cut the eyeball (fit constraint) and lift over the cornea (`tools/fit_bulge.py`).
 - Direction check Left/Right/Up/Down/Reset 5/5, measured from projected pupil positions.
-- Not yet done: comparing our blink and saccade curves frame by frame against real footage. Timings come from published physiology, not from our own measurement.
+- `tools/evaluate_motion.py` (13 Nov) checks saccade duration, blink timing and rate, and vergence against published ranges; it found four numbers off and they were fixed (D-018). Still not done: comparison against our own recordings of real eyes.
 
 ## Code and UV portability (20) — strong
 - One command per output; scene built from script; GNM weights fetched and checksum-verified.

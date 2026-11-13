@@ -3,11 +3,11 @@
 A clip is a list of timed gaze targets and blinks. `render_clip` turns it into per-frame values:
 eye yaw/pitch per eye (degrees; yaw > 0 = toward the character's left, pitch > 0 = up) and shape-key
 weights. Physiology used:
-- saccade duration 21 ms + 2.2 ms per degree (main sequence), minimum-jerk profile, small overshoot
+- saccade duration 25 ms + 2.4 ms per degree (main sequence; published fits span 20-30 ms + 2-2.7 ms/deg), measured peak-to-mean velocity ratio, small overshoot
   that settles back (glissade)
 - both eyes aim at one point, so they converge for near targets (vergence)
 - upper lid follows vertical gaze; brows lift on up-gaze
-- blinks: fast close (~100 ms), slower open (~200 ms); large saccades often trigger one
+- blinks: fast close (~100 ms), slower open (~240 ms); large saccades often trigger one
 - fixation is never frozen: slow drift plus occasional micro-saccades; pupil size fluctuates (hippus)
 """
 import math
@@ -21,7 +21,7 @@ PUPIL_REST = -0.9  # pupil key at rest: GNM's template pupil is dilated (5.4 mm)
 
 
 def saccade_duration(amplitude_deg):
-    return 0.021 + 0.0022 * amplitude_deg
+    return 0.025 + 0.0024 * amplitude_deg  # middle of the published range: 20-30 ms + 2-2.7 ms per degree
 
 
 def min_jerk(tau):
@@ -29,9 +29,17 @@ def min_jerk(tau):
     return tau**3 * (10 - 15 * tau + 6 * tau * tau)
 
 
+def saccade_profile(tau):
+    """Share of a saccade completed at fraction tau of its duration. A blend of a minimum-jerk and a
+    cosine curve: peak velocity is 1.68 x the mean, as measured on real saccades (minimum-jerk alone
+    gives 1.88, too peaked)."""
+    tau = np.clip(tau, 0.0, 1.0)
+    return 0.35 * min_jerk(tau) + 0.65 * (1 - np.cos(np.pi * tau)) / 2
+
+
 def blink_profile(t):
-    """Lid closure 0..1 at time t (s) since blink start; 0 again after 0.33 s."""
-    close, hold, opening = 0.10, 0.03, 0.20
+    """Lid closure 0..1 at time t (s) since blink start; 0 again after 0.37 s."""
+    close, hold, opening = 0.10, 0.03, 0.24
     if t < 0:
         return 0.0
     if t < close:
@@ -92,7 +100,7 @@ class Clip:
         self.blinks.append((t, strength))
         return self
 
-    def natural_blinks(self, every=(2.5, 4.5)):
+    def natural_blinks(self, every=(3.0, 6.0)):
         """Spontaneous blinks at random intervals, skipping ones too close to existing blinks."""
         t = self.rng.uniform(0.6, 1.5)
         while t < self.duration - 0.4:
@@ -110,7 +118,7 @@ def _direction(clip, t):
             break
         amp = math.hypot(y - yaw, p - pitch)
         dur = saccade_duration(amp)
-        s = float(min_jerk((t - start) / dur))
+        s = float(saccade_profile((t - start) / dur))
         # overshoot ~4% of amplitude, settling over 60 ms after the main movement
         after = t - start - dur
         if after > 0:

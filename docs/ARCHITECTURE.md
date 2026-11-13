@@ -1,17 +1,21 @@
 # Architecture
 
-Status 12 Nov: reader, eyelid/brow controls, scene, motion engine and `render.py` work. 13 Nov: generated texture sets (skin, left/right iris) and shaders are wired in; skin is a procedural baseline, photo-based skin still to come.
+Status 13 Nov: every required output is produced by script. Head, fitted controls, soft tissue (socket, bulge, drag), hair, photo-based skin, irises, shaders, motion engine, front and hero views, clay/wire looks, launch-spec API, seam audit, motion evaluation and the one-command `reproduce.sh` all work. Open: final-quality videos (rendering), Dockerfile, deck, demo video.
 
 ## Flow
 ```
 Google GNM Head v3 weights (Apache 2.0, auto-download)
         | truegaze/gnm.py       (NumPy reader, runs inside Blender; weights cached in assets/cache/)
         | tools/fit_controls.py -> assets/controls.npz (named eyelid controls as GNM expression coefficients)
+        | tools/fit_bulge.py    -> assets/bulge.npz    (socket depth, lid bulge, skin drag)
+        | tools/make_hair.py    -> assets/hair.npz     (lashes, brows, tear line, facial down)
+        | tools/transfer_skin.py-> assets/skin_transfer.npz (GNM vertex -> MakeHuman skin UV)
+        | truegaze/textures.py  -> textures/01..08     (photo-based skin, irises, relief, roughness)
         | truegaze/scene.py     (inside Blender 4.5 LTS, Python 3.11)
         v
 Blender scene: mesh + shape keys + armature (eye_L, eye_R, neck) + materials + cameras + lights
         ^                               ^
-        | uv_maps/set_NN/ (textures)    | truegaze/motion.py (pure Python trajectories)
+        | textures/NN/ (per UDIM tile)  | truegaze/motion.py (pure Python trajectories)
         v
 render.py --input Left|Right|"Generate Motion"  ->  frames -> MP4, stills, metadata JSON, scene.blend
 ```
@@ -27,7 +31,7 @@ render.py --input Left|Right|"Generate Motion"  ->  frames -> MP4, stills, metad
 | part | job | owner | status |
 |---|---|---|---|
 | `truegaze/gnm.py` | read GNM weights, UDIM tiles | A | done |
-| `tools/fit_controls.py` | blink and lid controls | A | done (brows, lid-follow todo) |
+| `tools/fit_controls.py` | blink, lid and brow controls | A | done |
 | `truegaze/scene.py` | mesh, shape keys, rig, camera, lights | A | done (flat colours) |
 | `truegaze/materials.py` | skin, eye and refracting cornea shaders, one material per UDIM tile | B | works |
 | `truegaze/textures.py` | generates texture sets in GNM's UV layout (`python3 -m truegaze.textures`) | B | baseline |
@@ -35,6 +39,8 @@ render.py --input Left|Right|"Generate Motion"  ->  frames -> MP4, stills, metad
 | `tools/make_hair.py` | lashes, brows, tear line with per-control shape keys (`assets/hair.npz`) | A | works |
 | `tools/transfer_skin.py` | 3D fit of GNM to MakeHuman's head; per-vertex lookup into MakeHuman's skin layout (`assets/skin_transfer.npz`) | B | works |
 | `tools/fit_bulge.py` | soft tissue: socket depth, lid bulge over the cornea, skin drag with gaze (`assets/bulge.npz`) | A | works |
+| `tools/evaluate_motion.py` | checks saccade, blink, vergence numbers against published ranges | A | works |
+| `reproduce.sh` | rebuilds every asset and output from a fresh clone | C | written, fresh-clone parts verified |
 | `wrapper/eyes.py` | launch-spec API `move/reset/render`, 10-frame sequence, metadata, direction check | C | works |
 | `apply_textures.py` | wraps a set on a stock or random-identity GNM head | C | works |
 | `tools/seam_audit.py` | measures colour steps across UV seams; writes `uv_maps/` sheets | B | works |

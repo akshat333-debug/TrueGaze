@@ -1,5 +1,11 @@
 # TrueGaze — Track 1 "Synthetic Eyes" full win plan
 
+## Status against this plan (13 Nov, end of day 2)
+Ahead of the schedule below: all four workstreams have working code and every required output exists.
+- **Changed from the plan:** no export step or MPFB fallback (D-009); skin is MakeHuman CC0 photo skins transferred in 3D instead of the diffusion route (D-015); hair is generated mesh strands (D-011); added socket depth, skin drag, hero view, clay/wire breakdowns and a motion evaluation that were not planned (D-014, D-016, D-017, D-018).
+- **Left:** final-quality videos (rendering, about 8 h), Dockerfile, deck, demo video, commit `textures/`, purge the reference video from history, make the repo public, submit.
+- The sections below are the original plan, kept for reference.
+
 ## Context
 Team Zero Drift (VIT Vellore, 3 members with Claude agents) switched to Track 1 on 12 Nov. Submission **22 Nov 2026** through the Google form, everything in the **public** repo `akshat333-debug/TrueGaze`. Goal: win the track (prize + PPO). The college PoC is not answering questions, so the build must satisfy **every reading** of the spec: the 12 Nov evaluation deck and the 5 Nov launch slides.
 
