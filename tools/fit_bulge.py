@@ -27,8 +27,8 @@ from truegaze.gnm import GNM  # noqa: E402
 from truegaze.motion import BULGE_PITCH, BULGE_YAW  # noqa: E402
 
 MIN_SKIN = 0.0016     # m, thinnest the lid may get over the eyeball
-DRAG = 0.16           # share of the eye's turn that the lid edge follows
-DRAG_REACH = 0.007    # m, how far from the lid edge the drag fades out
+DRAG = 0.30           # share of the eye's turn that the lid edge follows
+DRAG_REACH = 0.008    # m, how far from the lid edge the drag fades out
 
 
 def gaze_matrix(yaw_deg, pitch_deg):

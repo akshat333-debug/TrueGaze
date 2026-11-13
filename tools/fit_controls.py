@@ -108,8 +108,8 @@ def fit_eye(m, side):
         return out
 
     controls, report = {}, {}
-    for name, (ua, la) in {"blink": (1.0, 1.0), "upper_lid_down": (0.5, 0.0), "upper_lid_up": (-0.35, 0.0),
-                           "lower_lid_up": (0.0, 1.0)}.items():
+    for name, (ua, la) in {"blink": (1.0, 1.0), "blink_mid": (0.5, 0.5), "upper_lid_down": (0.5, 0.0),
+                           "upper_lid_up": (-0.35, 0.0), "lower_lid_up": (0.0, 1.0)}.items():
         coef, bad = solve(m, comps, targets(ua, la), ball, region)
         full = np.zeros(383)
         full[comps] = coef
@@ -117,6 +117,9 @@ def fit_eye(m, side):
         moved = T + np.tensordot(coef, m.expression_basis[comps], 1)
         gap = np.mean([moved[i, 1] for i in up]) - np.mean([moved[i, 1] for i in low])
         report[name] = (round(float(np.abs(coef).max()), 2), round(gap * 1000, 2), bad)
+    # A blink is not a straight line: half way, the lid must still lie on the eyeball. "blink_mid" becomes the
+    # correction to add at half blink (half-closed shape minus half of the closed shape), weighted 4b(1-b).
+    controls[f"blink_mid_{side}"] = controls[f"blink_mid_{side}"] - 0.5 * controls[f"blink_{side}"]
     # brows: lift or lower the brow region, keep the lid margins where they are
     brow = np.flatnonzero(m.group(f"{side}_brow_region"))
     for name, lift in {"brow_raise": 0.004, "brow_lower": -0.002}.items():

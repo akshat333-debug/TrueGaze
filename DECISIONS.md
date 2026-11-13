@@ -86,3 +86,8 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 - `tools/evaluate_motion.py` measures the engine the lab way (saccade duration = time above 30 deg/s) and compares with published ranges. Sources were looked up on 13 Nov; two bands that could not be confirmed (peak/mean velocity, fixation wander) are reported as notes and cannot fail the run.
 - Found and fixed: (1) the saccade constant "21 ms + 2.2 ms/deg" could not be confirmed; published fits span 20–30 ms + 2–2.7 ms/deg, so it is now 25 + 2.4 (middle of the range). (2) minimum-jerk saccades were too peaked (1.88 × mean velocity); the profile is now a blend with a cosine (1.68). (3) blink opening lengthened to 240 ms so closing is about 50% faster than opening, as measured on people. (4) spontaneous blink rate was 22/min, above the published 11–19; interval widened, now about 17/min.
 - Final-quality video uses motion blur (half-frame shutter): a 30 fps camera smears a 40–100 ms saccade, and without it fast eye jumps look like a cut. Cost: about 22 s per frame instead of 15 s.
+
+### D-019 · 13 Nov · Changes taken from the reference author's own notes
+- Read the 49 eye-related posts by Chris Jones in the Blender Artists "Human Progress" thread. Table of what he does and what we changed: `docs/reference_eye_piece.md`, third pass.
+- Taken: stronger lid drag (30%), non-linear blink through a fitted half-closed shape (`blink_mid`), caruncle, softer blue-grey limbus, iris with thick cords, crypts and relief, shinier lids and a wet pink lid edge with lashes rooted outside it, less SSS, uneven sclera surface, catchlight in the hero view.
+- Not taken, on purpose: caustics (he lost months to them), plica semilunaris, tension maps.

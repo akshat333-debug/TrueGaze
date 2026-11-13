@@ -36,6 +36,10 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 13 Nov — third critique pass, from the reference author's forum notes (D-019)
+- Done: `blink_mid` control (lid follows the eyeball through a blink), lid drag 30%, caruncle, iris rework with relief, soft blue-grey limbus, wet pink lid edge, shinier lids, uneven sclera surface, hero catchlight. All 8 sets regenerated; seam audit, 14 tests and motion evaluation pass.
+- Running: full chain again (stills, wire/clay, sequence, `.blend`, wire video, hero final, three finals; `renders/tmp/chain.log`, about 9 h, resumable).
+- Not done: Flexpressions video unwatched; plica; caustics.
 ### 13 Nov — motion evaluation, docs refresh
 - Done: `tools/evaluate_motion.py` (all sourced checks pass after four fixes, D-018); motion blur in final quality; `reproduce.sh` + `requirements.txt`; fresh-clone test passed; README, PLAN status, ARCHITECTURE, SELF_AUDIT refreshed; overview images `docs/hero_sets.jpg`, `docs/texture_sets.jpg`, `docs/breakdown.jpg`. Reference video committed at Akshat's request (see the 21 Nov checklist: purge from history before going public).
 - Running: `.blend`, wireframe video, final videos with motion blur, hero final video (`renders/tmp/chain.log`, about 8 h, resumable; about 22 s per frame).

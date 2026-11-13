@@ -47,3 +47,24 @@ Six reference frames (4.5, 7, 9, 11.5, 14.5, 18 s) were set beside our front, cl
 | 9 | Deep socket, lid fold, skin sliding over the eye | puffy lids | socket depth, crease, bulge and drag (D-014, D-016) | their upper lid folds into itself when open; ours only creases in shading |
 
 Real-eye facts used (from anatomy, not from new photo research): conjunctival vessels enter from the two corners and thin toward the iris; pingueculae are yellowish patches in the exposed strip beside the iris; iris freckles sit in the middle zone; lower-lid skin is the thinnest on the body, hence visible veins and fine lines.
+
+## Third pass, 13 Nov: the author's own notes (Blender Artists thread "Human Progress")
+
+Source: https://blenderartists.org/t/human-progress/1143224 (2,282 posts; the 49 eye-related posts by Chris Jones were read in full, plus five of his images: eyeball diagram, 2021 plica close-up, 2022 hazel eye, specular map, tear line). Nothing from the thread is copied into the repo; only what we learned.
+
+| What he does | What it told us | Change made |
+|---|---|---|
+| Eyelids are weighted to a bone that copies the eyeball's rotation at a fraction, "so that they appear to drag" | our 16% lid drag was timid | drag raised to 30% of the gaze angle at the lid edge, up to 2.7 mm |
+| Blink is five shapes blended non-linearly "so the eyelids follow the curvature of the eyeball" | our blink was one straight-line shape: half way, the lid cut a chord through the eyeball | new fitted half-closed shape; `blink_mid` corrective weighted 4b(1−b) |
+| Eyelid bulge by a warp from pupil to cornea | same idea as our fitted bulge keys | none needed |
+| Tear line is a ring duplicated from the eyelid so it shares its motion | same as ours (rebuilt from the lid edge per control) | none needed |
+| Caruncle and plica modelled, with their own drag; "most time spent per millimetre" | GNM has neither | small sunk pink caruncle added to the generated mesh, following both lids |
+| One eyeball material, sclera fading to clear cornea through a ramp; limbus "the hardest part" | our limbus was too sharp | limbus blend widened, blue-grey ring added where the white thins |
+| Iris: sculpted relief plus colour; thick cords, crypts, ragged collarette | ours was hundreds of hairlines, flat | about sixty thick cords, crypt pits between them, ragged starburst centre, relief from the picture itself |
+| Caustics: months lost, shadow caustics "failed to deliver" | not worth chasing in a week | still not attempted (stated limit) |
+| Specular map brightest on eyelids and lips, mottled everywhere | our lids were as matte as cheeks | lids shinier, roughness contrast raised, wet pink lid edge with lashes rooted outside it |
+| Advice to another artist: look at "uniformity of the vellus hair" and "evenness of the rim highlights"; reduce SSS around eyelids and nose | applies to us directly | SSS 0.30 → 0.24, sclera surface made slightly uneven so highlights wobble, catchlight softbox in the hero shot |
+
+Not done from this pass: plica semilunaris (thin flap behind the caruncle), separate SSS colour map, wrinkle/tension maps that change with expression, sculpted iris displacement.
+
+"Flexpressions" (the second reference) was not watched: no local copy and it shows whole-face expressions, outside this track's eye focus. Macro photo study was limited to the author's own close-up renders above; the Wikimedia search returned nothing usable.

@@ -37,7 +37,7 @@ def keyframe(head, arm, frames):
             for where in ("in", "out", "up", "down"):
                 keys[f"bulge_{where}_{side}"].keyframe_insert("value", frame=f + 1)
                 keys[f"drag_{where}_{side}"].keyframe_insert("value", frame=f + 1)
-            for name in ("blink", "upper_lid_up", "upper_lid_down", "lower_lid_up", "brow_raise"):
+            for name in ("blink", "blink_mid", "upper_lid_up", "upper_lid_down", "lower_lid_up", "brow_raise"):
                 keys[f"{name}_{side}"].value = frames[name][f]
                 keys[f"{name}_{side}"].keyframe_insert("value", frame=f + 1)
         keys["pupil"].value = frames["pupil"][f]

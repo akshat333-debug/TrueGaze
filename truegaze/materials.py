@@ -43,7 +43,7 @@ def skin(folder):
     bsdf.inputs["Coat Roughness"].default_value = 0.28
     nt.links.new(micro.outputs["Normal"], bsdf.inputs["Coat Normal"])
     bsdf.inputs["Specular IOR Level"].default_value = 0.3
-    bsdf.inputs["Subsurface Weight"].default_value = 0.3
+    bsdf.inputs["Subsurface Weight"].default_value = 0.24
     bsdf.inputs["Subsurface Radius"].default_value = (1.0, 0.35, 0.2)
     bsdf.inputs["Subsurface Scale"].default_value = 0.004
     return mat
@@ -55,6 +55,11 @@ def eye(folder, tile):
     nt.links.new(_image(nt, folder / f"color.{tile}.jpg").outputs["Color"], bsdf.inputs["Base Color"])
     bsdf.inputs["Roughness"].default_value = 0.5
     bsdf.inputs["Specular IOR Level"].default_value = 0.0
+    relief = nt.nodes.new("ShaderNodeBump")  # iris fibres stand up and crypts sink: the picture doubles as its height
+    relief.inputs["Strength"].default_value = 0.5
+    relief.inputs["Distance"].default_value = 0.0003
+    nt.links.new(nt.nodes["Image Texture"].outputs["Color"], relief.inputs["Height"])
+    nt.links.new(relief.outputs["Normal"], bsdf.inputs["Normal"])
     bsdf.inputs["Subsurface Weight"].default_value = 0.25  # the white of the eye glows a little, it is not paint
     bsdf.inputs["Subsurface Radius"].default_value = (1.0, 0.6, 0.5)
     bsdf.inputs["Subsurface Scale"].default_value = 0.0015
@@ -85,6 +90,24 @@ def cornea():
     glass, path, cycles_mix, out2 = new("ShaderNodeBsdfGlass"), new("ShaderNodeLightPath"), new("ShaderNodeMixShader"), new("ShaderNodeOutputMaterial")
     glass.inputs["IOR"].default_value = CORNEA_IOR
     glass.inputs["Roughness"].default_value = 0.0
+    # the wet skin over the white of the eye is slightly uneven, so its highlights wobble; the cornea stays smooth
+    uv, radius = new("ShaderNodeUVMap"), new("ShaderNodeVectorMath")
+    fract, centre, ramp = new("ShaderNodeVectorMath"), new("ShaderNodeVectorMath"), new("ShaderNodeMapRange")
+    fract.operation, centre.operation, radius.operation = "FRACTION", "SUBTRACT", "LENGTH"
+    centre.inputs[1].default_value = (0.5, 0.5, 0.0)
+    ramp.inputs["From Min"].default_value, ramp.inputs["From Max"].default_value = 0.15, 0.22  # cornea ends at 0.155 in this tile
+    ramp.inputs["To Max"].default_value = 0.12
+    lumps, wobble = new("ShaderNodeTexNoise"), new("ShaderNodeBump")
+    lumps.inputs["Scale"].default_value = 350
+    wobble.inputs["Distance"].default_value = 0.0003
+    link(uv.outputs["UV"], fract.inputs[0])
+    link(fract.outputs["Vector"], centre.inputs[0])
+    link(centre.outputs["Vector"], radius.inputs[0])
+    link(radius.outputs["Value"], ramp.inputs["Value"])
+    link(ramp.outputs["Result"], wobble.inputs["Strength"])
+    link(new("ShaderNodeTexCoord").outputs["Object"], lumps.inputs["Vector"])
+    link(lumps.outputs["Fac"], wobble.inputs["Height"])
+    link(wobble.outputs["Normal"], glass.inputs["Normal"])
     link(path.outputs["Is Shadow Ray"], cycles_mix.inputs["Fac"])  # light passes through to the iris
     link(glass.outputs["BSDF"], cycles_mix.inputs[1])
     link(clear.outputs["BSDF"], cycles_mix.inputs[2])
@@ -116,6 +139,17 @@ def fuzz():
     nt.links.new(clear.outputs["BSDF"], mix.inputs[1])
     nt.links.new(bsdf.outputs["BSDF"], mix.inputs[2])
     nt.links.new(mix.outputs["Shader"], nt.nodes["Material Output"].inputs["Surface"])
+    return mat
+
+
+def caruncle():
+    """Wet pink tissue in the inner corner of the eye."""
+    mat, _, bsdf = _principled("caruncle")
+    bsdf.inputs["Base Color"].default_value = (0.62, 0.30, 0.28, 1)
+    bsdf.inputs["Roughness"].default_value = 0.22
+    bsdf.inputs["Subsurface Weight"].default_value = 0.5
+    bsdf.inputs["Subsurface Radius"].default_value = (1.0, 0.3, 0.2)
+    bsdf.inputs["Subsurface Scale"].default_value = 0.002
     return mat
 
 

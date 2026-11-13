@@ -215,6 +215,12 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
                 path.append(p)
             pen.line(to_px(path), fill=int(rng.uniform(90, 255)), width=max(1, n // 2000))
     crease = np.clip(crease / crease.max(), 0, 1)
+    # the lid edge itself is a wet pink band (the lashes root just outside it)
+    edge = Image.new("L", (n, n))
+    for curve in roots["lid_uv"]:
+        ImageDraw.Draw(edge).line(to_px(curve), fill=255, width=max(2, n // 700))
+    water = np.clip(gaussian_filter(np.asarray(edge, np.float32) / 255, n / 3000) * 1.6, 0, 1)
+    color += (0.65 * water)[..., None] * (np.array([0.80, 0.47, 0.44]) * (0.55 + 0.45 * tone.mean()) - color)
     # fine lines of the thin skin round the eye: they run round the socket, crossed by fainter radial ones
     lines = np.zeros((n, n), np.float32)
     rings = gaussian_filter(rng.standard_normal((700, 48)).astype(np.float32), (0.8, 2.5), mode=("nearest", "wrap"))
@@ -252,8 +258,9 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
         bumps = bumps + 0.8 * cover * fine / (fine.std() + 1e-9) * (1 - k["inside"])
     height = 0.5 + 0.12 * bumps - 0.20 * crease - 0.05 * lines * (1 - k["inside"])
 
-    rough = 0.52 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.06 * k["orbital"] - 0.42 * k["inside"]
-    rough = rough + 0.03 * noise(n, n // 200, rng) - 0.10 * bumps * 0.3
+    rough = 0.52 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.13 * k["orbital"] - 0.42 * k["inside"] - 0.30 * water
+    rough = rough + 0.05 * noise(n, n // 200, rng) - 0.07 * bumps  # pores are duller than the skin between them
+    rough = np.clip(rough, 0.08, 1.0)  # wet tissue is glossy, never a perfect mirror
     return color, rough, height
 
 
@@ -287,12 +294,12 @@ def eye(n, radii, outer, inner, seed):
     bend = 0.045 * polar(10, 40, 1.5, 2.5)  # fibres wander sideways on their way out, they are not ruler-straight
 
     # sclera: off-white, pinker toward the corners, thin red veins that fade before the iris
-    sclera = np.array([0.62, 0.60, 0.57]) * (1 + 0.03 * noise(n, n // 6, rng))[..., None]
+    sclera = np.array([0.69, 0.69, 0.70]) * (1 + 0.03 * noise(n, n // 6, rng))[..., None]
     sclera += smoothstep(0.30, 0.46, r)[..., None] * (np.array([0.66, 0.46, 0.43]) - sclera)
     sclera *= (1 - 0.35 * smoothstep(iris_r + 0.03, 0.40, r))[..., None]  # darker toward the lids, as real eyes look
     # yellowish fatty patches left and right of the iris, where the eye is exposed between the lids
     patch = np.exp(-((r - iris_r - 0.09) / 0.05) ** 2) * np.abs(np.cos(theta)) ** 3 * np.clip(0.5 + 0.6 * noise(n, n // 12, rng), 0, 1)
-    sclera += (0.45 * patch)[..., None] * (np.array([0.66, 0.58, 0.38]) - sclera)
+    sclera += (0.25 * patch)[..., None] * (np.array([0.66, 0.58, 0.38]) - sclera)
     veins = np.zeros((n, n), np.float32)
     for _ in range(60):
         ang, rad = rng.choice([0, np.pi]) + rng.normal(0, 0.75), 0.44  # most vessels come in from the two corners
@@ -316,20 +323,25 @@ def eye(n, radii, outer, inner, seed):
     # iris: inner colour near the pupil, outer colour beyond the collarette, radial fibres, dark rim
     t = np.clip((r - pupil_r) / (iris_r - pupil_r), 0, 1)
     wavy = polar(4, 90, 0, 3.0)
-    mix = smoothstep(0.15, 0.42, t + 0.07 * wavy)
-    iris = np.array(inner) + mix[..., None] * (np.array(outer) - np.array(inner))
-    fibres = 0.6 * polar(40, 900, 9, 1.3) + 0.4 * polar(90, 1800, 14, 0.9)
-    crypts = smoothstep(1.3, 2.2, polar(30, 160, 2.5, 1.5)) * smoothstep(0.15, 0.35, t) * (1 - smoothstep(0.6, 0.85, t))
+    jag = polar(3, 150, 0, 1.0)                                      # the inner colour ends in a ragged starburst
+    mix = smoothstep(0.20, 0.36, t + 0.09 * jag + 0.04 * wavy)
+    inner = 0.6 * np.array(inner) + 0.4 * np.array(outer)  # the centre is a tint of the main colour, not a second colour
+    iris = inner + mix[..., None] * (np.array(outer) - inner)
+    ropes = polar(30, 220, 6, 1.8)                                   # about sixty thick cords, not hundreds of hairlines
+    fibres = 0.8 * ropes + 0.2 * polar(90, 1500, 14, 0.9)
+    # crypts: dark pits that open between cords, mostly around the collarette
+    crypts = smoothstep(0.1, 0.9, -ropes) * smoothstep(0.1, 1.0, polar(20, 90, 1.2, 1.2)) * smoothstep(0.2, 0.38, t) * (1 - smoothstep(0.55, 0.8, t))
     ring = 0.30 + 0.05 * wavy                                       # collarette: a paler zigzag ring a third of the way out
     collarette = np.exp(-((t - ring) / 0.035) ** 2)
     furrows = sum(np.exp(-((t - c - 0.02 * wavy) / 0.018) ** 2) for c in (0.62, 0.76, 0.88))  # contraction furrows
     ruff = 1 - 0.6 * (1 - smoothstep(0.0, 0.05, t))                  # dark pigment frill at the pupil edge
-    shade = (1 + 0.36 * fibres) * (1 - 0.40 * crypts) * (1 + 0.22 * collarette) * (1 - 0.10 * furrows) * ruff * (1 - 0.70 * smoothstep(0.78, 1.0, t))
+    shade = (1 + 0.42 * fibres) * (1 - 0.38 * crypts) * (1 + 0.22 * collarette) * (1 - 0.05 * furrows) * ruff * (1 - 0.70 * smoothstep(0.78, 1.0, t))
     iris = iris * np.clip(shade, 0.05, 2.2)[..., None]
     spots = smoothstep(2.3, 2.8, polar(44, 120, 1.2, 1.2)) * smoothstep(0.12, 0.3, t) * (1 - smoothstep(0.75, 0.9, t))  # a few brown freckles
     iris += (0.6 * spots)[..., None] * (np.array([0.22, 0.11, 0.04]) - iris)
 
-    edge = 0.018  # soft limbus: the iris edge is never a hard line
+    edge = 0.030  # soft limbus: the iris edge is never a hard line
+    sclera += (0.4 * np.exp(-((r - iris_r - 0.015) / 0.03) ** 2))[..., None] * (np.array([0.50, 0.54, 0.60]) - sclera)  # blue-grey ring where the white thins
     out = sclera + (1 - smoothstep(iris_r - edge, iris_r + edge, r))[..., None] * (iris - sclera)
     return out * smoothstep(pupil_r * 0.96, pupil_r * 1.04, r)[..., None]
 

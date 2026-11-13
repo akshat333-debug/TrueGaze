@@ -25,6 +25,7 @@ def _hair(head, arm, texture_set):
     mesh.materials.append(materials.hair(texture_set))
     mesh.materials.append(bpy.data.materials["cornea"])  # the tear line is the same clear wet material
     mesh.materials.append(materials.fuzz())
+    mesh.materials.append(materials.caruncle())
     mesh.polygons.foreach_set("material_index", d["material"].astype(int).tolist())
     mesh.polygons.foreach_set("use_smooth", [True] * len(d["quads"]))
     obj = bpy.data.objects.new("Hair", mesh)
@@ -156,6 +157,12 @@ def hero_view(arm, side="left"):
         light.location = eye + Vector(offset)
         light.rotation_euler = (eye - light.location).to_track_quat("-Z", "Y").to_euler()
         light.data.energy, light.data.size = energy, size
+    # a dim softbox beside the camera: it adds little light, its reflection is the window highlight on the cornea
+    catch = bpy.data.objects.new("catch", bpy.data.lights.new("catch", "AREA"))
+    catch.data.energy, catch.data.size = 0.5, 0.35
+    catch.location = cam.location + Vector((-sign * 0.10, 0.0, 0.22))
+    catch.rotation_euler = (eye - catch.location).to_track_quat("-Z", "Y").to_euler()
+    sc.collection.objects.link(catch)
 
 
 def breakdown(head, arm, wire=True):

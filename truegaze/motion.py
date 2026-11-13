@@ -142,7 +142,7 @@ def render_clip(clip, fps=30):
             micro[t >= when] += rng.normal(0, 0.35, 2)
     micro *= 0.6  # keep the accumulated jitter under about a degree
 
-    out = {k: np.zeros(n) for k in ("left_yaw", "left_pitch", "right_yaw", "right_pitch", "blink",
+    out = {k: np.zeros(n) for k in ("left_yaw", "left_pitch", "right_yaw", "right_pitch", "blink", "blink_mid",
                                      "upper_lid_up", "upper_lid_down", "lower_lid_up", "brow_raise", "pupil")}
     for i, ti in enumerate(t):
         yaw, pitch, dist = _direction(clip, ti)
@@ -153,6 +153,7 @@ def render_clip(clip, fps=30):
         for side, (y, p) in eye_angles(yaw, pitch, dist).items():
             out[f"{side}_yaw"][i], out[f"{side}_pitch"][i] = y, p
         out["blink"][i] = closure
+        out["blink_mid"][i] = 4 * closure * (1 - closure)  # keeps the half-closed lid on the eyeball
         for name, value in lids(yaw, pitch).items():
             out[name][i] = value
         out["pupil"][i] = PUPIL_REST + 0.2 * math.sin(2 * math.pi * 0.35 * ti) + 0.1 * math.sin(2 * math.pi * 0.9 * ti + 1)

@@ -4,7 +4,7 @@
 GNM has no hair. Each strand is a thin tube. Lashes and the tear line are rebuilt from the lid
 margin for every control (so they turn with the lid as it closes); brow hairs ride on the skin
 under them. Output: assets/hair.npz with rest vertices, quads, a material index per quad
-(0 hair, 1 tear film, 2 facial down) and one displacement array per control in assets/controls.npz.
+(0 hair, 1 tear film, 2 facial down, 3 caruncle) and one displacement array per control in assets/controls.npz.
 
 Run from the repo root: python3 tools/make_hair.py   (after tools/fit_controls.py and tools/fit_bulge.py)
 Numbers are human averages: upper lashes 8-10 mm in several rows, lower 5-6 mm, brow hairs 5-8 mm.
@@ -165,6 +165,17 @@ def fuzz(m, rng, normals):
     return centres, 0.006 * MM * np.array([1.0, 0.8, 0.3]) * np.ones((len(pick), 1))
 
 
+def caruncle(upper, lower):
+    """The pink fleshy bump in the inner corner of the eye, between the two lids. GNM has none."""
+    u = np.linspace(0.035, 0.13, 7)  # tucked inside the corner, not at its tip
+
+    def centres(V):
+        (p1, _, r1, _), (p2, _, r2, _) = upper.frame(V, u), lower.frame(V, u)
+        return ((p1 + p2) / 2 - unit(r1 + r2) * 0.25 * MM)[None]  # mostly sunk between the lids
+
+    return centres, (np.array([0.3, 0.65, 0.85, 0.85, 0.7, 0.45, 0.12]) * MM)[None]
+
+
 def skin_uv(m):
     """UV position of every vertex in the skin tile (seams are far from the brows and lids)."""
     sel = m.quad_tiles() == 1001
@@ -190,15 +201,17 @@ if __name__ == "__main__":
     parts = []  # (centres function, radii, tube sides, material)
     brow_uv, lash_uv, lid_uv = [], [], []
     for side in ("left", "right"):
-        for upper in (True, False):
-            lid = Lid(m, side, upper)
+        lids, rings = [Lid(m, side, True), Lid(m, side, False)], []
+        for lid in lids:
             parts.append((*lashes(lid, rng), 3, 0))
-            # smoothed (the mesh edge zigzags) and densely resampled, so the lash line is a line and not a row of dots
-            ring = gaussian_filter1d(skin_uv(m)[lid.idx], 2.0, axis=0, mode="nearest")
-            fine = np.linspace(0, len(ring) - 1, 12 * len(ring))
-            lash_uv.append(np.stack([np.interp(fine, np.arange(len(ring)), ring[:, i]) for i in range(2)], axis=1))
-            lid_uv.append(np.stack([np.interp(np.linspace(0, len(ring) - 1, 64), np.arange(len(ring)), ring[:, i]) for i in range(2)], axis=1))
             parts.append((*tear_line(lid), 6, 1))
+            rings.append(gaussian_filter1d(skin_uv(m)[lid.idx], 2.0, axis=0, mode="nearest"))  # smoothed: the mesh edge zigzags
+        parts.append((*caruncle(*lids), 8, 3))
+        middle = np.concatenate(rings).mean(axis=0)
+        for ring in rings:
+            resample = lambda r, n: np.stack([np.interp(np.linspace(0, len(r) - 1, n), np.arange(len(r)), r[:, i]) for i in range(2)], axis=1)
+            lash_uv.append(resample(ring + 0.10 * (ring - middle), 12 * len(ring)))  # lashes root outside the wet edge
+            lid_uv.append(resample(ring, 64))
         parts.append((*brows(m, side, rng, normals), 3, 0))
         brow_uv.append(parts[-1][0].root_uv)
 
