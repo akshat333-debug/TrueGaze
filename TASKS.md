@@ -36,6 +36,10 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 13 Nov — motion evaluation, docs refresh
+- Done: `tools/evaluate_motion.py` (all sourced checks pass after four fixes, D-018); motion blur in final quality; `reproduce.sh` + `requirements.txt`; fresh-clone test passed; README, PLAN status, ARCHITECTURE, SELF_AUDIT refreshed; overview images `docs/hero_sets.jpg`, `docs/texture_sets.jpg`, `docs/breakdown.jpg`. Reference video committed at Akshat's request (see the 21 Nov checklist: purge from history before going public).
+- Running: `.blend`, wireframe video, final videos with motion blur, hero final video (`renders/tmp/chain.log`, about 8 h, resumable; about 22 s per frame).
+- Gotcha: the draft videos in `outputs/videos/` still show the old motion timing until the finals replace them.
 ### 13 Nov — critique pass against the reference (D-017)
 - Done: hero view, skin micro-glints and oil coat, under-eye fine lines, richer sclera, wetter lid edge, iris freckles, facial down, denser darker lashes. Table of gaps and what is still short: `docs/reference_eye_piece.md`.
 - Running: full chain incl. final-quality videos and a hero-view Generate Motion (log `renders/tmp/chain.log`, about 5 h). Frames resume if stopped.
