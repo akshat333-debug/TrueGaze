@@ -2,32 +2,21 @@
 
 Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + motion, **B** textures + shading, **C** pipeline, tests, docs, deck, video. Full plan: `docs/PLAN.md`.
 
-## Next up (13 Nov — Day 1 spike)
-- [x] A: GNM head in Blender; eyes rotate about their centres; clean eyelid close found (12 Nov, **GO on GNM**)
-- [ ] B: export GNM UV templates per tile; collect CC0 source skins, log in `docs/ASSETS.md`
-- [x] `render.py` renders Left / Right / Generate Motion to MP4 headless (draft quality, 12 Nov)
-- [ ] All: install Blender 4.5.16 LTS (done on Akshat's Mac)
-- [ ] All: watch the two reference videos, note traits to imitate
+## Status for whoever picks this up (14 Nov, early morning)
+All required outputs exist at final quality and are committed: 8 texture sets, Left / Right / Generate Motion videos (front, hero and wire views), 24 stills, portability proofs, `.blend`, launch-spec sequence, deck. Seam audit, motion evaluation and 14 tests pass. Read the newest handoff note below first, then `DECISIONS.md` (latest D-021).
 
-## 14–16 Nov
-- [x] A: lid follow + brow raise/lower controls, armature, 40 cm camera (12 Nov)
-- [x] A: `motion.py` gaze, saccades, vergence, lids follow gaze, blinks, brows, pupil, with 10 tests (12 Nov)
-- [x] B: first transferred skin on the head; iris generator; cornea/sclera/wetness shading (13 Nov; skin is generated, not transferred yet)
-- [ ] B: Route B trial on Kaggle; 4 skin sets with normal/roughness; seam audit tool
-- [x] C: `eyes.move/reset/render`, 10-frame sequence, per-frame JSON
-- [x] C: direction and calibration tests; Left / Right draft videos
+## Open, in priority order
+- [ ] Deck: put the two other members' names in `MEMBERS` at the top of `tools/make_deck.py`, re-run it, open the .pptx once in PowerPoint (only checked in LibreOffice).
+- [ ] Demo video, 3 minutes or less (plan in `docs/DECK_OUTLINE.md`, last line); add its link to the deck's demo slide.
+- [ ] Decide: one more final video on a dark or old skin set (about 3 h render)? Videos all use set 01 now.
+- [ ] Commit `textures/` (104 MB; `reproduce.sh` also rebuilds it in about 3 minutes).
+- [ ] Dockerfile (brief asks for "Docker files"), or state in README that `reproduce.sh` is the setup.
+- [ ] Watch "Flexpressions" (second reference video; not done, no local copy).
+- [ ] **Before making the repo public:** the reference video `Eye Piece - Chris Jones (1080p, h264).mp4` (third-party, committed 13 Nov at Akshat's request while the repo is private) must be removed **from history too**: `git filter-repo --path "Eye Piece - Chris Jones (1080p, h264).mp4" --invert-paths` then force-push, or publish from a fresh repo without it.
+- [ ] 21 Nov: regenerate from a clean clone, make repo public, submit the form (https://forms.gle/86xENrtqhx988hBt8). 22 Nov is buffer only.
 
-## 17 Nov — checkpoint
-- [ ] Every required output exists end to end at draft quality (D-008); 8 texture sets; `render.py --all`; `.blend` with timeline animation
-
-## 18–20 Nov
-- [ ] A: Generate Motion sequence; lid bulge; motion polish against references
-- [ ] B: lashes, brows, tear line; redo weakest textures; final stills
-- [ ] C: Dockerfile, fresh-clone test, `apply_textures.py`, final renders, deck, demo video
-
-## 21 Nov — freeze and submit
-- [ ] **Before making the repo public:** the reference video `Eye Piece - Chris Jones (1080p, h264).mp4` (third-party, committed 13 Nov at Akshat's request while the repo is private) must be removed **from history too**, not only deleted: `git filter-repo --path "Eye Piece - Chris Jones (1080p, h264).mp4" --invert-paths` then force-push, or publish from a fresh repo without it. A plain delete leaves it downloadable from old commits.
-- [ ] Regenerate everything from a clean clone; README final; repo public; submit form. 22 Nov is buffer only.
+## How to run
+See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Applications/Blender.app/Contents/MacOS/Blender`. Final frames take 20 to 40 s each on an M3 with 8 GB.
 
 ## Done
 - [x] Repo and docs for Track 1 (12 Nov)

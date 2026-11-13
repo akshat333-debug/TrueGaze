@@ -1,9 +1,9 @@
 # TrueGaze — Track 1 "Synthetic Eyes" full win plan
 
-## Status against this plan (13 Nov, end of day 2)
-Ahead of the schedule below: all four workstreams have working code and every required output exists.
-- **Changed from the plan:** no export step or MPFB fallback (D-009); skin is MakeHuman CC0 photo skins transferred in 3D instead of the diffusion route (D-015); hair is generated mesh strands (D-011); added socket depth, skin drag, hero view, clay/wire breakdowns and a motion evaluation that were not planned (D-014, D-016, D-017, D-018).
-- **Left:** final-quality videos (rendering, about 8 h), Dockerfile, deck, demo video, commit `textures/`, purge the reference video from history, make the repo public, submit.
+## Status against this plan (14 Nov)
+Every required output is done at final quality and committed, two days before the 17 Nov checkpoint.
+- **Changed from the plan:** no export step or MPFB fallback (D-009); skin is MakeHuman CC0 photo skins transferred in 3D instead of the diffusion route (D-015); hair is generated mesh strands (D-011); added socket depth, skin drag, hero view, clay/wire breakdowns, motion evaluation, iris light pooling, expression wrinkles (D-014 to D-021).
+- **Left:** member names in the deck, demo video, Dockerfile, commit `textures/`, purge the reference video from history, make the repo public, submit. Open list: `TASKS.md`.
 - The sections below are the original plan, kept for reference.
 
 ## Context
