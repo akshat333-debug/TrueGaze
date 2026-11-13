@@ -38,7 +38,7 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 ## Handoff notes (newest on top)
 ### 13 Nov night — final renders; black-eye bug found and fixed
 - Final Left and Right (9 s each), stills for all 8 sets, wire/clay stills, portability proofs, launch-spec sequence, `.blend` and wireframe video are done and committed.
-- Bug: in both final Generate Motion videos the eyes rendered solid black from about frame 185 on. The same frame rendered alone was correct, so the cause was Cycles' persistent data going stale over a long sequential run. Persistent data is now off in `render.py`; frames 175+ of both Generate Motion videos were deleted and are re-rendering (about 2.3 h).
+- Bug: in both final Generate Motion videos the eyes rendered solid black from about frame 185 on. The same frame rendered alone was correct, so the cause was Cycles' persistent data going stale over a long sequential run. Persistent data is now off in `render.py`; frames 175+ of both Generate Motion videos were deleted and re-rendered. Checked 14 Nov 02:25: both videos 360 frames, one frame every 0.5 s viewed, eyes correct to the end; crow's-feet wrinkles show on blinks in the hero view.
 - Gotcha: always look at the end of a long render, not only the start.
 ### 13 Nov — light pooling, plica, expression wrinkles; render chain started (D-020)
 - Done: iris light pooling (shader), plica ridge, `wrinkle.1001` map with drivers (forehead lines on brow raise, crow's feet on lid closure), Burley eye scattering, Voronoi micro relief. All 8 sets regenerated (`textures/` is now 104 MB); seam audit, 14 tests and motion evaluation pass.
