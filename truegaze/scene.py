@@ -24,7 +24,7 @@ def _hair(head, arm, texture_set):
     mesh.from_pydata(to_blender(d["verts"]).tolist(), [], d["quads"].tolist())
     mesh.materials.append(materials.hair(texture_set))
     mesh.materials.append(bpy.data.materials["cornea"])  # the tear line is the same clear wet material
-    mesh.materials.append(materials.fuzz())
+    mesh.materials.append(materials.fuzz(texture_set))
     mesh.materials.append(materials.caruncle())
     mesh.polygons.foreach_set("material_index", d["material"].astype(int).tolist())
     mesh.polygons.foreach_set("use_smooth", [True] * len(d["quads"]))

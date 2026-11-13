@@ -98,3 +98,9 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 - **Expression wrinkles** use the reference author's final method: a wrinkle height map revealed by shape-key-driven weights, no tension maps. Drivers are plain averages, so the `.blend` needs no script permission.
 - Eyeball scattering switched to Christensen-Burley, skin to random-walk (skin), finest skin relief to Voronoi cells, all from the author's notes.
 - Render plan: `docs/RENDER_PLAN.md`.
+
+### D-021 · 14 Nov · Dark-skin sheen and old-skin wrinkles fixed by rule, light sets untouched
+- **Problem 1:** sets 03, 06, 08 showed a grey patch under the eye on the lit side. Test renders with specular off proved it was sheen, not colour: the extra shine round the eye that suits light skin is as strong as the whole diffuse colour on dark skin.
+- **Fix:** above a darkness threshold (`smoothstep(0.45, 0.65, dark)`; light sets measure ≤ 0.32, dark sets ≥ 0.71) the eye region gets no extra shine and a duller under-eye, fewer fine relief lines, and darker facial down (`info.json` → `fuzz`). Tuned by eye, not from a measurement.
+- **Problem 2:** set 07's photo has wrinkles painted as lines; as flat colour they rendered as orange streaks. **Fix:** for the "old" photo, half of that line detail leaves the colour and returns as relief.
+- **Why by rule:** both rules are exactly zero for the light sets, so set 01 and the final videos rendered from it are unchanged and need no re-render.

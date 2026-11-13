@@ -36,6 +36,11 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 14 Nov, 03:01 — skin fixes for dark sets and set 07 (D-021)
+- Done: grey under-eye patch on sets 03, 06, 08 and orange streaks on set 07 fixed in `truegaze/textures.py`; facial down darkens with the skin (`materials.fuzz` reads `info.json`). Stills for 03, 06, 07, 08 and the portability proofs for 03 and 07 re-rendered, overviews rebuilt, seam audit and 14 tests pass.
+- Sets 01, 02, 04, 05 are unchanged by construction, so the videos (set 01) still match.
+- Gotcha: `info.json` of 01, 02, 04, 05, 07 has no `fuzz` key until those sets are regenerated; the shader falls back to the same pale colour.
+- Next: commit `textures/`, deck, demo video.
 ### 14 Nov, 02:50 — audits re-run, overview images rebuilt
 - Seam audit passes (front step ≤ 6 of 255 on all 8 sets), motion evaluation passes (every sourced row in range), 14 tests pass.
 - New `tools/overview.sh` joins the stills into `docs/texture_sets.jpg`, `docs/hero_sets.jpg`, `docs/breakdown.jpg`; added as the last line of `reproduce.sh`.

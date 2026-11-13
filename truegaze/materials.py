@@ -186,14 +186,15 @@ def hair(texture_set):
     return mat
 
 
-def fuzz():
+def fuzz(texture_set):
     """Vellus hair: the fine pale down on facial skin that catches light at the edge of the face."""
     mat = bpy.data.materials.new("fuzz")
     mat.use_nodes = True
     mat.surface_render_method = "BLENDED"
     nt = mat.node_tree
     bsdf, clear, mix = nt.nodes["Principled BSDF"], nt.nodes.new("ShaderNodeBsdfTransparent"), nt.nodes.new("ShaderNodeMixShader")
-    bsdf.inputs["Base Color"].default_value = (0.55, 0.42, 0.33, 1)
+    info = json.loads((ROOT / "textures" / texture_set / "info.json").read_text())
+    bsdf.inputs["Base Color"].default_value = (*info.get("fuzz", (0.55, 0.42, 0.33)), 1)
     bsdf.inputs["Roughness"].default_value = 0.5
     mix.inputs["Fac"].default_value = 0.22
     nt.links.new(clear.outputs["BSDF"], mix.inputs[1])

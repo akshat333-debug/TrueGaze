@@ -36,6 +36,8 @@ SETS = {
 }
 
 
+FUZZ = (0.55, 0.42, 0.33)  # colour of facial down on light skin
+
 # MakeHuman assets (CC0, see docs/ASSETS.md) with their SHA-256, fetched on first use
 MAKEHUMAN_SKINS = "http://download.tuxfamily.org/makehuman/assets/1.2/base/skins/textures/"
 MAKEHUMAN_MESH = "https://raw.githubusercontent.com/makehumancommunity/makehuman/master/makehuman/data/3dobjs/"
@@ -168,6 +170,11 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
         picture, cover = photo_skin(m, n, photo)
         cover = cover * (1 - seam)  # on a seam only generated colour is the same on both sides
         tone = np.median(picture[(cover > 0.95) & (k["cheeks"] > 0.5)], axis=0)
+        if photo.startswith("old"):  # its wrinkles are painted lines: flat colour renders as orange streaks,
+            # so half of each line leaves the colour here and comes back as relief below
+            band = lambda x: gaussian_filter(x, n / 4096 * 3) - gaussian_filter(x, n / 4096 * 24)
+            folds = band(picture.mean(axis=2))
+            picture = picture - 0.5 * np.stack([band(picture[..., i]) for i in range(3)], axis=-1)
     else:
         cover = np.zeros((n, n), np.float32)
     tone = np.array(tone, np.float32)
@@ -282,9 +289,15 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
         luma = picture.mean(axis=2)
         fine = luma - gaussian_filter(luma, n / 4096 * 4)
         bumps = bumps + 0.8 * cover * fine / (fine.std() + 1e-9) * (1 - k["inside"])
-    height = 0.5 + 0.12 * bumps - 0.20 * crease - 0.05 * lines * (1 - k["inside"])
+        if photo.startswith("old"):
+            bumps = bumps + 1.6 * cover * folds / (folds.std() + 1e-9) * (1 - k["inside"])
+    height = 0.5 + 0.12 * bumps - 0.20 * crease - 0.05 * lines * (1 - k["inside"]) * (1 - 0.6 * smoothstep(0.45, 0.65, dark))  # fine lines scatter the sheen: fewer on dark skin
 
-    rough = 0.52 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.13 * k["orbital"] - 0.42 * k["inside"] - 0.30 * water
+    # dark skin reflects as much as light skin but shows it far more, so the extra shine round the eye
+    # that suits light skin reads there as a grey patch: dark sets get none, and a duller under-eye
+    deep = smoothstep(0.45, 0.65, dark)
+    rough = 0.52 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.13 * (1 - deep) * k["orbital"] - 0.42 * k["inside"] - 0.30 * water
+    rough = rough + 0.22 * deep * np.clip(k["orbital"] + k["under_eye"], 0, 1) * (1 - k["inside"])
     rough = rough + 0.05 * noise(n, n // 200, rng) - 0.07 * bumps  # pores are duller than the skin between them
     rough = np.clip(rough, 0.08, 1.0)  # wet tissue is glossy, never a perfect mirror
     return color, rough, height, wrinkles
@@ -382,7 +395,10 @@ def make_set(name, size=4096, eye_size=2048, out=ROOT / "textures"):
     save(rough, folder / "roughness.1001.jpg")
     save(height, folder / "height.1001.jpg")
     save(wrinkles, folder / "wrinkle.1001.jpg")
-    (folder / "info.json").write_text(json.dumps({"hair": hair, "skin_photo": f"MakeHuman {photo} (CC0)"}))  # read by materials.py
+    # facial down is pale on light skin; on dark skin pale down shows as light specks, so it darkens with the skin
+    dark = 1 - float(np.median(color[::16, ::16].reshape(-1, 3), axis=0).mean())
+    fuzz = [round(c * (1 - 0.7 * float(smoothstep(0.45, 0.65, dark))), 3) for c in FUZZ]
+    (folder / "info.json").write_text(json.dumps({"hair": hair, "fuzz": fuzz, "skin_photo": f"MakeHuman {photo} (CC0)"}))  # read by materials.py
     radii = eye_radii(m)
     save(eye(eye_size, radii, outer, inner, seed * 100 + 1), folder / "color.1002.jpg")  # left
     save(eye(eye_size, radii, outer, inner, seed * 100 + 2), folder / "color.1004.jpg")  # right
