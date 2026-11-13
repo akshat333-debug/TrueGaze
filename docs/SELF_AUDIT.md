@@ -10,7 +10,7 @@ Eight scripted texture sets with distinct left/right irises wrap onto any GNM he
 |---|---|---|
 | Iris detail | good | wavy fibres, collarette, furrows, limbal ring, refracting cornea; left ≠ right |
 | Sclera | fair | veins, corner darkening; no blood-vessel depth, uniform wetness |
-| Lashes, brows, wet lid edge | good | 2,800 strands, tear bead, follow the lids |
+| Lashes, brows, wet lid edge | good | about 3,000 strands, tear bead, follow the lids |
 | Skin colour | good (was weak) | photo-based: MakeHuman CC0 skins transferred in 3D (D-015); young, middle-aged and old, light and dark |
 | Skin micro-detail | fair | pores and creases as bump; no real wrinkle direction, no lid crease |
 | Seams | good, measured | `tools/seam_audit.py`: front-of-face step ≤ 6/255 |

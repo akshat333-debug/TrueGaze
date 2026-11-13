@@ -20,3 +20,4 @@ python3 -m pytest tests -q
 "$B" --background --python render.py -- --input "Generate Motion" --blend outputs/scene.blend
 "$B" --background --python render.py -- --all --quality "$QUALITY"          # outputs/videos/
 "$B" --background --python render.py -- --input "Generate Motion" --view hero --quality "$QUALITY"
+./tools/overview.sh                                                          # overview images -> docs/

@@ -36,6 +36,12 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 14 Nov, 02:50 — audits re-run, overview images rebuilt
+- Seam audit passes (front step ≤ 6 of 255 on all 8 sets), motion evaluation passes (every sourced row in range), 14 tests pass.
+- New `tools/overview.sh` joins the stills into `docs/texture_sets.jpg`, `docs/hero_sets.jpg`, `docs/breakdown.jpg`; added as the last line of `reproduce.sh`.
+- Hair count corrected in the deck outline (7,458, was 9,900) and self audit.
+- Seen in the stills, not fixed: sets 03 and 08 (dark skin) show a grey patch under the eye on the lit side in the front view; set 07 (old skin) looks blotchy orange in the hero view.
+- Next: decide on those two, commit `textures/`, deck, demo video.
 ### 13 Nov night — final renders; black-eye bug found and fixed
 - Final Left and Right (9 s each), stills for all 8 sets, wire/clay stills, portability proofs, launch-spec sequence, `.blend` and wireframe video are done and committed.
 - Bug: in both final Generate Motion videos the eyes rendered solid black from about frame 185 on. The same frame rendered alone was correct, so the cause was Cycles' persistent data going stale over a long sequential run. Persistent data is now off in `render.py`; frames 175+ of both Generate Motion videos were deleted and re-rendered. Checked 14 Nov 02:25: both videos 360 frames, one frame every 0.5 s viewed, eyes correct to the end; crow's-feet wrinkles show on blinks in the hero view.
