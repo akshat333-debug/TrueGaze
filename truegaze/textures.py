@@ -109,6 +109,7 @@ def skin_masks(m, n, seam):
     for i, k in enumerate(regions):
         sharp = np.clip(zoom(grid[..., i], n / small, order=1), 0, 1)
         out[k] = sharp + (1 - seam) * (gaussian_filter(sharp, n / (600 if k in ("lips", "inside") else 130)) - sharp)
+    out["inside"] *= 1 - out["lips"]  # the lips' contact line is not wet inner tissue
     return out
 
 
@@ -165,6 +166,7 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     k, detail = skin_masks(m, n, seam), 1 - seam
     if photo:  # the generated skin below takes the photo's own tone, so the two blend without an edge
         picture, cover = photo_skin(m, n, photo)
+        cover = cover * (1 - seam)  # on a seam only generated colour is the same on both sides
         tone = np.median(picture[(cover > 0.95) & (k["cheeks"] > 0.5)], axis=0)
     else:
         cover = np.zeros((n, n), np.float32)

@@ -107,7 +107,7 @@ def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
     scene["eye_mid"] = eye_mid
 
     # dark studio: one softbox key from the side and above (its reflection is the eye highlight), weak fill
-    for name, loc, energy, size in [("key", (0.32, -0.38, 0.30), 6, 0.30), ("fill", (-0.45, -0.40, 0.0), 0.5, 0.8)]:
+    for name, loc, energy, size in [("key", (0.32, -0.38, 0.30), 6, 0.30), ("fill", (-0.45, -0.40, 0.0), 1.2, 0.8)]:
         light = bpy.data.objects.new(name, bpy.data.lights.new(name, "AREA"))
         light.data.energy, light.data.size = energy, size
         light.location = eye_mid + Vector(loc)

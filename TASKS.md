@@ -35,6 +35,11 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 13 Nov — photo-based skin
+- Done: `tools/transfer_skin.py` fits GNM to MakeHuman's head (median 0.5 mm) and writes `assets/skin_transfer.npz`; `truegaze/textures.py` pulls MakeHuman's CC0 skins into GNM's layout for all 8 sets (D-015). Licence verified at the source and logged in `docs/ASSETS.md`. Seam audit passes (front ≤ 6/255) after fading the photo out on seams. Draft videos reviewed: Left, Right, Generate Motion all move the right way, blinks and lashes fine.
+- Tweaks: fill light 0.5 → 1.2 W (the shadow-side eye was too dark in videos); video lens 130 → 118 so brows are not cut off; inner-lip pink patch removed.
+- Gotchas: MakeHuman files download on first texture run (30 MB, plain HTTP, checked by SHA-256). The seam audit must be re-run after any texture change: it caught a regression from the photo skin at the lip line.
+- Next: check the re-rendered outputs, commit `outputs/`, final-quality videos on a faster GPU, Dockerfile and fresh-clone test, deck and demo video.
 ### 13 Nov — lashes, brows, tear line, launch-spec API, .blend, audits
 - Done: `tools/make_hair.py` (about 2,800 strands + tear line in `assets/hair.npz`, shape keys per control, driven from the head's keys); per-set hair colour in `textures/<set>/info.json`; skin texture now shaded under brows and along the lash line; iris has wavy fibres, collarette, furrows, pupil frill. `wrapper/eyes.py` (move/reset/render, 10-frame sequence, `metadata.json`, direction check 5/5). `render.py --all` and `--blend`. `apply_textures.py` (stock or random-identity GNM head). `tools/seam_audit.py` (+ `uv_maps/` sheets). README rewritten. 13 tests pass.
 - Facts found: GNM lid margin ring is the wet inner edge; lash roots must sit 0.9–1.6 mm further out. Only front-of-face UV seams are along the inner lip line. The pale cheek streak was plain specular sheen from the softbox (gone with specular off); skin is now rougher (0.62) with lower specular (0.3).

@@ -63,7 +63,7 @@ def render(a):
     n = keyframe(head, arm, motion.render_clip(motion.preset(a.input, a.seed, a.frame), FPS))
     sc = bpy.context.scene
     sc.frame_start, sc.frame_end, sc.render.fps = 1, n, FPS
-    sc.camera.data.lens = 130  # both eyes and brows from the 40 cm camera
+    sc.camera.data.lens = 118  # both eyes and full brows from the 40 cm camera
     sc.render.resolution_x, sc.render.resolution_y = (1280, 720) if a.quality == "final" else (960, 540)
     if a.quality == "draft":
         sc.render.engine = "BLENDER_EEVEE_NEXT"
