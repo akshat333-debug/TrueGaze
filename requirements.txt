@@ -1,0 +1,5 @@
+# for the asset tools and tests (rendering uses Blender's own Python and needs none of these)
+numpy
+scipy
+pillow
+pytest
