@@ -83,7 +83,7 @@ def render(a):
             raise SystemExit("final quality needs ffmpeg on the PATH to join the frames")
         sc.cycles.samples = 48
         sc.cycles.use_adaptive_sampling, sc.cycles.adaptive_threshold = True, 0.03  # stop early where the image is clean
-        sc.render.use_persistent_data = True  # keep textures loaded between frames
+        # no persistent data: on long runs it went stale and rendered the eyes black from frame ~185 on (13 Nov)
         sc.render.use_motion_blur = True  # a 30 fps camera smears a 40-100 ms saccade or a blink; so do we
         sc.render.motion_blur_shutter = 0.5
     sc.render.use_stamp = True  # caption naming the input, so the judge knows what was asked
