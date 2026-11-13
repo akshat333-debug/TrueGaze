@@ -29,3 +29,21 @@ What it shows, and what we take from it. Timings from frame differencing of the 
 4. Lashes and brows.
 5. Skin roughness and normal detail around the eye.
 6. Lid bulge following the cornea.
+
+## Second pass, 13 Nov: frame-by-frame critique against our renders
+
+Six reference frames (4.5, 7, 9, 11.5, 14.5, 18 s) were set beside our front, close and new hero renders. The reference frames stay local (third-party video); only our renders are in the repo.
+
+| # | What the reference has | Ours before | Done now | Still short |
+|---|---|---|---|---|
+| 1 | Hard raking key, black background, shallow focus | soft front light, everything sharp | `scene.hero_view`: camera 66° round to the outer side, hard key, depth of field; `--view hero` on `render.py`, hero still per set | our frame is still brighter and lower-contrast |
+| 2 | Skin highlight broken into pin-point glints | one broad soft sheen | micro-relief noise finer than the texture, thin oil coat layer, lower roughness (0.52) | fewer, softer glints than theirs |
+| 3 | Fine crosshatch wrinkles under the eye | none | concentric and radial fine lines round each socket in the relief map | regular-looking; real lines follow muscle direction |
+| 4 | White of the eye is grey-cream with yellow patches, veins from the corners, pink corners | clean white, even veins | warmer base, yellowish patches beside the iris, 60 vessels in two thicknesses entering from the corners, pink corners, subsurface glow | no separate fleshy inner-corner tissue (caruncle) in GNM's mesh |
+| 5 | Thick wet pink lid edge with a bright tear line | thin bead, dry edge | wetter lid edge (roughness −0.42), tear bead 0.42 mm | GNM's lid edge has no flat shelf; ours is narrower |
+| 6 | Iris with brown crypt spots, strong dark rim, light pooling on the far side | fibres, collarette, rim | pigment freckles added | no refracted light pooling (needs caustics) |
+| 7 | Fine facial down lit along the silhouette | none | 4,500 short pale hairs round the eyes | subtle by design; first try was far too visible |
+| 8 | Lashes: many, fine, dark, lower ones long | 150 / 65 per eye | 190 / 85, lower longer, darker, less shiny | no tip clumping by moisture |
+| 9 | Deep socket, lid fold, skin sliding over the eye | puffy lids | socket depth, crease, bulge and drag (D-014, D-016) | their upper lid folds into itself when open; ours only creases in shading |
+
+Real-eye facts used (from anatomy, not from new photo research): conjunctival vessels enter from the two corners and thin toward the iris; pingueculae are yellowish patches in the exposed strip beside the iris; iris freckles sit in the middle zone; lower-lid skin is the thinnest on the body, hence visible veins and fine lines.

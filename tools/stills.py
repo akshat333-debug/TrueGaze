@@ -1,7 +1,8 @@
-"""Renders still images of texture sets: a front view of both eyes and a close side view of one eye.
+"""Renders still images of texture sets: a front view of both eyes, a close side view of one eye,
+and a hero shot in the style of the reference video (dark studio, raking light, shallow focus).
 
   Blender --background --python tools/stills.py -- 01 02      (default: every set in textures/)
-  add --samples 32 for a quick look, --style clay|wire for making-of looks. Output: outputs/renders/<set>_front.png and <set>_close.png
+  add --samples 32 for a quick look, --style clay|wire for making-of looks. Output: outputs/renders/<set>_front.png, <set>_close.png, <set>_hero.png
 """
 import argparse
 import math
@@ -42,4 +43,11 @@ for name in a.sets:
     cam.rotation_euler = (eye - cam.location).to_track_quat("-Z", "Y").to_euler()
     cam.data.lens = 300
     sc.render.filepath = str(Path(a.out) / f"{name}_close.png")
+    bpy.ops.render.render(write_still=True)
+
+    # hero: the reference video's shot, the eye turned part-way toward a camera at its outer side
+    scene.hero_view(arm)
+    for side in ("left", "right"):
+        scene.pose_eye(head, arm, side, 22, 4)
+    sc.render.filepath = str(Path(a.out) / f"{name}_hero.png")
     bpy.ops.render.render(write_still=True)

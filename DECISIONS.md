@@ -75,3 +75,9 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 - **Thin skin:** faint blue-green veins around the socket and a soft crease above the upper lid, in the skin colour and relief maps; fainter on dark skin, as in life.
 - **Lashes and brows follow** socket, bulge and drag keys (same mechanism as the eyelid controls).
 - **Breakdown renders:** `--style clay|wire` on `render.py` and `tools/stills.py`. Wire draws GNM's own quad edges through a Wireframe modifier on a second object sharing the mesh data, so it animates with every key.
+
+### D-017 · 13 Nov · Second critique pass against the reference; hero view
+- Nine gaps listed and worked through in `docs/reference_eye_piece.md` (lighting and focus, skin glints, fine wrinkles, sclera, wet lid edge, iris spots, facial down, lashes, lid fold).
+- New `hero` view (one eye, 66° to its outer side, hard key, shallow focus) for stills and `render.py --view hero`. The front view stays the default because the brief asks to show both eyes moving.
+- Reference frames are never committed; comparisons are made locally.
+- Known and accepted: no caustic light pooling in the iris, no caruncle geometry, upper lid does not fold into itself.

@@ -215,6 +215,20 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
                 path.append(p)
             pen.line(to_px(path), fill=int(rng.uniform(90, 255)), width=max(1, n // 2000))
     crease = np.clip(crease / crease.max(), 0, 1)
+    # fine lines of the thin skin round the eye: they run round the socket, crossed by fainter radial ones
+    lines = np.zeros((n, n), np.float32)
+    rings = gaussian_filter(rng.standard_normal((700, 48)).astype(np.float32), (0.8, 2.5), mode=("nearest", "wrap"))
+    rays = gaussian_filter(rng.standard_normal((40, 900)).astype(np.float32), (3.0, 0.8), mode=("nearest", "wrap"))
+    for upper, lower in roots["lid_uv"].reshape(2, 2, 64, 2):
+        centre, half = (upper.mean(axis=0) + lower.mean(axis=0)) / 2, np.ptp(upper[:, 0]) / 2
+        r0, r1 = int((1 - centre[1] - 3.4 * half) * n), int((1 - centre[1] + 3.4 * half) * n)
+        c0, c1 = int((centre[0] - 3.4 * half) * n), int((centre[0] + 3.4 * half) * n)
+        yy, xx = np.mgrid[r0:r1, c0:c1]
+        du, dv = (xx + 0.5) / n - centre[0], (1 - (yy + 0.5) / n) - centre[1]
+        rho, ang = np.hypot(du, dv / 0.75) / half, (np.arctan2(dv, du) / (2 * np.pi)) % 1
+        both = (np.abs(map_coordinates(rings, [np.clip(rho / 3.4, 0, 1) * 699, ang * 47], order=1, mode="nearest"))
+                + 0.5 * np.abs(map_coordinates(rays, [np.clip(rho / 3.4, 0, 1) * 39, ang * 899], order=1, mode="nearest")))
+        lines[r0:r1, c0:c1] += both / both.std() * np.exp(-((rho - 1.9) / 0.8) ** 2) * (0.55 + 0.45 * (dv < 0))  # more below the eye
     veins = gaussian_filter(np.asarray(veins, np.float32) / 255, n / 1100) * (1 - k["inside"]) * detail
     veins = np.clip(veins / (veins.max() + 1e-9), 0, 1) * (0.25 + 0.75 * tone.mean())  # dark skin hides them more
     color *= 1 - veins[..., None] * np.array([0.11, 0.07, 0.02])    # blue-green: red is absorbed most
@@ -236,9 +250,9 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
         luma = picture.mean(axis=2)
         fine = luma - gaussian_filter(luma, n / 4096 * 4)
         bumps = bumps + 0.8 * cover * fine / (fine.std() + 1e-9) * (1 - k["inside"])
-    height = 0.5 + 0.12 * bumps - 0.20 * crease
+    height = 0.5 + 0.12 * bumps - 0.20 * crease - 0.05 * lines * (1 - k["inside"])
 
-    rough = 0.62 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.04 * k["orbital"] - 0.30 * k["inside"]
+    rough = 0.52 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.06 * k["orbital"] - 0.42 * k["inside"]
     rough = rough + 0.03 * noise(n, n // 200, rng) - 0.10 * bumps * 0.3
     return color, rough, height
 
@@ -273,14 +287,17 @@ def eye(n, radii, outer, inner, seed):
     bend = 0.045 * polar(10, 40, 1.5, 2.5)  # fibres wander sideways on their way out, they are not ruler-straight
 
     # sclera: off-white, pinker toward the corners, thin red veins that fade before the iris
-    sclera = np.array([0.64, 0.63, 0.62]) * (1 + 0.03 * noise(n, n // 6, rng))[..., None]
+    sclera = np.array([0.62, 0.60, 0.57]) * (1 + 0.03 * noise(n, n // 6, rng))[..., None]
     sclera += smoothstep(0.30, 0.46, r)[..., None] * (np.array([0.66, 0.46, 0.43]) - sclera)
     sclera *= (1 - 0.35 * smoothstep(iris_r + 0.03, 0.40, r))[..., None]  # darker toward the lids, as real eyes look
+    # yellowish fatty patches left and right of the iris, where the eye is exposed between the lids
+    patch = np.exp(-((r - iris_r - 0.09) / 0.05) ** 2) * np.abs(np.cos(theta)) ** 3 * np.clip(0.5 + 0.6 * noise(n, n // 12, rng), 0, 1)
+    sclera += (0.45 * patch)[..., None] * (np.array([0.66, 0.58, 0.38]) - sclera)
     veins = np.zeros((n, n), np.float32)
-    for _ in range(34):
-        ang, rad = rng.uniform(0, 2 * np.pi), 0.44
+    for _ in range(60):
+        ang, rad = rng.choice([0, np.pi]) + rng.normal(0, 0.75), 0.44  # most vessels come in from the two corners
         stop = iris_r + rng.uniform(0.02, 0.13)
-        walkers = [(ang, rad, 1.0)]
+        walkers = [(ang, rad, rng.choice([1.0, 0.45, 0.45]))]  # a few thick vessels, more fine ones
         while walkers:
             ang, rad, w = walkers.pop()
             turn = 0.0
@@ -293,7 +310,8 @@ def eye(n, radii, outer, inner, seed):
                     walkers.append((ang + rng.choice([-1, 1]) * 0.04, rad, w * 0.6))
     veins = gaussian_filter(veins, n / 1400)
     veins = np.clip(veins / np.quantile(veins[veins > 0], 0.97), 0, 1) * smoothstep(iris_r, iris_r + 0.08, r)
-    sclera += (0.40 * veins)[..., None] * (np.array([0.62, 0.16, 0.13]) - sclera)
+    sclera += (0.50 * veins)[..., None] * (np.array([0.62, 0.16, 0.13]) - sclera)
+    sclera += (0.5 * smoothstep(0.24, 0.42, r) * np.abs(np.cos(theta)) ** 2)[..., None] * (np.array([0.66, 0.36, 0.33]) - sclera)  # pink corners
 
     # iris: inner colour near the pupil, outer colour beyond the collarette, radial fibres, dark rim
     t = np.clip((r - pupil_r) / (iris_r - pupil_r), 0, 1)
@@ -308,6 +326,8 @@ def eye(n, radii, outer, inner, seed):
     ruff = 1 - 0.6 * (1 - smoothstep(0.0, 0.05, t))                  # dark pigment frill at the pupil edge
     shade = (1 + 0.36 * fibres) * (1 - 0.40 * crypts) * (1 + 0.22 * collarette) * (1 - 0.10 * furrows) * ruff * (1 - 0.70 * smoothstep(0.78, 1.0, t))
     iris = iris * np.clip(shade, 0.05, 2.2)[..., None]
+    spots = smoothstep(2.3, 2.8, polar(44, 120, 1.2, 1.2)) * smoothstep(0.12, 0.3, t) * (1 - smoothstep(0.75, 0.9, t))  # a few brown freckles
+    iris += (0.6 * spots)[..., None] * (np.array([0.22, 0.11, 0.04]) - iris)
 
     edge = 0.018  # soft limbus: the iris edge is never a hard line
     out = sclera + (1 - smoothstep(iris_r - edge, iris_r + edge, r))[..., None] * (iris - sclera)

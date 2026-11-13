@@ -4,7 +4,7 @@
 GNM has no hair. Each strand is a thin tube. Lashes and the tear line are rebuilt from the lid
 margin for every control (so they turn with the lid as it closes); brow hairs ride on the skin
 under them. Output: assets/hair.npz with rest vertices, quads, a material index per quad
-(0 hair, 1 tear film) and one displacement array per control in assets/controls.npz.
+(0 hair, 1 tear film, 2 facial down) and one displacement array per control in assets/controls.npz.
 
 Run from the repo root: python3 tools/make_hair.py   (after tools/fit_controls.py and tools/fit_bulge.py)
 Numbers are human averages: upper lashes 8-10 mm in several rows, lower 5-6 mm, brow hairs 5-8 mm.
@@ -69,10 +69,10 @@ class Lid:
 def lashes(lid, rng):
     """Returns a function V -> centres (n, K, 3), and radii (n, K)."""
     upper = lid.up > 0
-    n = 150 if upper else 65
+    n = 190 if upper else 85
     u = np.sort(rng.uniform(0.10, 0.98, n) if upper else rng.uniform(0.22, 0.96, n))
     mid = np.sin(np.pi * u ** 0.85)                                  # longest in the middle of the lid
-    length = (9.5 if upper else 5.5) * MM * (0.5 + 0.5 * mid) * rng.uniform(0.8, 1.15, n)
+    length = (9.5 if upper else 6.5) * MM * (0.5 + 0.5 * mid) * rng.uniform(0.8, 1.15, n)
     out = rng.uniform(0.9, 1.6, n) * MM                              # follicles sit on the front edge of the lid,
     row = rng.uniform(0.0, 0.6, n) * MM                              # across the lid's thickness, in a few rows
     clump = np.repeat(rng.normal(0, 9, n // 3 + 1), 3)[:n]          # neighbours lean together
@@ -96,7 +96,7 @@ def lashes(lid, rng):
 def tear_line(lid):
     """A thin clear bead where the lid edge meets the eyeball: it catches the light like tear fluid."""
     u = np.linspace(0.04, 0.97, K_TEAR)
-    radius = (0.26 if lid.up < 0 else 0.15) * MM
+    radius = (0.42 if lid.up < 0 else 0.20) * MM
     blur = np.exp(-0.5 * (np.arange(-4, 5) / 2.0) ** 2)
 
     def centres(V):
@@ -142,6 +142,29 @@ def brows(m, side, rng, normals):
     return centres, 0.03 * MM * np.linspace(1, 0.2, K_BROW) * rng.uniform(0.8, 1.3, (n, 1))
 
 
+def fuzz(m, rng, normals):
+    """Fine down on the skin around the eyes, growing downward. Returns V -> centres (n, 3, 3), and radii."""
+    T = m.template
+    mid = m.joints[2:4].mean(axis=0)
+    eyes = [m.joints[m.joint_names.index(f"{s}_eye")] for s in ("left", "right")]
+    ok = m.group("skin_exterior") & (T[:, 2] > mid[2] - 0.025) & (np.abs(T[:, 1] - mid[1]) < 0.05)
+    ok &= np.min([np.linalg.norm(T - e, axis=1) for e in eyes], axis=0) > 0.016  # not on the lids
+    pool = np.flatnonzero(ok)
+    tri = m.quads[np.isin(m.quads, pool).all(axis=1)]
+    pick = tri[rng.integers(len(tri), size=4500)]
+    w = rng.dirichlet(np.ones(4), size=len(pick))
+    root, normal = (T[pick] * w[..., None]).sum(1), unit((normals[pick] * w[..., None]).sum(1))
+    down = np.array([0.0, -1.0, 0.0]) + rng.normal(0, 0.35, (len(pick), 3))
+    flat = unit(down - (down * normal).sum(1, keepdims=True) * normal)
+    step = (flat * 0.8 + normal * 0.6) * (rng.uniform(0.5, 1.5, (len(pick), 1)) * MM / 2)
+    rest = np.stack([root, root + step, root + 1.9 * step - normal * 0.1 * MM], axis=1)
+
+    def centres(V):
+        return rest + ((V - T)[pick] * w[..., None]).sum(1)[:, None]
+
+    return centres, 0.006 * MM * np.array([1.0, 0.8, 0.3]) * np.ones((len(pick), 1))
+
+
 def skin_uv(m):
     """UV position of every vertex in the skin tile (seams are far from the brows and lids)."""
     sel = m.quad_tiles() == 1001
@@ -178,6 +201,8 @@ if __name__ == "__main__":
             parts.append((*tear_line(lid), 6, 1))
         parts.append((*brows(m, side, rng, normals), 3, 0))
         brow_uv.append(parts[-1][0].root_uv)
+
+    parts.append((*fuzz(m, rng, normals), 3, 2))
 
     verts, quads, mats, rest = [], [], [], []
     offset = 0

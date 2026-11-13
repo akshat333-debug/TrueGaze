@@ -24,6 +24,7 @@ def _hair(head, arm, texture_set):
     mesh.from_pydata(to_blender(d["verts"]).tolist(), [], d["quads"].tolist())
     mesh.materials.append(materials.hair(texture_set))
     mesh.materials.append(bpy.data.materials["cornea"])  # the tear line is the same clear wet material
+    mesh.materials.append(materials.fuzz())
     mesh.polygons.foreach_set("material_index", d["material"].astype(int).tolist())
     mesh.polygons.foreach_set("use_smooth", [True] * len(d["quads"]))
     obj = bpy.data.objects.new("Hair", mesh)
@@ -135,6 +136,26 @@ def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
     except TypeError:  # no Metal on this machine (Linux/Docker): stay on CPU
         scene.cycles.device = "CPU"
     return head, arm
+
+
+def hero_view(arm, side="left"):
+    """Close shot of one eye in the style of the reference video: camera 55 degrees round to the eye's
+    outer side and a little below, hard light raking in from behind the cheek, shallow focus."""
+    bpy.context.scene.world.node_tree.nodes["Background"].inputs["Color"].default_value = (0, 0, 0, 1)
+    sc = bpy.context.scene
+    sign = 1 if side == "left" else -1
+    eye = arm.matrix_world @ arm.pose.bones[f"{side}_eye"].head + Vector((0, -0.012, 0))  # front of the cornea
+    angle = math.radians(66)
+    cam = sc.camera
+    cam.location = eye + Vector((sign * math.sin(angle), -math.cos(angle), -0.06)) * CAMERA_DISTANCE
+    cam.rotation_euler = (eye - cam.location).to_track_quat("-Z", "Y").to_euler()
+    cam.data.lens = 270
+    cam.data.dof.use_dof, cam.data.dof.focus_distance, cam.data.dof.aperture_fstop = True, (eye - cam.location).length, 45
+    for name, offset, energy, size in (("key", (sign * 0.52, -0.16, 0.20), 4, 0.10), ("fill", (-sign * 0.15, -0.50, -0.05), 0.12, 0.8)):
+        light = bpy.data.objects[name]
+        light.location = eye + Vector(offset)
+        light.rotation_euler = (eye - light.location).to_track_quat("-Z", "Y").to_euler()
+        light.data.energy, light.data.size = energy, size
 
 
 def breakdown(head, arm, wire=True):

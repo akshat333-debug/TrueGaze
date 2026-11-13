@@ -7,6 +7,7 @@
 Options: --input Left|Right|"Generate Motion", --seed N, --frame screen|subject (whose left "Left" means),
 --quality draft|final, --texture 01..08, --out path.mp4, --all (all three inputs),
 --blend path.blend (save the animated scene instead of rendering),
+--view front|hero (hero: one eye close up in the reference video's style),
 --style textured|clay|wire (clay and wire are making-of looks: grey shape, and the mesh drawn on top)
 """
 import argparse
@@ -53,6 +54,7 @@ def main(argv):
     ap.add_argument("--frame", default="screen", choices=["screen", "subject"])
     ap.add_argument("--quality", default="draft", choices=["draft", "final"])
     ap.add_argument("--texture", default="01", help="texture set name in textures/")
+    ap.add_argument("--view", default="front", choices=["front", "hero"], help="hero: one eye close up, reference-video style")
     ap.add_argument("--style", default="textured", choices=["textured", "clay", "wire"], help="clay and wire are making-of looks")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
@@ -71,6 +73,8 @@ def render(a):
     sc = bpy.context.scene
     sc.frame_start, sc.frame_end, sc.render.fps = 1, n, FPS
     sc.camera.data.lens = 118  # both eyes and full brows from the 40 cm camera
+    if a.view == "hero":
+        scene.hero_view(arm)
     sc.render.resolution_x, sc.render.resolution_y = (1280, 720) if a.quality == "final" else (960, 540)
     if a.quality == "draft":
         sc.render.engine = "BLENDER_EEVEE_NEXT"
@@ -93,7 +97,7 @@ def render(a):
         bpy.ops.wm.save_as_mainfile(filepath=str(Path(a.blend).resolve()), compress=True)
         print("WROTE", a.blend)
         return
-    suffix = "" if a.style == "textured" else f"_{a.style}"
+    suffix = ("" if a.view == "front" else "_hero") + ("" if a.style == "textured" else f"_{a.style}")
     out = Path(a.out or ROOT / "outputs" / "videos" / f"{a.input.replace(' ', '_')}{suffix}.mp4")
     out.parent.mkdir(parents=True, exist_ok=True)
     if a.quality == "final":

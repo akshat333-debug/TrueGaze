@@ -35,6 +35,10 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 13 Nov — critique pass against the reference (D-017)
+- Done: hero view, skin micro-glints and oil coat, under-eye fine lines, richer sclera, wetter lid edge, iris freckles, facial down, denser darker lashes. Table of gaps and what is still short: `docs/reference_eye_piece.md`.
+- Running: full chain incl. final-quality videos and a hero-view Generate Motion (log `renders/tmp/chain.log`, about 5 h). Frames resume if stopped.
+- Not done: no fresh macro-photo research (worked from anatomy knowledge); "Flexpressions" reference still unwatched.
 ### 13 Nov — socket depth, skin drag, veins, wireframe (D-016)
 - Done: `tools/fit_bulge.py` now also fits `socket_*` (always on) and `drag_*` keys; `motion.soft_tissue()` replaces `bulge()`; hair follows all of them; skin texture has periorbital veins and an upper-lid crease; `--style clay|wire` making-of renders. Comparison image: `docs/socket_veins_wireframe.jpg`. 14 tests and the seam audit pass.
 - Build order is now: `fit_controls.py` → `fit_bulge.py` → `make_hair.py` → `transfer_skin.py` (once) → `python3 -m truegaze.textures`.

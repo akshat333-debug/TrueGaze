@@ -30,7 +30,18 @@ def skin(folder):
     bump.inputs["Strength"].default_value = 0.5
     bump.inputs["Distance"].default_value = 0.0006  # m: pores are a fraction of a millimetre deep
     nt.links.new(_image(nt, folder / "height.1001.jpg", data=True).outputs["Color"], bump.inputs["Height"])
-    nt.links.new(bump.outputs["Normal"], bsdf.inputs["Normal"])
+    # relief finer than the texture can hold: breaks highlights into the pin-point glints of real skin
+    grain, micro = nt.nodes.new("ShaderNodeTexNoise"), nt.nodes.new("ShaderNodeBump")
+    grain.inputs["Scale"].default_value = 9000
+    micro.inputs["Strength"].default_value = 0.35
+    micro.inputs["Distance"].default_value = 0.00008
+    nt.links.new(nt.nodes.new("ShaderNodeTexCoord").outputs["Object"], grain.inputs["Vector"])
+    nt.links.new(grain.outputs["Fac"], micro.inputs["Height"])
+    nt.links.new(bump.outputs["Normal"], micro.inputs["Normal"])
+    nt.links.new(micro.outputs["Normal"], bsdf.inputs["Normal"])
+    bsdf.inputs["Coat Weight"].default_value = 0.12   # thin oil film: a second, sharper highlight
+    bsdf.inputs["Coat Roughness"].default_value = 0.28
+    nt.links.new(micro.outputs["Normal"], bsdf.inputs["Coat Normal"])
     bsdf.inputs["Specular IOR Level"].default_value = 0.3
     bsdf.inputs["Subsurface Weight"].default_value = 0.3
     bsdf.inputs["Subsurface Radius"].default_value = (1.0, 0.35, 0.2)
@@ -44,6 +55,9 @@ def eye(folder, tile):
     nt.links.new(_image(nt, folder / f"color.{tile}.jpg").outputs["Color"], bsdf.inputs["Base Color"])
     bsdf.inputs["Roughness"].default_value = 0.5
     bsdf.inputs["Specular IOR Level"].default_value = 0.0
+    bsdf.inputs["Subsurface Weight"].default_value = 0.25  # the white of the eye glows a little, it is not paint
+    bsdf.inputs["Subsurface Radius"].default_value = (1.0, 0.6, 0.5)
+    bsdf.inputs["Subsurface Scale"].default_value = 0.0015
     return mat
 
 
@@ -83,8 +97,25 @@ def hair(texture_set):
     """Lash and brow colour comes from the texture set's info.json."""
     color = json.loads((ROOT / "textures" / texture_set / "info.json").read_text())["hair"]
     mat, _, bsdf = _principled("hair")
-    bsdf.inputs["Base Color"].default_value = (*color, 1)
-    bsdf.inputs["Roughness"].default_value = 0.35
+    bsdf.inputs["Base Color"].default_value = (*[c * 0.55 for c in color], 1)  # hair in bulk looks darker than one strand
+    bsdf.inputs["Roughness"].default_value = 0.55
+    bsdf.inputs["Specular IOR Level"].default_value = 0.25
+    return mat
+
+
+def fuzz():
+    """Vellus hair: the fine pale down on facial skin that catches light at the edge of the face."""
+    mat = bpy.data.materials.new("fuzz")
+    mat.use_nodes = True
+    mat.surface_render_method = "BLENDED"
+    nt = mat.node_tree
+    bsdf, clear, mix = nt.nodes["Principled BSDF"], nt.nodes.new("ShaderNodeBsdfTransparent"), nt.nodes.new("ShaderNodeMixShader")
+    bsdf.inputs["Base Color"].default_value = (0.55, 0.42, 0.33, 1)
+    bsdf.inputs["Roughness"].default_value = 0.5
+    mix.inputs["Fac"].default_value = 0.22
+    nt.links.new(clear.outputs["BSDF"], mix.inputs[1])
+    nt.links.new(bsdf.outputs["BSDF"], mix.inputs[2])
+    nt.links.new(mix.outputs["Shader"], nt.nodes["Material Output"].inputs["Surface"])
     return mat
 
 
