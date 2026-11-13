@@ -3,3 +3,4 @@ numpy
 scipy
 pillow
 pytest
+python-pptx  # only for tools/make_deck.py

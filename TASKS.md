@@ -36,6 +36,12 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 14 Nov, 03:08 — submission deck built
+- Done: `tools/make_deck.py` fills the organizers' template (`docs/organizer/Submission_Final_forGithub.pptx`) and writes `VITVellore_ZeroDrift.pptx`, 14 slides in the template's order plus a results-and-limits slide. Every slide rendered and looked at; file validates.
+- Every number on the slides was re-printed by its script on 14 Nov. Two stale README numbers found and fixed: skin drag is 2.7 mm (was 1.4), final frames take 20 to 40 s (was 10 s).
+- **To do before submitting:** put the two other members' names in `MEMBERS` at the top of `tools/make_deck.py` and re-run; add the demo video link to the demo slide once the video exists.
+- Checked only in LibreOffice, not in PowerPoint.
+- Next: demo video (3 minutes or less), commit `textures/`, Dockerfile, purge the reference video, go public.
 ### 14 Nov, 03:01 — skin fixes for dark sets and set 07 (D-021)
 - Done: grey under-eye patch on sets 03, 06, 08 and orange streaks on set 07 fixed in `truegaze/textures.py`; facial down darkens with the skin (`materials.fuzz` reads `info.json`). Stills for 03, 06, 07, 08 and the portability proofs for 03 and 07 re-rendered, overviews rebuilt, seam audit and 14 tests pass.
 - Sets 01, 02, 04, 05 are unchanged by construction, so the videos (set 01) still match.

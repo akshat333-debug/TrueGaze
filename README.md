@@ -40,7 +40,7 @@ python3 tools/evaluate_motion.py
 python3 -m pytest tests -q
 ```
 
-Final quality (`--quality final`) renders single frames with Cycles and joins them with `ffmpeg`; a stopped run resumes. About 10 s per frame on an M3.
+Final quality (`--quality final`) renders single frames with Cycles and joins them with `ffmpeg`; a stopped run resumes. Roughly 20 to 40 s per frame on an M3 with 8 GB (measured on the 14 Nov re-render).
 
 `render.py` options: `--seed N` (different natural blinks and micro-movements), `--frame screen|subject` (whose left "Left" means; default is the viewer's), `--quality draft|final`, `--texture 01..08`.
 
@@ -48,7 +48,7 @@ Final quality (`--quality final`) renders single frames with Cycles and joins th
 
 - **Head** (`truegaze/gnm.py`, `truegaze/scene.py`): GNM v3 read directly from Google's weights with NumPy and rebuilt in Blender: mesh, GNM's own UDIM UV layout, a four-bone rig. Eyeballs rotate about their real centres.
 - **Eyelid and brow controls** (`tools/fit_controls.py`): GNM's eye expressions are 200 unnamed statistical components. We solve for blink, lid raise/lower and brow raise/lower as combinations of them, with a constraint that the lid never sinks into the eyeball. The controls live in GNM's own expression space, so they work on any GNM head.
-- **Soft tissue** (`tools/fit_bulge.py`): the eye sits in a socket (GNM's puffy template lids are sunk by up to 2.9 mm); the lid skin lifts over the cornea as the eye turns; and skin near the lid edge is dragged up to 1.4 mm round with the eyeball, so the skin around a moving eye stretches and slides.
+- **Soft tissue** (`tools/fit_bulge.py`): the eye sits in a socket (GNM's puffy template lids are sunk by up to 2.9 mm); the lid skin lifts over the cornea as the eye turns; and skin near the lid edge is dragged up to 2.7 mm round with the eyeball, so the skin around a moving eye stretches and slides.
 - **Hero view**: `--view hero` (and a hero still per set) frames one eye from its outer side with hard raking light and shallow focus, like the reference videos.
 - **Expression wrinkles**: forehead lines deepen as the brows rise and crow's feet as the lids close, from a wrinkle map faded in by the same controls that move the face.
 - **Iris light pooling**: the cornea gathers side light onto the far side of the iris; computed in the iris shader (an approximation, not traced caustics).
@@ -59,6 +59,10 @@ Final quality (`--quality final`) renders single frames with Cycles and joins th
 - **Lashes, brows, tear line** (`tools/make_hair.py`): about 3,000 lash and brow strands, 4,500 fine facial hairs, a wet bead along each lid edge and the pink inner-corner tissue GNM lacks. They are rebuilt for every control, so lashes turn with the lid when it closes.
 - **Motion** (`truegaze/motion.py`): saccades follow the measured main sequence (duration 25 ms + 2.4 ms per degree, the middle of published fits) with a small overshoot; both eyes converge on one point; upper lids follow vertical gaze; blinks close fast and open slowly, and large gaze jumps trigger one; fixation is never frozen (drift and micro-saccades); pupils fluctuate. `tools/evaluate_motion.py` checks these numbers against published ranges.
 - **UV portability** (`apply_textures.py`): wraps any set onto a stock GNM head, including random GNM identities, with none of our rig on it. Texture files are named by GNM's UDIM tile numbers.
+
+## Deck
+
+`VITVellore_ZeroDrift.pptx`, built from the organizers' template by `python3 tools/make_deck.py` (needs `python-pptx`).
 
 ## Docs
 
