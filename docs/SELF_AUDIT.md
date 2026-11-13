@@ -11,12 +11,14 @@ Eight scripted texture sets with distinct left/right irises wrap onto any GNM he
 | Iris detail | good | wavy fibres, collarette, furrows, limbal ring, refracting cornea; left ≠ right |
 | Sclera | fair | veins, corner darkening; no blood-vessel depth, uniform wetness |
 | Lashes, brows, wet lid edge | good | 2,800 strands, tear bead, follow the lids |
-| Skin colour | **weak** | generated tone + regional tint; no photographic variation (capillaries, uneven pigment, fine lines) |
+| Skin colour | good (was weak) | photo-based: MakeHuman CC0 skins transferred in 3D (D-015); young, middle-aged and old, light and dark |
 | Skin micro-detail | fair | pores and creases as bump; no real wrinkle direction, no lid crease |
 | Seams | good, measured | `tools/seam_audit.py`: front-of-face step ≤ 6/255 |
 | 5–10 sets | done | 8 sets, 3 skin-tone groups, 6 eye colours |
 
-**Largest credibility gap:** skin. Close-ups read as a good CG render, not a photograph. The reference ("Eye Piece") wins on skin: pores that break up the highlight, lid creases, redness at the lid edge.
+**Update, same day:** route B below was taken and is in all 8 sets. Remaining gaps: no lid crease in the geometry, uniform wetness on the eyeball, skin micro-relief is still partly generated.
+
+**Largest credibility gap (before the update):** skin. Close-ups read as a good CG render, not a photograph. The reference ("Eye Piece") wins on skin: pores that break up the highlight, lid creases, redness at the lid edge.
 
 **Fork for the team (rebuild, not reword):**
 - A. Keep generated skin and polish (lid crease, wrinkle direction, capillary layer). Cheap, safe, bounded ceiling.
