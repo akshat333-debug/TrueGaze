@@ -67,3 +67,11 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 - Where the two heads cannot be matched the generated skin fills in, generated in the photo's own tone so no edge shows.
 - No real, identifiable person: MakeHuman skins are composite artist textures released to the public domain.
 - Downloads are pinned by SHA-256 in `truegaze/textures.py`; the tuxfamily server is plain HTTP, so the checksum is what protects a fresh clone.
+
+### D-016 · 13 Nov · Eye socket depth, skin drag, eyelid veins, wireframe breakdown (extends D-014)
+- Asked for by Akshat after comparing with the reference video. All four are in.
+- **Socket depth:** measured GNM's template lids at 4–13 mm off the eyeball (a real lid is 1–3 mm). `tools/fit_bulge.py` now sinks the hollow between lid and brow by up to 2.9 mm and the groove under the lower lid by up to 1.2 mm, never thinner than 1.6 mm over the eyeball. Stored as always-on keys `socket_left/right`, so the stock GNM topology and UVs are untouched.
+- **Skin drag:** lids are stuck to the wet eyeball, so skin near the lid edge turns with the eye by 16% of the gaze angle, fading over about 7 mm (up to 1.4 mm of slide). Keys `drag_<in|out|up|down>_<side>`, weight proportional to gaze angle (`motion.soft_tissue`).
+- **Thin skin:** faint blue-green veins around the socket and a soft crease above the upper lid, in the skin colour and relief maps; fainter on dark skin, as in life.
+- **Lashes and brows follow** socket, bulge and drag keys (same mechanism as the eyelid controls).
+- **Breakdown renders:** `--style clay|wire` on `render.py` and `tools/stills.py`. Wire draws GNM's own quad edges through a Wireframe modifier on a second object sharing the mesh data, so it animates with every key.

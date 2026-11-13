@@ -88,6 +88,11 @@ def hair(texture_set):
     return mat
 
 
+def clay():
+    """Plain grey, for making-of shots that show shape without texture."""
+    return bpy.data.materials.get("clay") or _flat("clay", (0.55, 0.55, 0.55), 0.6)
+
+
 def _flat(name, color, roughness):
     mat, _, bsdf = _principled(name)
     bsdf.inputs["Base Color"].default_value = (*color, 1)

@@ -63,8 +63,9 @@ def test_unknown_input_rejected():
 
 
 def test_bulge_keys_match_gaze_direction():
-    from truegaze.motion import BULGE_YAW, bulge
+    from truegaze.motion import BULGE_YAW, soft_tissue as bulge
     left = bulge("left", -BULGE_YAW, 0)    # left eye turned to the character's right = toward the nose
     assert left["bulge_in_left"] == 1 and left["bulge_out_left"] == 0
     assert bulge("right", -BULGE_YAW, 0)["bulge_out_right"] == 1
     assert bulge("left", 0, 12)["bulge_up_left"] == pytest.approx(0.25) and bulge("left", 0, 0)["bulge_down_left"] == 0
+    assert bulge("left", 0, 12)["drag_up_left"] == pytest.approx(0.5)  # drag is proportional, bulge is squared

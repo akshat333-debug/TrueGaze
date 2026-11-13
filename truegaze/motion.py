@@ -59,13 +59,17 @@ def lids(yaw, pitch):
             "brow_raise": float(np.clip(pitch / 30, 0, 0.8))}
 
 
-def bulge(side, yaw, pitch):
-    """Weights of one eye's four lid-bulge keys for its gaze (degrees). The cornea only reaches the
-    lid at larger angles, so the lift grows slowly at first: weight = (angle / limit) squared."""
+def soft_tissue(side, yaw, pitch):
+    """Weights of one eye's lid-bulge and skin-drag keys for its gaze (degrees).
+    Drag follows the eye in proportion. The cornea only reaches the lid at larger angles, so the
+    bulge grows slowly at first: weight = (angle / limit) squared."""
     toward_nose = -yaw if side == "left" else yaw
-    w = lambda angle, limit: float(np.clip(angle / limit, 0, 1) ** 2)
-    return {f"bulge_in_{side}": w(toward_nose, BULGE_YAW), f"bulge_out_{side}": w(-toward_nose, BULGE_YAW),
-            f"bulge_up_{side}": w(pitch, BULGE_PITCH), f"bulge_down_{side}": w(-pitch, BULGE_PITCH)}
+    out = {}
+    for name, angle, limit in (("in", toward_nose, BULGE_YAW), ("out", -toward_nose, BULGE_YAW),
+                               ("up", pitch, BULGE_PITCH), ("down", -pitch, BULGE_PITCH)):
+        w = float(np.clip(angle / limit, 0, 1))
+        out[f"bulge_{name}_{side}"], out[f"drag_{name}_{side}"] = w * w, w
+    return out
 
 
 class Clip:

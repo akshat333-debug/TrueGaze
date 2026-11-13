@@ -1,7 +1,7 @@
 """Renders still images of texture sets: a front view of both eyes and a close side view of one eye.
 
   Blender --background --python tools/stills.py -- 01 02      (default: every set in textures/)
-  add --samples 32 for a quick look. Output: outputs/renders/<set>_front.png and <set>_close.png
+  add --samples 32 for a quick look, --style clay|wire for making-of looks. Output: outputs/renders/<set>_front.png and <set>_close.png
 """
 import argparse
 import math
@@ -18,11 +18,15 @@ from truegaze import scene  # noqa: E402
 ap = argparse.ArgumentParser()
 ap.add_argument("sets", nargs="*", default=sorted(p.name for p in (ROOT / "textures").iterdir() if p.is_dir()))
 ap.add_argument("--samples", type=int, default=128)
+ap.add_argument("--style", default="textured", choices=["textured", "clay", "wire"])
 ap.add_argument("--out", default=str(ROOT / "outputs" / "renders"))
 a = ap.parse_args(sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else [])
 
 for name in a.sets:
     head, arm = scene.build(name)
+    if a.style != "textured":
+        scene.breakdown(head, arm, wire=a.style == "wire")
+    name += "" if a.style == "textured" else f"_{a.style}"
     sc = bpy.context.scene
     sc.cycles.samples = a.samples
     cam = sc.camera

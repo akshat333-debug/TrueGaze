@@ -35,6 +35,10 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 
 ---
 ## Handoff notes (newest on top)
+### 13 Nov — socket depth, skin drag, veins, wireframe (D-016)
+- Done: `tools/fit_bulge.py` now also fits `socket_*` (always on) and `drag_*` keys; `motion.soft_tissue()` replaces `bulge()`; hair follows all of them; skin texture has periorbital veins and an upper-lid crease; `--style clay|wire` making-of renders. Comparison image: `docs/socket_veins_wireframe.jpg`. 14 tests and the seam audit pass.
+- Build order is now: `fit_controls.py` → `fit_bulge.py` → `make_hair.py` → `transfer_skin.py` (once) → `python3 -m truegaze.textures`.
+- Running: stills for all sets, wire and clay stills, launch-spec sequence, `.blend`, wireframe Generate Motion video, then final-quality videos (log `renders/tmp/chain.log`, about 3.5 h).
 ### 13 Nov — final-quality video renders
 - `render.py --quality final` now writes single PNG frames to `renders/tmp/final/<input>_<texture>_<seed>_<frame>/` and skips frames that exist, so a stopped run resumes where it left off; ffmpeg (must be on the PATH) joins them into `outputs/videos/`. Cycles 48 samples with adaptive sampling and persistent data: about 10 s per 1280×720 frame on the M3, so about 2.5 h for all three videos.
 - Run: `caffeinate -i /Applications/Blender.app/Contents/MacOS/Blender --background --python render.py -- --all --quality final` (log in `renders/tmp/final.log`). To redo a video from scratch delete its frame folder first.

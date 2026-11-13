@@ -11,7 +11,7 @@ from mathutils import Matrix, Vector
 
 from . import materials
 from .gnm import GNM, PUPIL, to_blender
-from .motion import PUPIL_REST, bulge
+from .motion import PUPIL_REST, soft_tissue
 
 ROOT = Path(__file__).resolve().parent.parent
 CAMERA_DISTANCE = 0.40  # m in front of the eye midpoint (launch spec)
@@ -62,11 +62,13 @@ def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
         key = head.shape_key_add(name=name)
         key.slider_min = -1.0  # controls are linear, so negative values are valid
         key.data.foreach_set("co", to_blender(m.template + np.tensordot(coef, m.expression_basis, 1)).ravel())
-    bulge = np.load(ROOT / "assets" / "bulge.npz")  # lid skin lifting over the cornea as the eye turns
-    for name in (k for k in bulge.files if k != "index"):
+    soft = np.load(ROOT / "assets" / "bulge.npz")  # socket depth, lid bulge over the cornea, skin drag (tools/fit_bulge.py)
+    for name in (k for k in soft.files if k != "index"):
         moved = m.template.copy()
-        moved[bulge["index"]] += bulge[name]
-        head.shape_key_add(name=name).data.foreach_set("co", to_blender(moved).ravel())
+        moved[soft["index"]] += soft[name]
+        key = head.shape_key_add(name=name)
+        key.data.foreach_set("co", to_blender(moved).ravel())
+        key.value = 1.0 if name.startswith("socket") else 0.0  # the socket shape is always on
     key = head.shape_key_add(name="pupil")  # GNM's own iris component: positive dilates
     key.slider_min = -2.0
     key.value = PUPIL_REST
@@ -135,6 +137,28 @@ def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
     return head, arm
 
 
+def breakdown(head, arm, wire=True):
+    """Making-of look: grey clay instead of textures and, with wire, the mesh's own quad edges drawn on top.
+    The textured materials stay on the mesh data; only this scene's objects are overridden."""
+    grey = materials.clay()
+    for slot in head.material_slots:
+        if slot.material.name != "cornea":
+            slot.link = "OBJECT"
+            slot.material = grey
+    if not wire:
+        return
+    lines = bpy.data.objects.new("HeadWire", head.data)  # same mesh data, so it follows every shape key
+    bpy.context.scene.collection.objects.link(lines)
+    lines.parent = arm
+    lines.modifiers.new("rig", "ARMATURE").object = arm
+    mod = lines.modifiers.new("wire", "WIREFRAME")
+    mod.thickness, mod.use_replace = 0.00013, True
+    dark = bpy.data.materials.get("wire") or materials._flat("wire", (0.01, 0.01, 0.012), 0.8)
+    for slot in lines.material_slots:
+        slot.link = "OBJECT"
+        slot.material = dark
+
+
 def set_gaze(arm, side, yaw_deg, pitch_deg):
     """Rotates one eyeball about its centre. yaw > 0 turns toward the character's left (+X), pitch > 0 up."""
     bone = arm.pose.bones[f"{side}_eye"]
@@ -146,9 +170,9 @@ def set_gaze(arm, side, yaw_deg, pitch_deg):
 
 
 def pose_eye(head, arm, side, yaw_deg, pitch_deg):
-    """Turns one eye and sets everything that depends only on its gaze: the lid bulge over the cornea."""
+    """Turns one eye and sets what depends only on its gaze: lid bulge over the cornea and skin drag."""
     set_gaze(arm, side, yaw_deg, pitch_deg)
     keys = head.data.shape_keys.key_blocks
-    for name, value in bulge(side, yaw_deg, pitch_deg).items():
+    for name, value in soft_tissue(side, yaw_deg, pitch_deg).items():
         keys[name].value = value
     return keys

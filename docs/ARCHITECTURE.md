@@ -34,7 +34,7 @@ render.py --input Left|Right|"Generate Motion"  ->  frames -> MP4, stills, metad
 | `tools/stills.py` | front and close stills per texture set | B | works |
 | `tools/make_hair.py` | lashes, brows, tear line with per-control shape keys (`assets/hair.npz`) | A | works |
 | `tools/transfer_skin.py` | 3D fit of GNM to MakeHuman's head; per-vertex lookup into MakeHuman's skin layout (`assets/skin_transfer.npz`) | B | works |
-| `tools/fit_bulge.py` | lid skin lifting over the cornea as the eye turns (`assets/bulge.npz`) | A | works |
+| `tools/fit_bulge.py` | soft tissue: socket depth, lid bulge over the cornea, skin drag with gaze (`assets/bulge.npz`) | A | works |
 | `wrapper/eyes.py` | launch-spec API `move/reset/render`, 10-frame sequence, metadata, direction check | C | works |
 | `apply_textures.py` | wraps a set on a stock or random-identity GNM head | C | works |
 | `tools/seam_audit.py` | measures colour steps across UV seams; writes `uv_maps/` sheets | B | works |

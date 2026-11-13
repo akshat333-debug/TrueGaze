@@ -194,6 +194,31 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
         dots = gaussian_filter(dots, blur)
         dots = np.clip(dots / np.quantile(dots[dots > dots.max() * 0.02], 0.6), 0, 1)
         color += (strength * dots)[..., None] * (np.array(hair, np.float32) * 2 + 0.25 * tone - color)
+    # thin skin around the eye: faint blue veins show through, and the upper lid folds along a crease
+    crease = np.zeros((n, n), np.float32)
+    veins = Image.new("L", (n, n))
+    pen = ImageDraw.Draw(veins)
+    to_px = lambda uv: [(float(u) * n, float(1 - v) * n) for u, v in uv]
+    for upper, lower in roots["lid_uv"].reshape(2, 2, 64, 2):
+        centre, half = (upper.mean(axis=0) + lower.mean(axis=0)) / 2, np.ptp(upper[:, 0]) / 2
+        fold = upper + (upper - centre) * 0.95 * np.sin(np.pi * np.linspace(0.08, 0.95, 64))[:, None] ** 0.5  # follows the lid, above it
+        line = Image.new("L", (n, n))
+        ImageDraw.Draw(line).line(to_px(fold[4:-3]), fill=255, width=max(1, n // 1400))
+        crease += gaussian_filter(np.asarray(line, np.float32) / 255, n / 1300)
+        for _ in range(8):  # veins wander around the socket, mostly below and to the sides of the eye
+            angle = rng.uniform(np.pi * 0.9, np.pi * 2.1)
+            p = centre + half * rng.uniform(1.15, 1.6) * np.array([np.cos(angle), 0.75 * np.sin(angle)])
+            heading, path = angle + rng.choice([-1, 1]) * rng.uniform(0.9, 1.5), [p]
+            for _ in range(int(rng.uniform(25, 60))):
+                heading += rng.normal(0, 0.09)
+                p = p + half * 0.035 * np.array([np.cos(heading), np.sin(heading)])
+                path.append(p)
+            pen.line(to_px(path), fill=int(rng.uniform(90, 255)), width=max(1, n // 2000))
+    crease = np.clip(crease / crease.max(), 0, 1)
+    veins = gaussian_filter(np.asarray(veins, np.float32) / 255, n / 1100) * (1 - k["inside"]) * detail
+    veins = np.clip(veins / (veins.max() + 1e-9), 0, 1) * (0.25 + 0.75 * tone.mean())  # dark skin hides them more
+    color *= 1 - veins[..., None] * np.array([0.11, 0.07, 0.02])    # blue-green: red is absorbed most
+    color *= 1 - 0.12 * crease[..., None]
     # freckles and small moles
     spots = gaussian_filter(rng.random((n, n), np.float32), 1.5)
     spots = smoothstep(np.quantile(spots[::8, ::8], 0.997), spots.max(), spots)
@@ -211,7 +236,7 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
         luma = picture.mean(axis=2)
         fine = luma - gaussian_filter(luma, n / 4096 * 4)
         bumps = bumps + 0.8 * cover * fine / (fine.std() + 1e-9) * (1 - k["inside"])
-    height = 0.5 + 0.12 * bumps
+    height = 0.5 + 0.12 * bumps - 0.20 * crease
 
     rough = 0.62 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.04 * k["orbital"] - 0.30 * k["inside"]
     rough = rough + 0.03 * noise(n, n // 200, rng) - 0.10 * bumps * 0.3

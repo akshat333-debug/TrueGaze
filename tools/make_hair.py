@@ -6,13 +6,14 @@ margin for every control (so they turn with the lid as it closes); brow hairs ri
 under them. Output: assets/hair.npz with rest vertices, quads, a material index per quad
 (0 hair, 1 tear film) and one displacement array per control in assets/controls.npz.
 
-Run from the repo root: python3 tools/make_hair.py   (after tools/fit_controls.py)
+Run from the repo root: python3 tools/make_hair.py   (after tools/fit_controls.py and tools/fit_bulge.py)
 Numbers are human averages: upper lashes 8-10 mm in several rows, lower 5-6 mm, brow hairs 5-8 mm.
 """
 import sys
 from pathlib import Path
 
 import numpy as np
+from scipy.ndimage import gaussian_filter1d
 from scipy.spatial import cKDTree
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -164,14 +165,16 @@ if __name__ == "__main__":
     rng = np.random.default_rng(7)
     normals = vertex_normals(m)
     parts = []  # (centres function, radii, tube sides, material)
-    brow_uv, lash_uv = [], []
+    brow_uv, lash_uv, lid_uv = [], [], []
     for side in ("left", "right"):
         for upper in (True, False):
             lid = Lid(m, side, upper)
             parts.append((*lashes(lid, rng), 3, 0))
-            ring = skin_uv(m)[lid.idx]  # densely resampled, so the lash line is a line and not a row of dots
+            # smoothed (the mesh edge zigzags) and densely resampled, so the lash line is a line and not a row of dots
+            ring = gaussian_filter1d(skin_uv(m)[lid.idx], 2.0, axis=0, mode="nearest")
             fine = np.linspace(0, len(ring) - 1, 12 * len(ring))
             lash_uv.append(np.stack([np.interp(fine, np.arange(len(ring)), ring[:, i]) for i in range(2)], axis=1))
+            lid_uv.append(np.stack([np.interp(np.linspace(0, len(ring) - 1, 64), np.arange(len(ring)), ring[:, i]) for i in range(2)], axis=1))
             parts.append((*tear_line(lid), 6, 1))
         parts.append((*brows(m, side, rng, normals), 3, 0))
         brow_uv.append(parts[-1][0].root_uv)
@@ -186,7 +189,9 @@ if __name__ == "__main__":
     out = {"verts": np.concatenate(verts).astype(np.float32), "quads": np.concatenate(quads).astype(np.int32),
            "material": np.concatenate(mats).astype(np.int8),
            # where hair grows, in skin UV space: the skin texture is darkened there (follicles, lash line)
-           "brow_uv": np.concatenate(brow_uv).astype(np.float32), "lash_uv": np.concatenate(lash_uv).astype(np.float32)}
+           "brow_uv": np.concatenate(brow_uv).astype(np.float32), "lash_uv": np.concatenate(lash_uv).astype(np.float32),
+           # lid edges as 64-point curves: left upper, left lower, right upper, right lower
+           "lid_uv": np.stack(lid_uv).astype(np.float32)}
     assert np.isfinite(out["verts"]).all()
     for name, coef in np.load(ROOT / "assets" / "controls.npz").items():
         V = m.template + np.tensordot(coef, m.expression_basis, 1)
@@ -194,5 +199,10 @@ if __name__ == "__main__":
         out[f"move_{name}"] = np.concatenate(moved).astype(np.float32)
         assert np.isfinite(out[f"move_{name}"]).all()
         print(name, "max hair movement mm:", round(float(np.abs(out[f"move_{name}"]).max() * 1000), 2))
+    soft = np.load(ROOT / "assets" / "bulge.npz")  # socket, bulge and drag keys move the skin too (tools/fit_bulge.py)
+    for name in (k for k in soft.files if k != "index"):
+        V = m.template.copy()
+        V[soft["index"]] += soft[name]
+        out[f"move_{name}"] = np.concatenate([np.repeat((fn(V) - c).reshape(-1, 3), sides, axis=0) for (fn, _, sides, _), c in zip(parts, rest)]).astype(np.float32)
     np.savez_compressed(ROOT / "assets" / "hair.npz", **out)
     print("strands:", sum(len(c) for c in rest), "vertices:", len(out["verts"]))

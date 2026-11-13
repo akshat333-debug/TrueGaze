@@ -6,7 +6,8 @@
 
 Options: --input Left|Right|"Generate Motion", --seed N, --frame screen|subject (whose left "Left" means),
 --quality draft|final, --texture 01..08, --out path.mp4, --all (all three inputs),
---blend path.blend (save the animated scene instead of rendering)
+--blend path.blend (save the animated scene instead of rendering),
+--style textured|clay|wire (clay and wire are making-of looks: grey shape, and the mesh drawn on top)
 """
 import argparse
 import shutil
@@ -34,6 +35,7 @@ def keyframe(head, arm, frames):
             arm.pose.bones[f"{side}_eye"].keyframe_insert("rotation_quaternion", frame=f + 1)
             for where in ("in", "out", "up", "down"):
                 keys[f"bulge_{where}_{side}"].keyframe_insert("value", frame=f + 1)
+                keys[f"drag_{where}_{side}"].keyframe_insert("value", frame=f + 1)
             for name in ("blink", "upper_lid_up", "upper_lid_down", "lower_lid_up", "brow_raise"):
                 keys[f"{name}_{side}"].value = frames[name][f]
                 keys[f"{name}_{side}"].keyframe_insert("value", frame=f + 1)
@@ -51,6 +53,7 @@ def main(argv):
     ap.add_argument("--frame", default="screen", choices=["screen", "subject"])
     ap.add_argument("--quality", default="draft", choices=["draft", "final"])
     ap.add_argument("--texture", default="01", help="texture set name in textures/")
+    ap.add_argument("--style", default="textured", choices=["textured", "clay", "wire"], help="clay and wire are making-of looks")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
     if bool(a.all) == bool(a.input) or (a.all and (a.out or a.blend)):
@@ -62,6 +65,8 @@ def main(argv):
 
 def render(a):
     head, arm = scene.build(a.texture)
+    if a.style != "textured":
+        scene.breakdown(head, arm, wire=a.style == "wire")
     n = keyframe(head, arm, motion.render_clip(motion.preset(a.input, a.seed, a.frame), FPS))
     sc = bpy.context.scene
     sc.frame_start, sc.frame_end, sc.render.fps = 1, n, FPS
@@ -88,11 +93,12 @@ def render(a):
         bpy.ops.wm.save_as_mainfile(filepath=str(Path(a.blend).resolve()), compress=True)
         print("WROTE", a.blend)
         return
-    out = Path(a.out or ROOT / "outputs" / "videos" / f"{a.input.replace(' ', '_')}.mp4")
+    suffix = "" if a.style == "textured" else f"_{a.style}"
+    out = Path(a.out or ROOT / "outputs" / "videos" / f"{a.input.replace(' ', '_')}{suffix}.mp4")
     out.parent.mkdir(parents=True, exist_ok=True)
     if a.quality == "final":
         # hours of rendering: write single frames and skip the ones already there, so a stopped run resumes
-        frames = ROOT / "renders" / "tmp" / "final" / f"{out.stem}_{a.texture}_{a.seed}_{a.frame}"
+        frames = ROOT / "renders" / "tmp" / "final" / f"{out.stem}_{a.texture}_{a.seed}_{a.frame}_{a.style}"
         sc.render.image_settings.file_format = "PNG"
         sc.render.use_overwrite = False
         sc.render.filepath = str(frames) + "/"
