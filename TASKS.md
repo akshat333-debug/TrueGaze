@@ -2,14 +2,16 @@
 
 Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + motion, **B** textures + shading, **C** pipeline, tests, docs, deck, video. Full plan: `docs/PLAN.md`.
 
-## Status for whoever picks this up (14 Nov, early morning)
+## Status for whoever picks this up (15 Nov, 04:00)
+Full re-render with the D-021 / D-022 look finished 15 Nov 03:54 and is committed: all stills, overviews, launch-spec frames, `.blend`, six videos (Left, Right, Generate Motion front / hero / wire, Generate Motion on set 03). Every video passed the automatic black-eye check and was looked at on a contact sheet. Deck rebuilt from the new stills. Older status below.
+
 All required outputs exist at final quality and are committed: 8 texture sets, Left / Right / Generate Motion videos (front, hero and wire views), 24 stills, portability proofs, `.blend`, launch-spec sequence, deck. Seam audit, motion evaluation and 14 tests pass. Read the newest handoff note below first, then `DECISIONS.md` (latest D-021).
 
 ## Open, in priority order
-- [ ] **Look and motion improvements:** 12 tasks with costs in `docs/IMPROVEMENTS.md` (outside review checked against the code, plus web research). Recommended: tasks 1 to 8 as one batch, then re-render the videos overnight.
+- [ ] Optional look tasks 10 to 12 in `docs/IMPROVEMENTS.md` (lid fold, caustics still, head sway); each needs the videos rendered again.
+- [ ] Known look gap: dark sets 03 and 08 still show a faint darker patch under the eyes in the front view.
 - [ ] Deck: put the two other members' names in `MEMBERS` at the top of `tools/make_deck.py`, re-run it, open the .pptx once in PowerPoint (only checked in LibreOffice).
 - [ ] Demo video, 3 minutes or less (plan in `docs/DECK_OUTLINE.md`, last line); add its link to the deck's demo slide. Cut script ready: `python3 tools/make_demo.py` after the render writes `outputs/demo.mp4` (about 85 s, silent, captioned; tested 15 Nov with a stand-in for the set 03 clip). Upload and voice-over still to do.
-- [ ] Decide: one more final video on a dark or old skin set (about 3 h render)? Videos all use set 01 now.
 - [ ] Commit `textures/` (104 MB; `reproduce.sh` also rebuilds it in about 3 minutes).
 - [ ] Dockerfile is written but untested: build it and run draft once the render is done.
 - [ ] Watch "Flexpressions" (second reference video; not done, no local copy).
@@ -26,6 +28,11 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 15 Nov, 04:00 — full re-render done and committed
+- **Done:** `renders/tmp/chain2.sh` finished (about 11 h from the 16:59 restart). `outputs/`, `uv_maps/`, `docs/*.jpg` and the deck now all show the D-022 look. New: `outputs/videos/Generate_Motion_set03.mp4` (dark skin, 12 s). `black_frames` on all six videos: none flagged, and no frame needed a second render. `tools/make_demo.py` cut `outputs/demo.mp4` (85 s, silent, captioned; mp4 outside `outputs/videos/` is git-ignored, so it is local only).
+- **Next:** upload the demo (add voice-over if wanted) and put its link in the deck; member names in the deck; build the Dockerfile once; commit `textures/`; purge the reference video; go public; submit.
+- **Gotchas:** the Mac must stay awake with the lid open for long renders (`caffeinate -i` does not stop lid-close sleep). Set 03 / 08 under-eye patch is weaker than before D-021 but still visible.
+- **Run:** `python3 tools/make_demo.py`, `python3 tools/make_deck.py`.
 ### 14 Nov, 17:30 — black-eye guard; a second real case found; Dockerfile
 - **Found:** the committed `outputs/videos/Right.mp4` has solid black eyes in its last 3 frames (268 to 270). The 13 Nov check missed it: it sampled the Generate Motion videos only. So the fault was not only "from frame 185 on"; it can hit any late frame of a long run. Right is in the re-render queue anyway.
 - **Guard added:** `render.py` sets `use_persistent_data = False` explicitly, and `black_frames()` measures each frame's share of near-black pixels with ffmpeg before joining; frames that jump 2 points above the clip's median are deleted and rendered again, and the run fails if they are still dark. Tested: flags exactly frames 268 to 270 of the old Right.mp4 and frames 186 on of a video with the eyes blacked out by hand; flags nothing in the three good videos.
