@@ -15,9 +15,11 @@ python3 tools/seam_audit.py            # seam check + UV overview sheets -> uv_m
 python3 -m pytest tests -q
 "$B" --background --python tools/stills.py                                   # outputs/renders/
 "$B" --background --python tools/stills.py -- 01 --style wire
+"$B" --background --python tools/stills.py -- 01 --style clay
 "$B" --background --python apply_textures.py -- --texture 05 --identity 3   # UV portability proof
 "$B" --background --python wrapper/eyes.py -- --sequence outputs/launch_spec
 "$B" --background --python render.py -- --input "Generate Motion" --blend outputs/scene.blend
 "$B" --background --python render.py -- --all --quality "$QUALITY"          # outputs/videos/
 "$B" --background --python render.py -- --input "Generate Motion" --view hero --quality "$QUALITY"
+"$B" --background --python render.py -- --input "Generate Motion" --texture 03 --quality "$QUALITY" --out outputs/videos/Generate_Motion_set03.mp4
 ./tools/overview.sh                                                          # overview images -> docs/

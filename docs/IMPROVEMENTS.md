@@ -32,6 +32,8 @@ Not found: any measured data on brow or cheek movement coupled to saccades. Item
 
 ## 3. Tasks, in order of value for the 60 texture points
 
+**Status 14 Nov:** tasks 1 to 8 are done (D-022) and task 9 is in the render queue (`renders/tmp/chain2.sh`). Tasks 10 to 12 are open.
+
 Cost is work plus test renders. "Videos" = the change alters set 01, so the five final videos must be re-rendered (about 9 h of machine time in total) to stay consistent.
 
 | # | Task | Where | Cost | Videos |

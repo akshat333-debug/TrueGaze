@@ -26,6 +26,13 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 14 Nov, morning — eight look and motion changes (D-022); full re-render running
+- Done: tasks 1 to 8 of `docs/IMPROVEMENTS.md`: lid shadow on the eyeball, greyer eye whites, concave tear film, window catchlight in the hero view, softer lower-lash roots, more skin shine contrast, brow lowers with down-gaze and blinks, set 01 iris toned down. Tests (14) and motion evaluation pass. Checked on test stills of sets 01 and 03.
+- **Running:** `renders/tmp/chain2.sh` (log `renders/tmp/chain2.log`): all textures, all stills, proofs, overviews, launch-spec sequence, `.blend`, wire video, then final videos in this order: Generate Motion hero, Generate Motion, Left, Right, Generate Motion on set 03 (new). About 1,620 final frames at 20 to 40 s each: 12 to 15 hours. It prints `STILLS_DONE`, `SMALL_DONE`, `CHAIN_DONE`.
+- **Until it finishes, `outputs/` in git is the old look.** Do not commit half the outputs: wait for `CHAIN_DONE`, check each video over its whole length (the 13 Nov black-eye bug showed only after frame 185), then commit `outputs/` and `docs/*.jpg` together and re-run `python3 tools/make_deck.py`.
+- If the machine sleeps or the run stops: start `./renders/tmp/chain2.sh` again; finished frames are kept. The early steps repeat (about 40 minutes).
+- Gotcha: the tear film must stay a reflect-only material. As glass it drew a black line round the eye.
+- Next after the render: deck names, demo video, Dockerfile, commit `textures/`, purge the reference video, go public.
 ### 14 Nov, 03:08 — submission deck built
 - Done: `tools/make_deck.py` fills the organizers' template (`docs/organizer/Submission_Final_forGithub.pptx`) and writes `VITVellore_ZeroDrift.pptx`, 14 slides in the template's order plus a results-and-limits slide. Every slide rendered and looked at; file validates.
 - Every number on the slides was re-printed by its script on 14 Nov. Two stale README numbers found and fixed: skin drag is 2.7 mm (was 1.4), final frames take 20 to 40 s (was 10 s).
