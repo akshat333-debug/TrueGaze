@@ -6,6 +6,7 @@ Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + mo
 All required outputs exist at final quality and are committed: 8 texture sets, Left / Right / Generate Motion videos (front, hero and wire views), 24 stills, portability proofs, `.blend`, launch-spec sequence, deck. Seam audit, motion evaluation and 14 tests pass. Read the newest handoff note below first, then `DECISIONS.md` (latest D-021).
 
 ## Open, in priority order
+- [ ] **Look and motion improvements:** 12 tasks with costs in `docs/IMPROVEMENTS.md` (outside review checked against the code, plus web research). Recommended: tasks 1 to 8 as one batch, then re-render the videos overnight.
 - [ ] Deck: put the two other members' names in `MEMBERS` at the top of `tools/make_deck.py`, re-run it, open the .pptx once in PowerPoint (only checked in LibreOffice).
 - [ ] Demo video, 3 minutes or less (plan in `docs/DECK_OUTLINE.md`, last line); add its link to the deck's demo slide.
 - [ ] Decide: one more final video on a dark or old skin set (about 3 h render)? Videos all use set 01 now.
