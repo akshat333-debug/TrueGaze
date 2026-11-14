@@ -12,8 +12,7 @@ All required outputs exist at final quality and are committed: 8 texture sets, L
 - [ ] Known look gap: dark sets 03 and 08 still show a faint darker patch under the eyes in the front view.
 - [ ] Deck: put the two other members' names in `MEMBERS` at the top of `tools/make_deck.py`, re-run it, open the .pptx once in PowerPoint (only checked in LibreOffice).
 - [ ] Demo video, 3 minutes or less (plan in `docs/DECK_OUTLINE.md`, last line); add its link to the deck's demo slide. Cut script ready: `python3 tools/make_demo.py` after the render writes `outputs/demo.mp4` (about 85 s, silent, captioned; tested 15 Nov with a stand-in for the set 03 clip). Upload and voice-over still to do.
-- [ ] Commit `textures/` (104 MB; `reproduce.sh` also rebuilds it in about 3 minutes).
-- [ ] Dockerfile is written but untested: build it and run draft once the render is done.
+- [ ] Docker: image builds and runs everything except videos on the M3 (see 15 Nov 05:10 note). Decide whether to try it on an x86-64 Linux machine or leave it as stated in the README.
 - [ ] Watch "Flexpressions" (second reference video; not done, no local copy).
 - [ ] **Before making the repo public:** the reference video `Eye Piece - Chris Jones (1080p, h264).mp4` (third-party, committed 13 Nov at Akshat's request while the repo is private) must be removed **from history too**: `git filter-repo --path "Eye Piece - Chris Jones (1080p, h264).mp4" --invert-paths` then force-push, or publish from a fresh repo without it.
 - [ ] 21 Nov: regenerate from a clean clone, make repo public, submit the form (https://forms.gle/86xENrtqhx988hBt8). 22 Nov is buffer only.
@@ -28,6 +27,11 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 15 Nov, 05:10 — textures committed; Docker built and tested
+- **Done:** `textures/` is in git (56 files, 103 MB; no longer ignored). Docker image built (2.91 GB, `--platform=linux/amd64` because Blender has no Linux arm64 build).
+- **Docker test on the M3 (emulated, 4 GB Docker memory):** asset fitting, textures, seam audit (PASS), 14 tests, three Cycles clay stills (correct image, about 2 min each) all ran. Draft video `Left`: 1.8 min per frame in software OpenGL, then killed (exit 137, out of memory) at frame 12. So `./reproduce.sh draft` does not finish in the container on this Mac.
+- **Next:** demo upload and link, member names in the deck, purge the reference video, go public, submit.
+- **Gotchas:** EGL warnings in the container log are harmless (software OpenGL). Test output is in `renders/tmp/docker_out/` (ignored).
 ### 15 Nov, 04:00 — full re-render done and committed
 - **Done:** `renders/tmp/chain2.sh` finished (about 11 h from the 16:59 restart). `outputs/`, `uv_maps/`, `docs/*.jpg` and the deck now all show the D-022 look. New: `outputs/videos/Generate_Motion_set03.mp4` (dark skin, 12 s). `black_frames` on all six videos: none flagged, and no frame needed a second render. `tools/make_demo.py` cut `outputs/demo.mp4` (85 s, silent, captioned; mp4 outside `outputs/videos/` is git-ignored, so it is local only).
 - **Next:** upload the demo (add voice-over if wanted) and put its link in the deck; member names in the deck; build the Dockerfile once; commit `textures/`; purge the reference video; go public; submit.
