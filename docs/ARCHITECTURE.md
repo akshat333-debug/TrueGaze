@@ -32,24 +32,24 @@ render.py --input Left|Right|"Generate Motion"  ->  frames -> MP4, stills, metad
 |---|---|---|---|
 | `truegaze/gnm.py` | read GNM weights, UDIM tiles | A | done |
 | `tools/fit_controls.py` | blink, lid and brow controls | A | done |
-| `truegaze/scene.py` | mesh, shape keys, rig, camera, lights | A | done (flat colours) |
+| `truegaze/scene.py` | mesh, shape keys, rig, camera, lights | A | done |
 | `truegaze/materials.py` | skin, eye and refracting cornea shaders, one material per UDIM tile | B | works |
-| `truegaze/textures.py` | generates texture sets in GNM's UV layout (`python3 -m truegaze.textures`) | B | baseline |
+| `truegaze/textures.py` | generates texture sets in GNM's UV layout (`python3 -m truegaze.textures`) | B | done (8 sets) |
 | `tools/stills.py` | front and close stills per texture set | B | works |
 | `tools/make_hair.py` | lashes, brows, tear line with per-control shape keys (`assets/hair.npz`) | A | works |
 | `tools/transfer_skin.py` | 3D fit of GNM to MakeHuman's head; per-vertex lookup into MakeHuman's skin layout (`assets/skin_transfer.npz`) | B | works |
 | `tools/fit_bulge.py` | soft tissue: socket depth, lid bulge over the cornea, skin drag with gaze (`assets/bulge.npz`) | A | works |
 | `tools/evaluate_motion.py` | checks saccade, blink, vergence numbers against published ranges | A | works |
-| `reproduce.sh` | rebuilds every asset and output from a fresh clone | C | written, fresh-clone parts verified |
+| `reproduce.sh` | rebuilds every asset and output from a fresh clone | C | done, fresh-clone parts verified 13 Nov |
 | `wrapper/eyes.py` | launch-spec API `move/reset/render`, 10-frame sequence, metadata, direction check | C | works |
 | `apply_textures.py` | wraps a set on a stock or random-identity GNM head | C | works |
 | `tools/seam_audit.py` | measures colour steps across UV seams; writes `uv_maps/` sheets | B | works |
 | `truegaze/motion.py` | gaze, saccades, vergence, lids, blinks, brows, pupil | A | done, tested |
-| `truegaze/eyes.py`, `wrapper/eyes.py` | `move(h, v)`, `reset()`, `render()` | C | todo |
-| `render.py` | 3 inputs to MP4, caption, draft/final | C | done (draft) |
-| `tests/`, `Dockerfile` | checks and reproducible run | C | todo |
+| `render.py` | 3 inputs to MP4, caption, draft/final | C | done (draft and final, black-eye frame check) |
+| `tests/`, `Dockerfile` | 14 tests; container builds and runs everything except videos on an M3 (README) | C | done |
+| `tools/overview.sh`, `tools/make_deck.py`, `tools/make_demo.py` | overview images, deck, demo video cut | C | done |
 
 ## Conventions
 - Units metres. Camera 40 cm in front of the eye midpoint; fixation plane 35 cm, bounds ±5 cm; renders 1024×1024.
 - `h`, `v` in [-1, 1]. Default: +h moves gaze to the right **on screen**; `--frame subject` flips (D-006).
-- Textures are UDIM files `face.<tile>.png` per set.
+- Textures are UDIM files per set: `color.<tile>.jpg` (1001 skin, 1002 and 1004 the two eyes), plus `roughness`, `height` and `wrinkle` for tile 1001.

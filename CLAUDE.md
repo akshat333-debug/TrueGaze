@@ -25,4 +25,4 @@ Rules and rubric: `docs/hackathondetails.md`. Plan: `docs/PLAN.md`. Design: `doc
 ## Ownership (avoid merge conflicts)
 - **A** — rig and motion (`tools/`, `truegaze/scene.py`, `truegaze/motion.py`).
 - **B** — textures and shading (`textures/`, `uv_maps/`, `truegaze/materials.py`).
-- **C** — pipeline, tests, docs, deck, video (`render.py`, `truegaze/eyes.py`, `wrapper/`, `tests/`, `docs/`).
+- **C** — pipeline, tests, docs, deck, video (`render.py`, `apply_textures.py`, `wrapper/`, `tests/`, `docs/`).

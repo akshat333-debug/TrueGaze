@@ -22,7 +22,7 @@ from scipy.spatial import cKDTree
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 from tools.fit_controls import lid_ring  # noqa: E402
-from tools.make_hair import unit, vertex_normals  # noqa: E402
+from tools.make_hair import vertex_normals  # noqa: E402
 from truegaze.gnm import GNM  # noqa: E402
 from truegaze.textures import makehuman_file  # noqa: E402
 

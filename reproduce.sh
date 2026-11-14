@@ -16,7 +16,9 @@ python3 -m pytest tests -q
 "$B" --background --python tools/stills.py                                   # outputs/renders/
 "$B" --background --python tools/stills.py -- 01 --style wire
 "$B" --background --python tools/stills.py -- 01 --style clay
-"$B" --background --python apply_textures.py -- --texture 05 --identity 3   # UV portability proof
+"$B" --background --python apply_textures.py -- --texture 03 --out outputs/renders/portability_03.png   # UV portability proofs
+"$B" --background --python apply_textures.py -- --texture 05 --identity 3 --out outputs/renders/portability_05_identity3.png
+"$B" --background --python apply_textures.py -- --texture 07 --identity 11 --out outputs/renders/portability_07_identity11.png
 "$B" --background --python wrapper/eyes.py -- --sequence outputs/launch_spec
 "$B" --background --python render.py -- --input "Generate Motion" --blend outputs/scene.blend
 "$B" --background --python render.py -- --all --quality "$QUALITY"          # outputs/videos/

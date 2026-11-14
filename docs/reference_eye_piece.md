@@ -1,6 +1,6 @@
 # Reference: "Eye Piece" by Chris Jones (WIP 05/02/14)
 
-46.7 s, 1080p30. Local copy only (not committed: third-party video, repo goes public).
+46.7 s, 1080p30. The video file is in the repo root for now, at Akshat's request while the repo is private; it is third-party and must be removed from git history before the repo goes public.
 What it shows, and what we take from it. Timings from frame differencing of the first 16 s.
 
 ## Structure of the video

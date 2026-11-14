@@ -97,7 +97,7 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 - **Plica** is its free edge only, a fine ridge. A flat ribbon was tried and rejected: it stood off the curved eyeball like a panel.
 - **Expression wrinkles** use the reference author's final method: a wrinkle height map revealed by shape-key-driven weights, no tension maps. Drivers are plain averages, so the `.blend` needs no script permission.
 - Eyeball scattering switched to Christensen-Burley, skin to random-walk (skin), finest skin relief to Voronoi cells, all from the author's notes.
-- Render plan: `docs/RENDER_PLAN.md`.
+- Render plan: was `docs/RENDER_PLAN.md` (removed 15 Nov once the renders finished; the order lives in `reproduce.sh`).
 
 ### D-021 · 14 Nov · Dark-skin sheen and old-skin wrinkles fixed by rule, light sets untouched
 - **Problem 1:** sets 03, 06, 08 showed a grey patch under the eye on the lit side. Test renders with specular off proved it was sheen, not colour: the extra shine round the eye that suits light skin is as strong as the whole diffuse colour on dark skin.

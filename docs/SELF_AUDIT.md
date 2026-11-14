@@ -1,4 +1,4 @@
-# Self-audit against the judging rubric (13 Nov, status line updated 14 Nov)
+# Self-audit against the judging rubric (13 Nov, status lines updated 15 Nov)
 
 Rubric: texture photorealism 60 · kinematic accuracy 20 · code and UV portability 20 · brownie points for natural motion. Judged on "visual photorealism, no seams, smooth kinematics, UV compatibility".
 
@@ -36,7 +36,7 @@ Decided 13 Nov: B for all 8 sets (D-015). 14 Nov: dark-skin sheen and old-skin s
 - One command per output; scene built from script; GNM weights fetched and checksum-verified.
 - `apply_textures.py` wraps sets on stock and random-identity GNM heads with none of our rig.
 - Texture files named by GNM UDIM tile numbers.
-- Not yet done (14 Nov): Dockerfile and a fresh-clone run on Linux; FLAME-topology version (spec allows GNM *or* FLAME, so not required).
+- 15 Nov: Dockerfile built and run on an M3 (everything except videos, which ran out of memory there; README). Not yet done: a run on a real Linux machine; FLAME-topology version (spec allows GNM *or* FLAME, so not required).
 
 ## Brownie points (natural motion)
 - Present: micro-movements, natural and gaze-evoked blinks, lids and brows following gaze, lash motion, lid bulge, pupil changes.

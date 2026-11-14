@@ -3,7 +3,7 @@
 ## Status against this plan (15 Nov, after the full re-render)
 Every required output is done at final quality and committed, two days before the 17 Nov checkpoint.
 - **Changed from the plan:** no export step or MPFB fallback (D-009); skin is MakeHuman CC0 photo skins transferred in 3D instead of the diffusion route (D-015); hair is generated mesh strands (D-011); added socket depth, skin drag, hero view, clay/wire breakdowns, motion evaluation, iris light pooling, expression wrinkles (D-014 to D-021).
-- **Left:** member names in the deck, demo video, Dockerfile, commit `textures/`, purge the reference video from history, make the repo public, submit. Open list: `TASKS.md`.
+- **Left:** member names in the deck, demo video upload and link, purge the reference video from history, make the repo public, submit. Open list: `TASKS.md`.
 - The sections below are the original plan, kept for reference.
 
 ## Context
