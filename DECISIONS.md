@@ -104,3 +104,14 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 - **Fix:** above a darkness threshold (`smoothstep(0.45, 0.65, dark)`; light sets measure ≤ 0.32, dark sets ≥ 0.71) the eye region gets no extra shine and a duller under-eye, fewer fine relief lines, and darker facial down (`info.json` → `fuzz`). Tuned by eye, not from a measurement.
 - **Problem 2:** set 07's photo has wrinkles painted as lines; as flat colour they rendered as orange streaks. **Fix:** for the "old" photo, half of that line detail leaves the colour and returns as relief.
 - **Why by rule:** both rules are exactly zero for the light sets, so set 01 and the final videos rendered from it are unchanged and need no re-render.
+
+### D-022 · 14 Nov · Eight look and motion changes from an outside review and web research (list: `docs/IMPROVEMENTS.md`)
+- **Lid shadow on the eyeball** is a shader gradient fixed to the resting lid opening, not traced: the lights are too large to cast it. Standard practice (commercial eye shaders ship an "eye occlusion" layer).
+- **Eye whites** darkened to a warm grey; limbal ring darker; set 01's blue toned down; iris pooling strength 2.6 → 1.9.
+- **Tear film** is now a concave strip in the corner between lid and eyeball (lower deeper than upper). It only reflects: as solid glass it refracted the dark lid interior and drew a black line.
+- **Hero catchlight** is a two-by-three window, placed by mirror geometry so it lands on the cornea. Before, it missed the eye entirely.
+- **Lash roots:** shading under the lower lashes cut from 0.35 to 0.12; lashes have 10 points instead of 7.
+- **Skin:** pores dull the shine more (0.07 → 0.12), coat 0.12 → 0.16. Tuned by eye.
+- **Motion:** `brow_lower` (fitted, never used before) follows down-gaze and blinks; lower lid rises slightly in a blink. Amounts are our own; no measured data was found.
+- **Rejected from the review:** concave iris (GNM's chamber already measures about 3 mm, like a real eye), head following gaze (data says the head stays still under 20 to 25 degrees), paler fuzz (undoes D-021).
+- All five videos and all stills are re-rendered, because every set changed.

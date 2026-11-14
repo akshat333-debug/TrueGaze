@@ -54,8 +54,8 @@ def skin(folder):
     nt.links.new(grain.outputs["Distance"], micro.inputs["Height"])
     nt.links.new(bump.outputs["Normal"], micro.inputs["Normal"])
     nt.links.new(micro.outputs["Normal"], bsdf.inputs["Normal"])
-    bsdf.inputs["Coat Weight"].default_value = 0.12   # thin oil film: a second, sharper highlight
-    bsdf.inputs["Coat Roughness"].default_value = 0.28
+    bsdf.inputs["Coat Weight"].default_value = 0.16   # thin oil film: a second, sharper highlight
+    bsdf.inputs["Coat Roughness"].default_value = 0.24
     nt.links.new(micro.outputs["Normal"], bsdf.inputs["Coat Normal"])
     bsdf.inputs["Specular IOR Level"].default_value = 0.3
     bsdf.subsurface_method = "RANDOM_WALK_SKIN"
@@ -112,7 +112,17 @@ def eye(folder, tile):
     glow = new("ShaderNodeVectorMath")
     glow.operation = "SCALE"
     link(picture.outputs["Color"], glow.inputs[0])
-    link(num("ADD", 1.0, num("MULTIPLY", crescent, 2.6)), glow.inputs["Scale"])
+    # Lid shadow. The lights are large and soft, so the lids barely shade the eyeball; real eyes are clearly
+    # darker under the upper lid and in the corners. Darkening by position in the head, around the eye centre.
+    # shortcut: fixed to the resting lid opening, drive it with the lid keys if the lids ever open much wider
+    centre, here, parts = new("ShaderNodeCombineXYZ"), new("ShaderNodeTexCoord"), new("ShaderNodeSeparateXYZ")
+    centre.name = "eye_centre"  # set by set_eye_centres
+    link(vec("SUBTRACT", here.outputs["Object"], centre.outputs[0]), parts.inputs[0])
+    x, z = parts.outputs["X"], parts.outputs["Z"]
+    shade = num("SUBTRACT", 1.0, num("MULTIPLY", ramp(z, 0.0000, 0.0045), 0.50))                                   # under the upper lid
+    shade = num("MULTIPLY", shade, num("SUBTRACT", 1.0, num("MULTIPLY", ramp(num("MULTIPLY", z, -1.0), 0.0035, 0.0065), 0.20)))  # along the lower lid
+    shade = num("MULTIPLY", shade, num("SUBTRACT", 1.0, num("MULTIPLY", ramp(num("ABSOLUTE", num("SUBTRACT", x, 0.0), 0.0), 0.0075, 0.0120), 0.35)))  # both corners
+    link(num("MULTIPLY", num("ADD", 1.0, num("MULTIPLY", crescent, 1.9)), shade), glow.inputs["Scale"])
     link(glow.outputs["Vector"], bsdf.inputs["Base Color"])
     bsdf.inputs["Specular IOR Level"].default_value = 0.0
     relief = nt.nodes.new("ShaderNodeBump")  # iris fibres stand up and crypts sink: the picture doubles as its height
@@ -176,6 +186,24 @@ def cornea():
     return mat
 
 
+def tear():
+    """Tear film along the lid edges: clear, and it only adds reflections. As solid glass the thin wedge
+    refracted the dark inside of the lid and drew a black line round the eye."""
+    mat = bpy.data.materials.new("tear")
+    mat.use_nodes = True
+    mat.surface_render_method = "BLENDED"
+    nt = mat.node_tree
+    nt.nodes.remove(nt.nodes["Principled BSDF"])
+    clear, gloss, fresnel, mix = (nt.nodes.new(n) for n in ("ShaderNodeBsdfTransparent", "ShaderNodeBsdfGlossy", "ShaderNodeFresnel", "ShaderNodeMixShader"))
+    fresnel.inputs["IOR"].default_value = 1.336  # tear fluid
+    gloss.inputs["Roughness"].default_value = 0.03
+    nt.links.new(fresnel.outputs["Fac"], mix.inputs["Fac"])
+    nt.links.new(clear.outputs["BSDF"], mix.inputs[1])
+    nt.links.new(gloss.outputs["BSDF"], mix.inputs[2])
+    nt.links.new(mix.outputs["Shader"], nt.nodes["Material Output"].inputs["Surface"])
+    return mat
+
+
 def hair(texture_set):
     """Lash and brow colour comes from the texture set's info.json."""
     color = json.loads((ROOT / "textures" / texture_set / "info.json").read_text())["hair"]
@@ -212,6 +240,13 @@ def caruncle():
     bsdf.inputs["Subsurface Radius"].default_value = (1.0, 0.3, 0.2)
     bsdf.inputs["Subsurface Scale"].default_value = 0.002
     return mat
+
+
+def set_eye_centres(left, right):
+    """Tells each eye shader where its eyeball's centre is in the head object's space (for the lid shadow)."""
+    for tile, point in ((1002, left), (1004, right)):
+        for socket, value in zip(bpy.data.materials[f"eye_{tile}"].node_tree.nodes["eye_centre"].inputs, point):
+            socket.default_value = value
 
 
 def set_key_direction(direction):

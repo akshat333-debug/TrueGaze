@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parent.parent
 # name: fallback skin tone, iris outer colour, iris inner colour (around the pupil), hair colour, seed,
 # MakeHuman skin photo (CC0) that gives the skin its colour
 SETS = {
-    "01": ((0.78, 0.57, 0.46), (0.25, 0.36, 0.42), (0.45, 0.40, 0.28), (0.1, 0.06, 0.035), 1, "young_lightskinned_male_diffuse"),   # light skin, blue-grey eyes
+    "01": ((0.78, 0.57, 0.46), (0.21, 0.30, 0.36), (0.43, 0.38, 0.27), (0.1, 0.06, 0.035), 1, "young_lightskinned_male_diffuse"),   # light skin, blue-grey eyes
     "02": ((0.62, 0.42, 0.30), (0.30, 0.17, 0.07), (0.45, 0.25, 0.08), (0.03, 0.02, 0.012), 2, "middleage_lightskinned_male_diffuse"),   # medium skin, brown eyes
     "03": ((0.36, 0.22, 0.15), (0.14, 0.07, 0.03), (0.25, 0.12, 0.04), (0.012, 0.009, 0.007), 3, "young_darkskinned_male_diffuse"),   # dark skin, dark brown eyes
     "04": ((0.82, 0.62, 0.52), (0.28, 0.38, 0.20), (0.55, 0.38, 0.12), (0.16, 0.08, 0.04), 4, "young_lightskinned_female_diffuse"),   # fair skin, green eyes
@@ -195,7 +195,9 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     color += k["inside"][..., None] * (wet - color)
     # hair roots: brow skin is shaded by follicles, and the lash line reads as a dark edge on the lid
     roots = np.load(ROOT / "assets" / "hair.npz")
-    for uv, strength, blur in ((roots["brow_uv"], 0.30, n / 500), (roots["lash_uv"], 0.35, n / 1400)):
+    lash = roots["lash_uv"].reshape(4, -1, 2)  # left upper, left lower, right upper, right lower
+    # the upper lash line reads as a dark edge; under the sparse lower lashes the same shading looks like dirt
+    for uv, strength, blur in ((roots["brow_uv"], 0.30, n / 500), (lash[[0, 2]].reshape(-1, 2), 0.35, n / 1400), (lash[[1, 3]].reshape(-1, 2), 0.12, n / 1000)):
         dots = np.zeros((n, n), np.float32)
         np.add.at(dots, (np.clip(((1 - uv[:, 1]) * n).astype(int), 0, n - 1), np.clip((uv[:, 0] * n).astype(int), 0, n - 1)), 1)
         dots = gaussian_filter(dots, blur)
@@ -298,7 +300,7 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     deep = smoothstep(0.45, 0.65, dark)
     rough = 0.52 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.13 * (1 - deep) * k["orbital"] - 0.42 * k["inside"] - 0.30 * water
     rough = rough + 0.22 * deep * np.clip(k["orbital"] + k["under_eye"], 0, 1) * (1 - k["inside"])
-    rough = rough + 0.05 * noise(n, n // 200, rng) - 0.07 * bumps  # pores are duller than the skin between them
+    rough = rough + 0.05 * noise(n, n // 200, rng) - 0.12 * bumps  # pores are duller than the skin between them
     rough = np.clip(rough, 0.08, 1.0)  # wet tissue is glossy, never a perfect mirror
     return color, rough, height, wrinkles
 
@@ -333,9 +335,10 @@ def eye(n, radii, outer, inner, seed):
     bend = 0.045 * polar(10, 40, 1.5, 2.5)  # fibres wander sideways on their way out, they are not ruler-straight
 
     # sclera: off-white, pinker toward the corners, thin red veins that fade before the iris
-    sclera = np.array([0.69, 0.69, 0.70]) * (1 + 0.03 * noise(n, n // 6, rng))[..., None]
+    # (real eye whites are a warm grey, not paper white: too bright a white is the commonest giveaway of a CG eye)
+    sclera = np.array([0.66, 0.64, 0.62]) * (1 + 0.03 * noise(n, n // 6, rng))[..., None]
     sclera += smoothstep(0.30, 0.46, r)[..., None] * (np.array([0.66, 0.46, 0.43]) - sclera)
-    sclera *= (1 - 0.35 * smoothstep(iris_r + 0.03, 0.40, r))[..., None]  # darker toward the lids, as real eyes look
+    sclera *= (1 - 0.45 * smoothstep(iris_r + 0.03, 0.40, r))[..., None]  # darker toward the lids, as real eyes look
     # yellowish fatty patches left and right of the iris, where the eye is exposed between the lids
     patch = np.exp(-((r - iris_r - 0.09) / 0.05) ** 2) * np.abs(np.cos(theta)) ** 3 * np.clip(0.5 + 0.6 * noise(n, n // 12, rng), 0, 1)
     sclera += (0.25 * patch)[..., None] * (np.array([0.66, 0.58, 0.38]) - sclera)
@@ -374,7 +377,7 @@ def eye(n, radii, outer, inner, seed):
     collarette = np.exp(-((t - ring) / 0.035) ** 2)
     furrows = sum(np.exp(-((t - c - 0.02 * wavy) / 0.018) ** 2) for c in (0.62, 0.76, 0.88))  # contraction furrows
     ruff = 1 - 0.6 * (1 - smoothstep(0.0, 0.05, t))                  # dark pigment frill at the pupil edge
-    shade = (1 + 0.42 * fibres) * (1 - 0.38 * crypts) * (1 + 0.22 * collarette) * (1 - 0.05 * furrows) * ruff * (1 - 0.70 * smoothstep(0.78, 1.0, t))
+    shade = (1 + 0.42 * fibres) * (1 - 0.38 * crypts) * (1 + 0.22 * collarette) * (1 - 0.05 * furrows) * ruff * (1 - 0.82 * smoothstep(0.74, 1.0, t))
     iris = iris * np.clip(shade, 0.05, 2.2)[..., None]
     spots = smoothstep(2.3, 2.8, polar(44, 120, 1.2, 1.2)) * smoothstep(0.12, 0.3, t) * (1 - smoothstep(0.75, 0.9, t))  # a few brown freckles
     iris += (0.6 * spots)[..., None] * (np.array([0.22, 0.11, 0.04]) - iris)

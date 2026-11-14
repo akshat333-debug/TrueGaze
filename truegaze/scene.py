@@ -5,6 +5,7 @@ Blender frame: character faces -Y, up is +Z, the character's left is +X (screen 
 import math
 from pathlib import Path
 
+import bmesh
 import bpy
 import numpy as np
 from mathutils import Matrix, Vector
@@ -23,11 +24,16 @@ def _hair(head, arm, texture_set):
     mesh = bpy.data.meshes.new("hair")
     mesh.from_pydata(to_blender(d["verts"]).tolist(), [], d["quads"].tolist())
     mesh.materials.append(materials.hair(texture_set))
-    mesh.materials.append(bpy.data.materials["cornea"])  # the tear line is the same clear wet material
+    mesh.materials.append(materials.tear())
     mesh.materials.append(materials.fuzz(texture_set))
     mesh.materials.append(materials.caruncle())
     mesh.polygons.foreach_set("material_index", d["material"].astype(int).tolist())
     mesh.polygons.foreach_set("use_smooth", [True] * len(d["quads"]))
+    bm = bmesh.new()  # the tear film is clear: its faces must point outward or it refracts inside out
+    bm.from_mesh(mesh)
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    bm.to_mesh(mesh)
+    bm.free()
     obj = bpy.data.objects.new("Hair", mesh)
     bpy.context.scene.collection.objects.link(obj)
     obj.shape_key_add(name="Basis")
@@ -118,6 +124,7 @@ def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
         light.location = eye_mid + Vector(loc)
         light.rotation_euler = (eye_mid - light.location).to_track_quat("-Z", "Y").to_euler()
         scene.collection.objects.link(light)
+    materials.set_eye_centres(joints[2], joints[3])
     materials.set_key_direction(Vector((0.32, -0.38, 0.30)).normalized())  # the key light above; the iris shader needs it
     world = bpy.data.worlds.new("world")
     world.use_nodes = True
@@ -162,8 +169,33 @@ def hero_view(arm, side="left"):
     materials.set_key_direction((bpy.data.objects["key"].location - eye).normalized())
     # a dim softbox beside the camera: it adds little light, its reflection is the window highlight on the cornea
     catch = bpy.data.objects.new("catch", bpy.data.lights.new("catch", "AREA"))
-    catch.data.energy, catch.data.size = 0.5, 0.35
-    catch.location = cam.location + Vector((-sign * 0.10, 0.0, 0.22))
+    catch.data.energy, catch.data.size = 0.65, 0.35
+    catch.data.shape, catch.data.size_y = "RECTANGLE", 0.45
+    # window panes: two by three, with dark bars between, so the cornea reflects a window and not a blank card
+    catch.data.use_nodes = True
+    nt = catch.data.node_tree
+    uv, split, glass = nt.nodes.new("ShaderNodeNewGeometry"), nt.nodes.new("ShaderNodeSeparateXYZ"), None
+    nt.links.new(uv.outputs["Parametric"], split.inputs[0])
+    for axis, panes in (("X", 2), ("Y", 3)):
+        scaled, part, off, bar = (nt.nodes.new("ShaderNodeMath") for _ in range(4))
+        scaled.operation, part.operation, off.operation, bar.operation = "MULTIPLY", "FRACT", "SUBTRACT", "ABSOLUTE"
+        scaled.inputs[1].default_value, off.inputs[1].default_value = panes, 0.5
+        pane = nt.nodes.new("ShaderNodeMath")
+        pane.operation, pane.inputs[1].default_value = "LESS_THAN", 0.44
+        for a, b in ((split.outputs[axis], scaled), (scaled.outputs[0], part), (part.outputs[0], off), (off.outputs[0], bar), (bar.outputs[0], pane)):
+            nt.links.new(a, b.inputs[0])
+        if glass is None:
+            glass = pane
+        else:
+            both = nt.nodes.new("ShaderNodeMath")
+            both.operation = "MULTIPLY"
+            nt.links.new(glass.outputs[0], both.inputs[0])
+            nt.links.new(pane.outputs[0], both.inputs[1])
+            nt.links.new(both.outputs[0], nt.nodes["Emission"].inputs["Strength"])
+    # placed where the cornea mirrors it to the camera: just above the pupil of an eye turned part-way to the camera
+    view = (cam.location - eye).normalized()
+    normal = (Vector((sign * 0.37, -0.93, 0.0)) + 0.6 * view + Vector((0, 0, 0.30))).normalized()
+    catch.location = eye + (2 * normal.dot(view) * normal - view) * 0.45
     catch.rotation_euler = (eye - catch.location).to_track_quat("-Z", "Y").to_euler()
     sc.collection.objects.link(catch)
 

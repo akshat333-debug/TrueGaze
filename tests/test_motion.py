@@ -39,6 +39,7 @@ def test_lids_follow_gaze():
     up = render_clip(Clip(2.0).look(0.2, 0, 20, blink_on_large=False))
     down = render_clip(Clip(2.0).look(0.2, 0, -20, blink_on_large=False))
     assert up["upper_lid_up"][-1] > 0.5 and up["brow_raise"][-1] > 0.4
+    assert up["brow_lower"][-1] == 0  # the brow does not pull both ways at once
     assert down["upper_lid_down"][-1] > 0.4 and down["upper_lid_up"][-1] == 0
 
 

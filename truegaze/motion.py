@@ -64,7 +64,8 @@ def lids(yaw, pitch):
     """Lid and brow shape-key weights that go with a gaze direction (degrees): lids follow the eye."""
     return {"upper_lid_up": float(np.clip(pitch / 25, 0, 1)), "upper_lid_down": float(np.clip(-pitch / 30, 0, 1)),
             "lower_lid_up": float(np.clip(-pitch / 60, 0, 0.3) + 0.1 * np.clip(abs(yaw) / 30, 0, 1)),
-            "brow_raise": float(np.clip(pitch / 30, 0, 0.8))}
+            "brow_raise": float(np.clip(pitch / 30, 0, 0.8)),
+            "brow_lower": float(np.clip(-pitch / 45, 0, 0.45))}  # the brow sinks a little when looking down
 
 
 def soft_tissue(side, yaw, pitch):
@@ -143,7 +144,7 @@ def render_clip(clip, fps=30):
     micro *= 0.6  # keep the accumulated jitter under about a degree
 
     out = {k: np.zeros(n) for k in ("left_yaw", "left_pitch", "right_yaw", "right_pitch", "blink", "blink_mid",
-                                     "upper_lid_up", "upper_lid_down", "lower_lid_up", "brow_raise", "pupil")}
+                                     "upper_lid_up", "upper_lid_down", "lower_lid_up", "brow_raise", "brow_lower", "pupil")}
     for i, ti in enumerate(t):
         yaw, pitch, dist = _direction(clip, ti)
         yaw, pitch = yaw + drift[i, 0] + micro[i, 0], pitch + drift[i, 1] + micro[i, 1]
@@ -156,6 +157,9 @@ def render_clip(clip, fps=30):
         out["blink_mid"][i] = 4 * closure * (1 - closure)  # keeps the half-closed lid on the eyeball
         for name, value in lids(yaw, pitch).items():
             out[name][i] = value
+        # the muscle that closes the lids also pulls the brow down and the lower lid up a little
+        out["brow_lower"][i] = min(out["brow_lower"][i] + 0.18 * closure, 0.6)
+        out["lower_lid_up"][i] = min(out["lower_lid_up"][i] + 0.10 * closure, 0.4)
         out["pupil"][i] = PUPIL_REST + 0.2 * math.sin(2 * math.pi * 0.35 * ti) + 0.1 * math.sin(2 * math.pi * 0.9 * ti + 1)
     return out
 

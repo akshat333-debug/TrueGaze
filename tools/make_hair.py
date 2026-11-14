@@ -22,7 +22,7 @@ from tools.fit_controls import lid_ring  # noqa: E402
 from truegaze.gnm import GNM  # noqa: E402
 
 MM = 0.001
-K_LASH, K_BROW, K_TEAR = 7, 5, 48
+K_LASH, K_BROW, K_TEAR = 10, 5, 48
 
 
 def unit(v):
@@ -37,7 +37,8 @@ def tubes(centres, radii, sides):
     b = np.cross(d, a)
     ang = 2 * np.pi * np.arange(sides) / sides
     ring = np.cos(ang)[:, None] * a[:, :, None] + np.sin(ang)[:, None] * b[:, :, None]
-    verts = centres[:, :, None] + radii[:, :, None, None] * ring
+    # radii may instead be ready-made offsets (n, K, sides, 3) for a cross-section that is not round
+    verts = centres[:, :, None] + (radii if radii.ndim == 4 else radii[:, :, None, None] * ring)
     i, kk, j = np.meshgrid(np.arange(n), np.arange(k - 1), np.arange(sides), indexing="ij")
     at = lambda kk, j: (i * k + kk) * sides + j % sides
     quads = np.stack([at(kk, j), at(kk, j + 1), at(kk + 1, j + 1), at(kk + 1, j)], axis=-1)
@@ -54,6 +55,7 @@ class Lid:
         self.idx = idx[np.argsort(sign * m.template[idx, 0])]
         self.centre = m.joints[m.joint_names.index(f"{side}_eye")]
         self.up = 1 if upper else -1
+        self.rest = m.template
 
     def frame(self, V, u):
         P = V[self.idx]
@@ -94,9 +96,10 @@ def lashes(lid, rng):
 
 
 def tear_line(lid):
-    """A thin clear bead where the lid edge meets the eyeball: it catches the light like tear fluid."""
+    """The tear film where the lid edge meets the eyeball. Tear fluid wets both surfaces, so it fills the
+    corner between them with a concave face (a meniscus); the lower one is deeper, because fluid collects there."""
     u = np.linspace(0.04, 0.97, K_TEAR)
-    radius = (0.42 if lid.up < 0 else 0.20) * MM
+    radius = (0.50 if lid.up < 0 else 0.26) * MM
     blur = np.exp(-0.5 * (np.arange(-4, 5) / 2.0) ** 2)
 
     def centres(V):
@@ -104,7 +107,16 @@ def tear_line(lid):
         c = np.pad(p - away * 0.1 * MM + r * 0.2 * MM, ((4, 4), (0, 0)), mode="edge")  # smooth out the mesh's corners
         return np.stack([np.convolve(c[:, i], blur / blur.sum(), mode="valid") for i in range(3)], axis=-1)[None]
 
-    return centres, (radius * np.sin(np.pi * np.linspace(0.02, 0.98, K_TEAR)) ** 0.3)[None]
+    # cross-section: the corner itself, then an arc from the lid margin (height h up the lid) round to the
+    # eyeball (h out into the opening), bowed toward the corner. r = out of the eyeball, away = up the lid.
+    smooth = lambda x: np.stack([np.convolve(np.pad(x, ((4, 4), (0, 0)), mode="edge")[:, i], blur / blur.sum(), mode="valid") for i in range(3)], axis=-1)
+    _, _, r, away = lid.frame(lid.rest, u)
+    r, away = unit(smooth(r)), unit(smooth(away))
+    h = (radius * np.sin(np.pi * np.linspace(0.02, 0.98, K_TEAR)) ** 0.3)[:, None, None]
+    a = np.linspace(0, np.pi / 2, 5)[None, :, None]
+    arc = h * (r[:, None] * (1 - np.sin(a)) + 1.15 * away[:, None] * (1 - np.cos(a)) * -1)   # from h*r round to -1.15*h*away
+    ring = np.concatenate([np.zeros((K_TEAR, 1, 3)), arc], axis=1) - 0.06 * MM * (r - away)[:, None]  # sunk a little into both
+    return centres, ring[None]
 
 
 def brows(m, side, rng, normals):
