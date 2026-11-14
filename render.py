@@ -11,6 +11,7 @@ Options: --input Left|Right|"Generate Motion", --seed N, --frame screen|subject 
 --style textured|clay|wire (clay and wire are making-of looks: grey shape, and the mesh drawn on top)
 """
 import argparse
+import re
 import shutil
 import subprocess
 import sys
@@ -25,6 +26,17 @@ from truegaze import motion, scene  # noqa: E402
 FPS = 30
 INPUTS = ["Left", "Right", "Generate Motion"]
 SIDES = ("left", "right")
+
+
+def black_frames(source):
+    """Frame numbers (from 1) whose share of near-black pixels jumps above the clip's usual level.
+    Guards against the 13 Nov fault, where both eyeballs rendered solid black part-way through a long run.
+    `source` is anything ffmpeg reads: a frame pattern or a video. Blinks only lower the share, so they pass."""
+    log = subprocess.run(["ffmpeg", "-v", "info", "-i", str(source), "-vf", "blackframe=amount=0:threshold=32", "-f", "null", "-"],
+                         capture_output=True, text=True, check=True).stderr
+    share = [int(m) for m in re.findall(r"pblack:(\d+)", log)]  # percent of each frame that is near-black
+    usual = sorted(share)[len(share) // 2]
+    return [i + 1 for i, p in enumerate(share) if p >= usual + 2]  # two eyeballs are 3% or more of the frame
 
 
 def keyframe(head, arm, frames):
@@ -84,6 +96,7 @@ def render(a):
         sc.cycles.samples = 48
         sc.cycles.use_adaptive_sampling, sc.cycles.adaptive_threshold = True, 0.03  # stop early where the image is clean
         # no persistent data: on long runs it went stale and rendered the eyes black from frame ~185 on (13 Nov)
+        sc.render.use_persistent_data = False
         sc.render.use_motion_blur = True  # a 30 fps camera smears a 40-100 ms saccade or a blink; so do we
         sc.render.motion_blur_shutter = 0.5
     sc.render.use_stamp = True  # caption naming the input, so the judge knows what was asked
@@ -109,6 +122,15 @@ def render(a):
         sc.render.use_overwrite = False
         sc.render.filepath = str(frames) + "/"
         bpy.ops.render.render(animation=True)
+        bad = black_frames(frames / "%04d.png")
+        if bad:  # delete them and render again; frames that are fine are skipped
+            print("BLACK FRAMES, rendering again:", bad)
+            for f in bad:
+                (frames / f"{f:04d}.png").unlink()
+            bpy.ops.render.render(animation=True)
+            bad = black_frames(frames / "%04d.png")
+            if bad:
+                raise SystemExit(f"frames still too dark after a second render: {bad}. Look at them in {frames}")
         subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", str(FPS), "-i", str(frames / "%04d.png"),
                         "-c:v", "libx264", "-pix_fmt", "yuv420p", "-crf", "17", str(out)], check=True)
     else:

@@ -1,0 +1,7 @@
+renders/
+outputs/
+textures/
+assets/cache/
+.git/
+*.mp4
+*.pptx

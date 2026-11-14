@@ -11,7 +11,7 @@ All required outputs exist at final quality and are committed: 8 texture sets, L
 - [ ] Demo video, 3 minutes or less (plan in `docs/DECK_OUTLINE.md`, last line); add its link to the deck's demo slide.
 - [ ] Decide: one more final video on a dark or old skin set (about 3 h render)? Videos all use set 01 now.
 - [ ] Commit `textures/` (104 MB; `reproduce.sh` also rebuilds it in about 3 minutes).
-- [ ] Dockerfile (brief asks for "Docker files"), or state in README that `reproduce.sh` is the setup.
+- [ ] Dockerfile is written but untested: build it and run draft once the render is done.
 - [ ] Watch "Flexpressions" (second reference video; not done, no local copy).
 - [ ] **Before making the repo public:** the reference video `Eye Piece - Chris Jones (1080p, h264).mp4` (third-party, committed 13 Nov at Akshat's request while the repo is private) must be removed **from history too**: `git filter-repo --path "Eye Piece - Chris Jones (1080p, h264).mp4" --invert-paths` then force-push, or publish from a fresh repo without it.
 - [ ] 21 Nov: regenerate from a clean clone, make repo public, submit the form (https://forms.gle/86xENrtqhx988hBt8). 22 Nov is buffer only.
@@ -26,6 +26,12 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 14 Nov, 17:30 — black-eye guard; a second real case found; Dockerfile
+- **Found:** the committed `outputs/videos/Right.mp4` has solid black eyes in its last 3 frames (268 to 270). The 13 Nov check missed it: it sampled the Generate Motion videos only. So the fault was not only "from frame 185 on"; it can hit any late frame of a long run. Right is in the re-render queue anyway.
+- **Guard added:** `render.py` sets `use_persistent_data = False` explicitly, and `black_frames()` measures each frame's share of near-black pixels with ffmpeg before joining; frames that jump 2 points above the clip's median are deleted and rendered again, and the run fails if they are still dark. Tested: flags exactly frames 268 to 270 of the old Right.mp4 and frames 186 on of a video with the eyes blacked out by hand; flags nothing in the three good videos.
+- Limit of the guard: it sees eyes going black, not other faults. Dark-skin clips have a higher baseline of dark pixels; the rule is relative to the clip, but it has not been tried on a real dark-skin failure.
+- The render chain was restarted at 16:59 (the Mac slept with the lid closed around 15:00; `caffeinate -i` does not stop lid-close sleep). Keep the lid open and the charger in.
+- `Dockerfile` written (Blender 4.5.16 Linux, CPU rendering). **Not built or run yet**: building during the render would starve it of memory. Build and run `draft` once the render is done.
 ### 14 Nov, morning — eight look and motion changes (D-022); full re-render running
 - Done: tasks 1 to 8 of `docs/IMPROVEMENTS.md`: lid shadow on the eyeball, greyer eye whites, concave tear film, window catchlight in the hero view, softer lower-lash roots, more skin shine contrast, brow lowers with down-gaze and blinks, set 01 iris toned down. Tests (14) and motion evaluation pass. Checked on test stills of sets 01 and 03.
 - **Running:** `renders/tmp/chain2.sh` (log `renders/tmp/chain2.log`): all textures, all stills, proofs, overviews, launch-spec sequence, `.blend`, wire video, then final videos in this order: Generate Motion hero, Generate Motion, Left, Right, Generate Motion on set 03 (new). About 1,620 final frames at 20 to 40 s each: 12 to 15 hours. It prints `STILLS_DONE`, `SMALL_DONE`, `CHAIN_DONE`.
