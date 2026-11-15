@@ -336,7 +336,7 @@ card(s_limits, 0.4, 1.7, 4.5, 3.3, "Results", [
     "Every sourced motion check in range; direction check 5 of 5.",
     "Textures wrap onto stock and random GNM heads.",
     "Skin fit to the photo source: median 0.5 mm.",
-    "14 unit tests pass.",
+    "16 unit tests pass.",
 ], accent=GREEN, size=13)
 card(s_limits, 5.1, 1.7, 4.5, 3.3, "Limits", [
     "Iris light pooling is a shader estimate, not traced caustics.",

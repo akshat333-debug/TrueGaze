@@ -234,7 +234,14 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     for curve in roots["lid_uv"]:
         ImageDraw.Draw(edge).line(to_px(curve), fill=255, width=max(2, n // 700))
     water = np.clip(gaussian_filter(np.asarray(edge, np.float32) / 255, n / 3000) * 1.6, 0, 1)
-    color += (0.65 * water)[..., None] * (np.array([0.80, 0.47, 0.44]) * (0.55 + 0.45 * tone.mean()) - color)
+    pink = np.array([0.80, 0.47, 0.44]) * (0.55 + 0.45 * tone.mean())
+    color += (0.65 * water)[..., None] * (pink - color)
+    # the lid margin: the 2 mm shelf between the eyeball and the lash roots is smooth, pinker and damp, not lid skin
+    shelf = Image.new("L", (n, n))
+    for inner, front in zip(roots["lid_uv"], roots["margin_uv"]):
+        ImageDraw.Draw(shelf).polygon(to_px(np.concatenate([inner, front[::-1]])), fill=255)
+    shelf = np.clip(gaussian_filter(np.asarray(shelf, np.float32) / 255, n / 3000), 0, 1) * (1 - seam)
+    color += (0.45 * shelf)[..., None] * (pink - color)
     # fine lines of the thin skin round the eye: they run round the socket, crossed by fainter radial ones
     lines = np.zeros((n, n), np.float32)
     rings = gaussian_filter(rng.standard_normal((700, 160)).astype(np.float32), (0.8, 1.2), mode=("nearest", "wrap"))  # short arcs: long ones read as fingerprint rings
@@ -291,19 +298,19 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     creases = gaussian_filter(white, (n / 4096 * 0.7, n / 4096 * 5)) + gaussian_filter(white, (n / 4096 * 5, n / 4096 * 0.7))
     creases = -np.abs(creases / creases.std())
     amount = 0.55 + 0.45 * np.clip(k["nose"] + k["cheeks"], 0, 1) - 0.4 * k["lips"]
-    bumps = (0.6 * pores + 0.25 * creases) * amount * (1 - k["inside"]) + 0.08 * noise(n, n // 400, rng)
+    bumps = (0.6 * pores + 0.25 * creases) * amount * (1 - k["inside"]) * (1 - shelf) + 0.08 * noise(n, n // 400, rng)
     if photo:  # the photo's own fine detail (pores, lines) also becomes relief, so shine follows what is drawn
         luma = picture.mean(axis=2)
         fine = luma - gaussian_filter(luma, n / 4096 * 4)
         bumps = bumps + 0.8 * cover * fine / (fine.std() + 1e-9) * (1 - k["inside"])
         if photo.startswith("old"):
-            bumps = bumps + 1.6 * cover * folds / (folds.std() + 1e-9) * (1 - k["inside"])
+            bumps = bumps + 0.8 * cover * folds / (folds.std() + 1e-9) * (1 - k["inside"])  # at 1.6 the folds caught the light as shiny streaks
     height = 0.5 + 0.12 * bumps - 0.20 * crease - 0.05 * lines * (1 - k["inside"]) * (1 - 0.6 * smoothstep(0.45, 0.65, dark))  # fine lines scatter the sheen: fewer on dark skin
 
     # dark skin reflects as much as light skin but shows it far more, so the extra shine round the eye
     # that suits light skin reads there as a grey patch: dark sets get none, and a duller under-eye
     deep = smoothstep(0.45, 0.65, dark)
-    rough = 0.52 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.13 * (1 - deep) * k["orbital"] - 0.42 * k["inside"] - 0.30 * water
+    rough = 0.52 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.13 * (1 - deep) * k["orbital"] - 0.42 * k["inside"] - 0.30 * water - 0.22 * shelf
     rough = rough + 0.05 * noise(n, n // 200, rng) - 0.12 * bumps  # pores are duller than the skin between them
     rough = np.clip(rough, 0.08, 1.0)  # wet tissue is glossy, never a perfect mirror
     return color, rough, height, wrinkles

@@ -76,7 +76,7 @@ Deliver **8 sets** (rule asks 5–10), each: skin albedo 4K (tile 1001), left ir
 - **Gaze:** inputs h, v in [-1, 1] map to a fixation point on a plane **35 cm** ahead, ±5 cm. Each eye aims at the point, giving true 3D rotation and natural **vergence**; torsion follows Listing's law.
 - **Saccades:** duration from the main sequence (about 2.2 ms per degree + 21 ms), minimum-jerk velocity profile, small overshoot and corrective glissade.
 - **Fixation life:** micro-saccades, slow drift and tremor, so a held gaze never looks frozen.
-- **Eyelids:** upper lid follows vertical gaze; lower lid shifts slightly; lids narrow on side gaze.
+- **Eyelids:** both lids follow vertical gaze (D-025); lids narrow on side gaze.
 - **Blinks:** fast close (~100 ms), slower open (~200 ms), every 3–5 s and usually paired with large saccades; eyes dip down and in during a blink.
 - **Brows and face:** brows lift on up-gaze; small squint/cheek coupling; optional few-degree head follow on large shifts.
 - **Pupil:** slow hippus and constriction on convergence.

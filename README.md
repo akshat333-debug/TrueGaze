@@ -39,7 +39,7 @@ reproduce.sh         rebuilds every asset and output from a fresh clone
 Dockerfile           the same in a container
 truegaze/            library: GNM reader, scene, materials, textures, motion
 tools/               asset fitting, hair, skin transfer, stills, audits, deck, demo
-tests/               14 tests (motion, hair, textures)
+tests/               16 tests (motion, hair, textures)
 textures/01..08/     the eight texture sets, files named by GNM UDIM tile
 uv_maps/             one overview sheet per texture set
 assets/              fitted controls, soft tissue, hair, skin lookup (rebuilt by tools/)

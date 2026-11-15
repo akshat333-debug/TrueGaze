@@ -58,6 +58,21 @@ def test_left_means_screen_left_by_default():
     assert mid(render_clip(preset("Left", frame="subject"))) > 20
 
 
+def test_head_sways_and_eyes_hold_the_target():
+    out = render_clip(Clip(8.0, seed=1), fps=30)
+    assert 0.5 < np.abs(out["head_yaw"]).max() < 2.5 and np.abs(out["head_roll"]).max() < 1
+    gaze = (out["left_yaw"] + out["right_yaw"]) / 2 + out["head_yaw"]  # eye in head + head = gaze in space
+    assert np.abs(gaze - gaze.mean()).max() < 1.0  # only fixational jitter is left
+    assert out["retract"].max() == 0  # no blink, no pull-back
+
+
+def test_lower_lid_follows_gaze_and_eyeball_pulls_back_in_a_blink():
+    down = render_clip(Clip(2.0).look(0.2, 0, -20, blink_on_large=False))
+    assert down["lower_lid_up"][-1] < -0.3  # rides down with the eye
+    blink = render_clip(Clip(2.0).blink(0.5))
+    assert blink["retract"].max() == pytest.approx(0.001)
+
+
 def test_unknown_input_rejected():
     with pytest.raises(ValueError):
         preset("Up")

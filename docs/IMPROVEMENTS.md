@@ -49,7 +49,7 @@ Cost is work plus test renders. "Videos" = the change alters set 01, so the five
 | 9 | **Second-set video:** one final video on a dark or old set (all videos are set 01 now) | `render.py --texture` | 3 h render | new video |
 | 10 | **Upper-lid fold with overhang** (skin tucks under the brow fold when the eye is open) | `fit_bulge.py` | large, risky on GNM's coarse lid mesh | yes |
 | 11 | True caustics with path guiding (CPU only) for one hero still | `stills.py` | large | no |
-| 12 | Idle head sway (not gaze-following) | rig rework: hair and camera assume a still head | large | yes |
+| 12 | Idle head sway (not gaze-following) | done 15 Nov (D-025): the rig object turns about the neck, no rework needed | done | yes |
 
 Recommended batch: 1 to 8 together, tested on stills of sets 01, 03, 07, then one overnight re-render of the five videos plus task 9. Tasks 10 to 12 only if time remains after the deck and demo video.
 

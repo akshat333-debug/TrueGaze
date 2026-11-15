@@ -46,7 +46,7 @@ def _hair(head, arm, texture_set):
         target = driver.variables.new().targets[0]
         target.id_type, target.id = "KEY", head.data.shape_keys
         target.data_path = f'key_blocks["{name}"].value'
-    obj.parent = arm  # shortcut: assumes neck and head bones stay at rest, skin it to the head bone when the head moves
+    obj.parent = arm  # shortcut: assumes neck and head bones stay at rest (the head moves by moving the rig, see pose_head)
     return obj
 
 
@@ -224,19 +224,28 @@ def breakdown(head, arm, wire=True):
         slot.material = dark
 
 
-def set_gaze(arm, side, yaw_deg, pitch_deg):
-    """Rotates one eyeball about its centre. yaw > 0 turns toward the character's left (+X), pitch > 0 up."""
+def pose_head(arm, yaw_deg, pitch_deg, roll_deg):
+    """Tilts the whole rig (head, eyes, hair) about the neck joint. Signs as set_gaze; roll > 0 tips toward the character's left.
+    The rig object moves, not its neck bone, so everything parented to it follows and the eye maths stays in rig space."""
+    arm.rotation_euler = (-math.radians(pitch_deg), math.radians(roll_deg), math.radians(yaw_deg))
+    pivot = arm.data.bones["neck"].head_local
+    arm.location = pivot - arm.rotation_euler.to_matrix() @ pivot
+
+
+def set_gaze(arm, side, yaw_deg, pitch_deg, back=0.0):
+    """Rotates one eyeball about its centre. yaw > 0 turns toward the character's left (+X), pitch > 0 up.
+    back (m) moves the eyeball straight back into the socket, as happens in a blink."""
     bone = arm.pose.bones[f"{side}_eye"]
     rest = bone.bone.matrix_local
     turn = Matrix.Rotation(math.radians(yaw_deg), 4, "Z") @ Matrix.Rotation(-math.radians(pitch_deg), 4, "X")
     pivot = Matrix.Translation(rest.to_translation())
-    # shortcut: assumes neck and head are at rest, switch to parent-relative maths when the head moves
-    bone.matrix = pivot @ turn @ pivot.inverted() @ rest
+    # shortcut: assumes neck and head bones are at rest (pose_head moves the rig object instead)
+    bone.matrix = Matrix.Translation((0, back, 0)) @ pivot @ turn @ pivot.inverted() @ rest
 
 
-def pose_eye(head, arm, side, yaw_deg, pitch_deg):
+def pose_eye(head, arm, side, yaw_deg, pitch_deg, back=0.0):
     """Turns one eye and sets what depends only on its gaze: lid bulge over the cornea and skin drag."""
-    set_gaze(arm, side, yaw_deg, pitch_deg)
+    set_gaze(arm, side, yaw_deg, pitch_deg, back)
     keys = head.data.shape_keys.key_blocks
     for name, value in soft_tissue(side, yaw_deg, pitch_deg).items():
         keys[name].value = value

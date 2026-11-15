@@ -69,7 +69,9 @@ inward = -eye_angles(0, 0, 0.35)["left"][0]
 check("vergence at 35 cm, per eye", inward, math.degrees(math.atan(EYE_HALF_SPAN / 0.35)) - 0.05, math.degrees(math.atan(EYE_HALF_SPAN / 0.35)) + 0.05, "deg")
 
 still = render_clip(Clip(6.0, seed=3), 60)
-check("fixation wander (max from mean, 6 s)", float(np.abs(still["left_yaw"] - still["left_yaw"].mean()).max()), 0.05, 1.0, "deg", sourced=False)
+check("fixation wander (max from mean, 6 s)", float(np.abs((gaze := still["left_yaw"] + still["head_yaw"]) - gaze.mean()).max()), 0.05, 1.0, "deg", sourced=False)
+
+check("head sway (largest angle, 6 s)", float(np.abs(still["head_yaw"]).max()), 0.3, 2.5, "deg", sourced=False)
 
 print("\n".join(rows))
 sys.exit(1 if failed else 0)

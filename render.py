@@ -43,9 +43,13 @@ def keyframe(head, arm, frames):
     keys = head.data.shape_keys.key_blocks
     n = len(frames["blink"])
     for f in range(n):
+        scene.pose_head(arm, frames["head_yaw"][f], frames["head_pitch"][f], frames["head_roll"][f])
+        arm.keyframe_insert("rotation_euler", frame=f + 1)
+        arm.keyframe_insert("location", frame=f + 1)
         for side in SIDES:
-            scene.pose_eye(head, arm, side, frames[f"{side}_yaw"][f], frames[f"{side}_pitch"][f])
+            scene.pose_eye(head, arm, side, frames[f"{side}_yaw"][f], frames[f"{side}_pitch"][f], frames["retract"][f])
             arm.pose.bones[f"{side}_eye"].keyframe_insert("rotation_quaternion", frame=f + 1)
+            arm.pose.bones[f"{side}_eye"].keyframe_insert("location", frame=f + 1)
             for where in ("in", "out", "up", "down"):
                 keys[f"bulge_{where}_{side}"].keyframe_insert("value", frame=f + 1)
                 keys[f"drag_{where}_{side}"].keyframe_insert("value", frame=f + 1)

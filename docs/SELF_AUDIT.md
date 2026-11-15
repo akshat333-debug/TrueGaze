@@ -4,6 +4,8 @@ Replaces the 13 Nov self-audit. Written to find faults, not to defend the build.
 
 **What was looked at:** the brief and rubric (`docs/hackathondetails.md`); the reference video "Eye Piece" (frames at 4.5, 9, 14.5, 18 s and its blink at 5.6 to 6.1 s); our stills at full size (`01_front`, `01_close`, `01_hero`, `07_close`, sets 03 and 08 front, the three overview sheets); contact sheets of all six videos and a frame-by-frame strip of one blink in the hero video; `uv_maps/01.jpg`; the numbers printed by `tools/evaluate_motion.py`, `tools/seam_audit.py` and `outputs/launch_spec/metadata.json`.
 
+**Since this audit:** items 1 to 7 and 12 were worked on in D-024 and items 8 to 11 in D-025 (`DECISIONS.md` says what each achieved and what is still visible). The scores below are from before those changes and were not re-estimated.
+
 **Limits of this audit:** one reviewer playing eight roles, not eight people. Videos were judged from sampled frames, not watched at speed. The second reference ("Flexpressions") was not watched. Scores are estimates of how a strict judge would mark, not a prediction of the result.
 
 ## Verdict

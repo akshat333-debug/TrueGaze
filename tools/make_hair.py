@@ -56,6 +56,21 @@ class Lid:
         self.centre = m.joints[m.joint_names.index(f"{side}_eye")]
         self.up = 1 if upper else -1
         self.rest = m.template
+        # The margin: GNM's lid is about 2 mm thick, with a flat shelf between the eyeball and the lid's front
+        # edge. For each ring vertex find that front edge: the skin vertex straight out of the eyeball from it.
+        skin = np.flatnonzero(m.group("skin_exterior"))
+        P = m.template[self.idx]
+        s = np.r_[0, np.cumsum(np.linalg.norm(np.diff(P, axis=0), axis=1))]
+        self.s = s / s[-1]
+        p, t, r, away = self.frame(m.template, self.s)
+        self.front, depth = self.idx.copy(), np.zeros(len(self.idx))
+        for j in range(len(self.idx)):
+            d = m.template[skin] - p[j]
+            along, out = d @ away[j], d @ r[j]
+            ok = (np.abs(d @ t[j]) < 1.5 * MM) & (along > -1.5 * MM) & (along < 0.5 * MM) & (out > 0) & (out < 2.9 * MM)
+            if ok.any():
+                self.front[j], depth[j] = skin[ok][np.argmax(out[ok])], out[ok].max()
+        self.depth = gaussian_filter1d(depth, 1.5, mode="nearest")
 
     def frame(self, V, u):
         P = V[self.idx]
@@ -76,7 +91,7 @@ def lashes(lid, rng):
     u = lo + (hi - lo) * (np.arange(n) + rng.uniform(0, 1, n)) / n  # one per slot: pure chance leaves bald gaps
     mid = np.sin(np.pi * u ** 0.85)                                  # longest in the middle of the lid
     length = (8.0 if upper else 5.0) * MM * (0.5 + 0.5 * mid) * rng.uniform(0.55, 1.15, n)  # uneven: lashes are at every stage of growth
-    out = rng.uniform(0.9, 1.6, n) * MM                              # follicles sit on the front edge of the lid,
+    out = np.maximum(np.interp(u, lid.s, lid.depth) * rng.uniform(0.75, 1.0, n), 0.9 * MM)  # follicles sit on the front edge of the lid margin,
     row = rng.uniform(0.0, 0.6, n) * MM                              # across the lid's thickness, in a few rows
     clump = np.repeat(rng.normal(0, 4, n // 3 + 1), 3)[:n]  # neighbours lean together, a little: strong bunches look like combs
     lean = np.radians(-25 + 65 * u + clump + rng.normal(0, 5 if upper else 7, n))   # fan out toward the outer corner
@@ -228,20 +243,22 @@ if __name__ == "__main__":
     rng = np.random.default_rng(7)
     normals = vertex_normals(m)
     parts = []  # (centres function, radii, tube sides, material)
-    brow_uv, lash_uv, lid_uv = [], [], []
+    brow_uv, lash_uv, lid_uv, margin_uv = [], [], [], []
     for side in ("left", "right"):
-        lids, rings = [Lid(m, side, True), Lid(m, side, False)], []
+        lids, rings, fronts = [Lid(m, side, True), Lid(m, side, False)], [], []
         for lid in lids:
             parts.append((*lashes(lid, rng), 3, 0))
             parts.append((*tear_line(lid), 6, 1))
             rings.append(gaussian_filter1d(skin_uv(m)[lid.idx], 2.0, axis=0, mode="nearest"))  # smoothed: the mesh edge zigzags
+            fronts.append(gaussian_filter1d(skin_uv(m)[lid.front], 2.0, axis=0, mode="nearest"))
+            print(side, "upper" if lid.up > 0 else "lower", "margin depth mm:", np.round(lid.depth[::4] / MM, 1))
         parts.append((*caruncle(*lids), 8, 3))
         parts.append((*plica(*lids), 6, 3))
-        middle = np.concatenate(rings).mean(axis=0)
-        for ring in rings:
+        for ring, front in zip(rings, fronts):
             resample = lambda r, n: np.stack([np.interp(np.linspace(0, len(r) - 1, n), np.arange(len(r)), r[:, i]) for i in range(2)], axis=1)
-            lash_uv.append(resample(ring + 0.10 * (ring - middle), 12 * len(ring)))  # lashes root outside the wet edge
+            lash_uv.append(resample(front, 12 * len(ring)))  # lashes root on the front edge of the margin
             lid_uv.append(resample(ring, 64))
+            margin_uv.append(resample(front, 64))
         parts.append((*brows(m, side, rng, normals), 3, 0))
         brow_uv.append(parts[-1][0].root_uv)
 
@@ -259,7 +276,9 @@ if __name__ == "__main__":
            # where hair grows, in skin UV space: the skin texture is darkened there (follicles, lash line)
            "brow_uv": np.concatenate(brow_uv).astype(np.float32), "lash_uv": np.concatenate(lash_uv).astype(np.float32),
            # lid edges as 64-point curves: left upper, left lower, right upper, right lower
-           "lid_uv": np.stack(lid_uv).astype(np.float32)}
+           "lid_uv": np.stack(lid_uv).astype(np.float32),
+           # the front edge of each lid margin, same order: between it and lid_uv lies the wet shelf
+           "margin_uv": np.stack(margin_uv).astype(np.float32)}
     assert np.isfinite(out["verts"]).all()
     for name, coef in np.load(ROOT / "assets" / "controls.npz").items():
         V = m.template + np.tensordot(coef, m.expression_basis, 1)

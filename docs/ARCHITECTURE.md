@@ -46,7 +46,7 @@ render.py --input Left|Right|"Generate Motion"  ->  frames -> MP4, stills, metad
 | `tools/seam_audit.py` | measures colour steps across UV seams; writes `uv_maps/` sheets | B | works |
 | `truegaze/motion.py` | gaze, saccades, vergence, lids, blinks, brows, pupil | A | done, tested |
 | `render.py` | 3 inputs to MP4, caption, draft/final | C | done (draft and final, black-eye frame check) |
-| `tests/`, `Dockerfile` | 14 tests; container builds and runs everything except videos on an M3 (README) | C | done |
+| `tests/`, `Dockerfile` | 16 tests; container builds and runs everything except videos on an M3 (README) | C | done |
 | `tools/overview.sh`, `tools/make_deck.py`, `tools/make_demo.py` | overview images, deck, demo video cut | C | done |
 
 ## Conventions

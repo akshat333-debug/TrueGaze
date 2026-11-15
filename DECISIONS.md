@@ -134,3 +134,12 @@ Tested on stills of sets 01, 03, 07. Amounts tuned by eye against the reference 
 - **Dark-skin sheen (12):** tested: not the down hairs. It is the skin's own reflection, which shows far more on dark colour. Reflection and oil coat are halved on dark sets (`deep` in each set's `info.json`). Weaker, not gone.
 - **Not done:** lid margin shelf (8), lower lid and eyeball pull-back (9), head sway (10), set 07 streaks (11).
 - Every set changed, so all stills and all videos are rendered again.
+
+## D-025 — Second look batch: lid margin, lower lid, eyeball pull-back, head sway, set 07 relief (15 Nov)
+Tested on set 01 stills in seven poses (neutral, down, up, half blink, closed, head tilted), stills of sets 03 and 07, and one draft video of the hero view.
+- **Lid margin (audit task 8):** measured first: GNM's lid is not a knife edge. It has a flat shelf 2 to 2.8 mm deep (0.9 mm at the thinnest part of the lower lid). It only looked like a knife edge because the shelf was painted and lit as ordinary lid skin and the lashes rooted in the middle of it. No new geometry: `tools/make_hair.py` finds the shelf's front edge, roots the lashes there and saves it as `margin_uv`; the skin texture paints the shelf pinker, smooth and damp.
+- **Lower lid (9):** it rose on down-gaze, which is backwards and cut into the iris. It now rides down with the eye (about 1.6 mm at 30 degrees) and up a little on up-gaze. A blink already lifts it to the closed line through the fitted blink key; that was left alone. Amounts are our own; no measured data was looked up.
+- **Eyeball pull-back (9):** the eyeball moves 1 mm straight back while the lids are closed.
+- **Head sway (10):** yaw up to about 1.7 degrees, pitch 1 (part of it breathing at 15 per minute), roll 0.5, as slow sine waves with random phase per seed. The eyes counter-turn so the gaze stays on its target. The whole rig object turns about the neck joint, so hair, lids and eye maths follow without a rig rework. Amounts are our own. The launch-spec API (`wrapper/eyes.py`) keeps a still head: it shows the commanded pose only.
+- **Set 07 (11):** the folds taken from the photo were returned as relief at 1.6 strength and caught the light as shiny streaks; now 0.8. Milder, still visible under the eye in the front view.
+- All sets and all motion changed, so all stills and all videos are rendered again.

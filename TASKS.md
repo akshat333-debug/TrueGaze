@@ -16,10 +16,10 @@ Look tasks come from the 15 Nov council audit (`docs/SELF_AUDIT.md`: estimate 66
 - [x] 5. (D-024) Half-lit pupil with a hard vertical edge in the close view (`01_close`, `07_close`): find the cause, fix. **B**
 - [x] 6. (D-024) Concentric ring pattern in the fine relief lines round the socket: remove. **B**
 - [x] 7. (D-024) Light sets: calm the pink rings under the eye. **B**
-- [ ] 8. Lid margin as a visible wet shelf between lash roots and eye (3 to 5 h, may not work on GNM's mesh). **A**
-- [ ] 9. Lower lid moves with blink and down-gaze; eyeball pulls back about 1 mm in a blink (2 h). **A**
-- [ ] 10. Slow head sway of a degree or two (2 h). **A**
-- [ ] 11. Set 07 forehead streaks at close range (1 h). **B**
+- [x] 8. (D-025) Lid margin as a visible wet shelf between lash roots and eye. **A**
+- [x] 9. (D-025) Lower lid moves with down-gaze; eyeball pulls back about 1 mm in a blink. **A**
+- [x] 10. (D-025) Slow head sway of a degree or two. **A**
+- [x] 11. (D-025) Set 07 streaks: fold relief halved. **B**
 - [x] 12. (D-024) Dark sets: whitish sheen on the lit cheek still reads as a grey patch at small size. Test with down hairs off, then with the coat off, to find the cause (1 to 2 h). **B**
 - [ ] Full re-render after the batch, then `tools/overview.sh`, `tools/make_deck.py`, `tools/make_demo.py`. **C**
 - [ ] Demo video: upload `outputs/demo.mp4` (voice-over optional), put the link on the deck's demo slide. **C**
@@ -38,6 +38,11 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 15 Nov, 18:30 — second look batch D-025 done, full re-render started
+- **Done:** audit tasks 8 to 11 (see D-025). 16 tests pass, `tools/evaluate_motion.py` passes. `assets/hair.npz` rebuilt (lash roots moved, new `margin_uv`).
+- **Running:** `renders/tmp/chain2.sh` (everything, about 8.5 h; log `renders/tmp/chain2.log`). Until it prints `CHAIN_DONE`, `textures/` (only 01, 03, 07 regenerated so far), `outputs/`, `uv_maps/`, `docs/*.jpg`, the deck and the demo show the D-024 look.
+- **Next:** check all videos, commit textures and outputs together.
+- **Gotchas:** `renders/tmp/final/` was emptied before the run. Head sway moves the eye a few millimetres in the hero view; that is intended.
 ### 15 Nov, 16:30 — full re-render with the D-024 look finished and committed
 - **Done:** `renders/tmp/chain2.sh` printed `CHAIN_DONE` at 16:22 (about 8.5 h). All stills, six videos, overviews, launch-spec frames, `.blend`, deck and demo rebuilt. `black_frames` is empty for all six videos; contact sheets of five videos and the three overview images were looked at; 14 tests pass.
 - **Seen in the new renders:** pupil fault gone on all eight sets. Still open: a faint arc of relief lines above the outer corner on light sets in the close view; whitish cheek sheen on dark sets in the front view (weaker); set 07 streaks; hero view still brighter than the reference.
