@@ -38,6 +38,10 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 15 Nov, 16:30 — full re-render with the D-024 look finished and committed
+- **Done:** `renders/tmp/chain2.sh` printed `CHAIN_DONE` at 16:22 (about 8.5 h). All stills, six videos, overviews, launch-spec frames, `.blend`, deck and demo rebuilt. `black_frames` is empty for all six videos; contact sheets of five videos and the three overview images were looked at; 14 tests pass.
+- **Seen in the new renders:** pupil fault gone on all eight sets. Still open: a faint arc of relief lines above the outer corner on light sets in the close view; whitish cheek sheen on dark sets in the front view (weaker); set 07 streaks; hero view still brighter than the reference.
+- **Next:** upload `outputs/demo.mp4` and put the link in the deck; open the deck in PowerPoint; tasks 8 to 11 only if another 8.5 h render is acceptable.
 ### 15 Nov, 08:00 — look batch D-024 done, full re-render started
 - **Done:** audit tasks 1 to 7 and 12 (see D-024). Tested on stills of sets 01, 03, 07 only.
 - **Running:** `renders/tmp/chain2.sh` again (everything, about 11 h; log `renders/tmp/chain2.log`). Until it prints `CHAIN_DONE`, `outputs/`, `uv_maps/`, `docs/*.jpg`, the deck and the demo still show the old look.
