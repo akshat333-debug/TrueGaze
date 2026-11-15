@@ -21,7 +21,7 @@ from pptx.enum.text import MSO_ANCHOR
 from pptx.util import Inches, Pt
 
 ROOT = Path(__file__).resolve().parent.parent
-MEMBERS = ["Akshat Agrawal", "Member 2", "Member 3"]  # fill in before submitting
+MEMBERS = ["Akshat Agrawal (23MIC0079)", "Hemang Dubey (23MIC0069)", "Ishita Solanki (23MID0443)"]
 REPO = "github.com/akshat333-debug/TrueGaze"
 
 WHITE, TEXT, MUTED = RGBColor(0xFF, 0xFF, 0xFF), RGBColor(0xE8, 0xED, 0xF5), RGBColor(0x9A, 0xA8, 0xC0)

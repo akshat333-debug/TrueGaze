@@ -115,3 +115,9 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 - **Motion:** `brow_lower` (fitted, never used before) follows down-gaze and blinks; lower lid rises slightly in a blink. Amounts are our own; no measured data was found.
 - **Rejected from the review:** concave iris (GNM's chamber already measures about 3 mm, like a real eye), head following gaze (data says the head stays still under 20 to 25 degrees), paler fuzz (undoes D-021).
 - All five videos and all stills are re-rendered, because every set changed.
+
+## D-023 — Dark-skin under-eye patch: two causes, both removed (15 Nov)
+- **Cause 1:** D-021 raised roughness by 0.22 round the eyes on dark sets. That made a matt island with a visible border under glossy cheeks. Removed.
+- **Cause 2:** MakeHuman's dark photo skins have grey eye bags painted in. On dark sets only, the low-frequency tone round the eye (between a 12 px and a 300 px blur at 4K) is flattened by 70%; fine detail stays.
+- **Scope:** only sets 03, 06 and 08 change (their colour and roughness files). The other five sets are byte-identical, so the set 01 videos stay valid. Re-rendered: stills of 03, 06, 08, `portability_03`, overviews, the set 03 video.
+- **Left over:** a broad whitish sheen on the lit cheek of the dark sets. At thumbnail size it still reads as a grey patch, so this is half a fix. Suspects, not yet tested: the pale down hairs, the oil coat.

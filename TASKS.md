@@ -8,13 +8,24 @@ Full re-render with the D-021 / D-022 look finished 15 Nov 03:54 and is committe
 All required outputs exist at final quality and are committed: 8 texture sets, Left / Right / Generate Motion videos (front, hero and wire views), 24 stills, portability proofs, `.blend`, launch-spec sequence, deck. Seam audit, motion evaluation and 14 tests pass. Read the newest handoff note below first, then `DECISIONS.md` (latest D-021).
 
 ## Open, in priority order
-- [ ] Optional look tasks 10 to 12 in `docs/IMPROVEMENTS.md` (lid fold, caustics still, head sway); each needs the videos rendered again.
-- [ ] Known look gap: dark sets 03 and 08 still show a faint darker patch under the eyes in the front view.
-- [ ] Deck: put the two other members' names in `MEMBERS` at the top of `tools/make_deck.py`, re-run it, open the .pptx once in PowerPoint (only checked in LibreOffice).
-- [ ] Demo video, 3 minutes or less add its link to the deck's demo slide. Cut script ready: `python3 tools/make_demo.py` after the render writes `outputs/demo.mp4` (about 85 s, silent, captioned; tested 15 Nov with a stand-in for the set 03 clip). Upload and voice-over still to do.
-- [x] Docker: decided 15 Nov to leave as documented in the README (builds; runs everything except videos on the M3).
+Look tasks come from the 15 Nov council audit (`docs/SELF_AUDIT.md`: estimate 66 of 100, photorealism 33 of 60). Batch 1 to 7, test on stills of sets 01, 03, 07, then render all videos once (about 11 h).
+- [ ] 1. Hero view low-key: black background, raking key, weak rim, lower exposure (1 h). **A**
+- [ ] 2. Lashes: upper shorter and uneven, tapered; lower sparse, no bunches or hooked tips (2 to 3 h). **A**
+- [ ] 3. Wet eye white: glossy coat with a visible highlight; more, finer, blurred, less red vessels (2 h). **B**
+- [ ] 4. Iris: cut saturation about a third, break up the cream collarette blocks, soften the limbus (1 to 2 h). **B**
+- [ ] 5. Half-lit pupil with a hard vertical edge in the close view (`01_close`, `07_close`): find the cause, fix. **B**
+- [ ] 6. Concentric ring pattern in the fine relief lines round the socket: remove. **B**
+- [ ] 7. Light sets: calm the pink rings under the eye. **B**
+- [ ] 8. Lid margin as a visible wet shelf between lash roots and eye (3 to 5 h, may not work on GNM's mesh). **A**
+- [ ] 9. Lower lid moves with blink and down-gaze; eyeball pulls back about 1 mm in a blink (2 h). **A**
+- [ ] 10. Slow head sway of a degree or two (2 h). **A**
+- [ ] 11. Set 07 forehead streaks at close range (1 h). **B**
+- [ ] 12. Dark sets: whitish sheen on the lit cheek still reads as a grey patch at small size. Test with down hairs off, then with the coat off, to find the cause (1 to 2 h). **B**
+- [ ] Full re-render after the batch, then `tools/overview.sh`, `tools/make_deck.py`, `tools/make_demo.py`. **C**
+- [ ] Demo video: upload `outputs/demo.mp4` (voice-over optional), put the link on the deck's demo slide. **C**
+- [ ] Open the deck once in PowerPoint (only checked in LibreOffice). **C**
 - [ ] Watch "Flexpressions" (second reference video; not done, no local copy).
-- [ ] **Before making the repo public (not now; Akshat said on 15 Nov to keep it for the time being):** the reference video `Eye Piece - Chris Jones (1080p, h264).mp4` (third-party, committed 13 Nov at Akshat's request while the repo is private) must be removed **from history too**: `git filter-repo --path "Eye Piece - Chris Jones (1080p, h264).mp4" --invert-paths` then force-push, or publish from a fresh repo without it.
+- [ ] **Before making the repo public (not now; Akshat said on 15 Nov to keep it for the time being):** remove the reference video `Eye Piece - Chris Jones (1080p, h264).mp4` from the repo **and from git history**.
 - [ ] 21 Nov: regenerate from a clean clone, make repo public, submit the form (https://forms.gle/86xENrtqhx988hBt8). 22 Nov is buffer only.
 
 ## How to run
@@ -27,6 +38,11 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 15 Nov, 06:15 — dark-skin patch fixed, names in the deck, council audit, new task list
+- **Done:** D-023 (painted grey eye bags and a matt island removed on sets 03, 06, 08; a whitish cheek sheen remains, task 12). Member names and registration numbers in `tools/make_deck.py`. `docs/SELF_AUDIT.md` rewritten as an eight-judge audit against the brief and the reference video; the open list above is built from it.
+- **Running:** `renders/tmp/chain3.sh` (stills of 03, 06, 08, `portability_03`, overviews, set 03 video; log `renders/tmp/chain3.log`).
+- **Next:** tasks 1 to 7 as one batch, then one full re-render.
+- **Gotchas:** only the three dark sets changed; set 01 videos were not touched and are still valid.
 ### 15 Nov, 06:00 — repo clean-up and docs pass
 - **Done:** removed the day-1 spike script and three unused images, `docs/RENDER_PLAN.md` and `docs/DECK_OUTLINE.md` (both overtaken by `reproduce.sh`, `tools/make_deck.py`, `tools/make_demo.py`), one unused import. `reproduce.sh` now makes all three portability proofs that are committed. README has a submission-package table and a repository layout. `docs/ARCHITECTURE.md` parts table, `CLAUDE.md` ownership line and the reference-video note corrected.
 - **Not moved:** no folder was renamed; every script and doc points at the current paths and there is no time to re-verify a full render after a move.

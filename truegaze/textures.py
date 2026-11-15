@@ -191,6 +191,10 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     color += k["lips"][..., None] * (lip - color) * 0.85
     if photo:
         color += cover[..., None] * (picture - color)
+        # the dark photo skins have grey eye bags painted in: flatten that tone, keep the fine detail
+        bag = gaussian_filter(np.clip(k["orbital"] + k["under_eye"], 0, 1), n / 80) * smoothstep(0.45, 0.65, dark)
+        low = lambda s: np.stack([gaussian_filter(color[..., i], n / 4096 * s) for i in range(3)], axis=-1)
+        color += 0.7 * bag[..., None] * (low(300) - low(12))
     wet = np.array([0.72, 0.36, 0.34]) * (0.6 + 0.4 * tone.mean())
     color += k["inside"][..., None] * (wet - color)
     # hair roots: brow skin is shaded by follicles, and the lash line reads as a dark edge on the lid
@@ -299,7 +303,6 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     # that suits light skin reads there as a grey patch: dark sets get none, and a duller under-eye
     deep = smoothstep(0.45, 0.65, dark)
     rough = 0.52 - 0.08 * k["nose"] - 0.14 * k["lips"] - 0.13 * (1 - deep) * k["orbital"] - 0.42 * k["inside"] - 0.30 * water
-    rough = rough + 0.22 * deep * np.clip(k["orbital"] + k["under_eye"], 0, 1) * (1 - k["inside"])
     rough = rough + 0.05 * noise(n, n // 200, rng) - 0.12 * bumps  # pores are duller than the skin between them
     rough = np.clip(rough, 0.08, 1.0)  # wet tissue is glossy, never a perfect mirror
     return color, rough, height, wrinkles
