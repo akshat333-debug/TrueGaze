@@ -122,6 +122,7 @@ def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
         light = bpy.data.objects.new(name, bpy.data.lights.new(name, "AREA"))
         light.data.energy, light.data.size = energy, size
         light.location = eye_mid + Vector(loc)
+        light.visible_glossy = name == "key"  # the fill is 80 cm wide: mirrored in the cornea its edge cut the pupil in half
         light.rotation_euler = (eye_mid - light.location).to_track_quat("-Z", "Y").to_euler()
         scene.collection.objects.link(light)
     materials.set_eye_centres(joints[2], joints[3])
@@ -153,6 +154,7 @@ def hero_view(arm, side="left"):
     outer side and a little below, hard light raking in from behind the cheek, shallow focus."""
     bpy.context.scene.world.node_tree.nodes["Background"].inputs["Color"].default_value = (0, 0, 0, 1)
     sc = bpy.context.scene
+    sc.view_settings.exposure = -0.5  # low-key, like the reference: most of the frame stays in shadow
     sign = 1 if side == "left" else -1
     eye = arm.matrix_world @ arm.pose.bones[f"{side}_eye"].head + Vector((0, -0.012, 0))  # front of the cornea
     angle = math.radians(66)
@@ -161,7 +163,7 @@ def hero_view(arm, side="left"):
     cam.rotation_euler = (eye - cam.location).to_track_quat("-Z", "Y").to_euler()
     cam.data.lens = 270
     cam.data.dof.use_dof, cam.data.dof.focus_distance, cam.data.dof.aperture_fstop = True, (eye - cam.location).length, 45
-    for name, offset, energy, size in (("key", (sign * 0.52, -0.16, 0.20), 4, 0.10), ("fill", (-sign * 0.15, -0.50, -0.05), 0.12, 0.8)):
+    for name, offset, energy, size in (("key", (sign * 0.50, 0.00, 0.22), 6, 0.08), ("fill", (-sign * 0.15, -0.50, -0.05), 0.02, 0.8)):
         light = bpy.data.objects[name]
         light.location = eye + Vector(offset)
         light.rotation_euler = (eye - light.location).to_track_quat("-Z", "Y").to_euler()

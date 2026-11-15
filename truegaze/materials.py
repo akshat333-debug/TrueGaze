@@ -54,10 +54,12 @@ def skin(folder):
     nt.links.new(grain.outputs["Distance"], micro.inputs["Height"])
     nt.links.new(bump.outputs["Normal"], micro.inputs["Normal"])
     nt.links.new(micro.outputs["Normal"], bsdf.inputs["Normal"])
-    bsdf.inputs["Coat Weight"].default_value = 0.16   # thin oil film: a second, sharper highlight
+    # on dark skin the same reflection shows far more against the dark colour and reads as a grey patch: halve it
+    deep = json.loads((folder / "info.json").read_text()).get("deep", 0.0)
+    bsdf.inputs["Coat Weight"].default_value = 0.16 - 0.08 * deep   # thin oil film: a second, sharper highlight
     bsdf.inputs["Coat Roughness"].default_value = 0.24
     nt.links.new(micro.outputs["Normal"], bsdf.inputs["Coat Normal"])
-    bsdf.inputs["Specular IOR Level"].default_value = 0.3
+    bsdf.inputs["Specular IOR Level"].default_value = 0.3 - 0.13 * deep
     bsdf.subsurface_method = "RANDOM_WALK_SKIN"
     bsdf.inputs["Subsurface Weight"].default_value = 0.24
     bsdf.inputs["Subsurface Radius"].default_value = (1.0, 0.35, 0.2)

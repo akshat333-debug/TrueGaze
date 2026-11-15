@@ -191,8 +191,9 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     color += k["lips"][..., None] * (lip - color) * 0.85
     if photo:
         color += cover[..., None] * (picture - color)
-        # the dark photo skins have grey eye bags painted in: flatten that tone, keep the fine detail
-        bag = gaussian_filter(np.clip(k["orbital"] + k["under_eye"], 0, 1), n / 80) * smoothstep(0.45, 0.65, dark)
+        # the photo skins have eye bags painted in (grey on dark skin, pink rings on light): flatten that tone,
+        # fully on dark skin and partly on light, and keep the fine detail
+        bag = gaussian_filter(np.clip(k["orbital"] + k["under_eye"], 0, 1), n / 80) * (0.5 + 0.5 * smoothstep(0.45, 0.65, dark))
         low = lambda s: np.stack([gaussian_filter(color[..., i], n / 4096 * s) for i in range(3)], axis=-1)
         color += 0.7 * bag[..., None] * (low(300) - low(12))
     wet = np.array([0.72, 0.36, 0.34]) * (0.6 + 0.4 * tone.mean())
@@ -236,7 +237,7 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     color += (0.65 * water)[..., None] * (np.array([0.80, 0.47, 0.44]) * (0.55 + 0.45 * tone.mean()) - color)
     # fine lines of the thin skin round the eye: they run round the socket, crossed by fainter radial ones
     lines = np.zeros((n, n), np.float32)
-    rings = gaussian_filter(rng.standard_normal((700, 48)).astype(np.float32), (0.8, 2.5), mode=("nearest", "wrap"))
+    rings = gaussian_filter(rng.standard_normal((700, 160)).astype(np.float32), (0.8, 1.2), mode=("nearest", "wrap"))  # short arcs: long ones read as fingerprint rings
     rays = gaussian_filter(rng.standard_normal((40, 900)).astype(np.float32), (3.0, 0.8), mode=("nearest", "wrap"))
     for upper, lower in roots["lid_uv"].reshape(2, 2, 64, 2):
         centre, half = (upper.mean(axis=0) + lower.mean(axis=0)) / 2, np.ptp(upper[:, 0]) / 2
@@ -245,7 +246,7 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
         yy, xx = np.mgrid[r0:r1, c0:c1]
         du, dv = (xx + 0.5) / n - centre[0], (1 - (yy + 0.5) / n) - centre[1]
         rho, ang = np.hypot(du, dv / 0.75) / half, (np.arctan2(dv, du) / (2 * np.pi)) % 1
-        both = (np.abs(map_coordinates(rings, [np.clip(rho / 3.4, 0, 1) * 699, ang * 47], order=1, mode="nearest"))
+        both = (np.abs(map_coordinates(rings, [np.clip(rho / 3.4, 0, 1) * 699, ang * 159], order=1, mode="nearest"))
                 + 0.5 * np.abs(map_coordinates(rays, [np.clip(rho / 3.4, 0, 1) * 39, ang * 899], order=1, mode="nearest")))
         lines[r0:r1, c0:c1] += both / both.std() * np.exp(-((rho - 1.9) / 0.8) ** 2) * (0.55 + 0.45 * (dv < 0))  # more below the eye
     veins = gaussian_filter(np.asarray(veins, np.float32) / 255, n / 1100) * (1 - k["inside"]) * detail
@@ -346,10 +347,10 @@ def eye(n, radii, outer, inner, seed):
     patch = np.exp(-((r - iris_r - 0.09) / 0.05) ** 2) * np.abs(np.cos(theta)) ** 3 * np.clip(0.5 + 0.6 * noise(n, n // 12, rng), 0, 1)
     sclera += (0.25 * patch)[..., None] * (np.array([0.66, 0.58, 0.38]) - sclera)
     veins = np.zeros((n, n), np.float32)
-    for _ in range(60):
+    for _ in range(110):
         ang, rad = rng.choice([0, np.pi]) + rng.normal(0, 0.75), 0.44  # most vessels come in from the two corners
         stop = iris_r + rng.uniform(0.02, 0.13)
-        walkers = [(ang, rad, rng.choice([1.0, 0.45, 0.45]))]  # a few thick vessels, more fine ones
+        walkers = [(ang, rad, rng.choice([1.0, 0.45, 0.45, 0.25, 0.25]))]  # a few thick vessels, many fine ones
         while walkers:
             ang, rad, w = walkers.pop()
             turn = 0.0
@@ -360,9 +361,12 @@ def eye(n, radii, outer, inner, seed):
                 veins[int((0.5 - rad * np.sin(ang)) * n) % n, int((0.5 + rad * np.cos(ang)) * n) % n] += w
                 if rng.random() < 0.0015 and w > 0.3:
                     walkers.append((ang + rng.choice([-1, 1]) * 0.04, rad, w * 0.6))
-    veins = gaussian_filter(veins, n / 1400)
-    veins = np.clip(veins / np.quantile(veins[veins > 0], 0.97), 0, 1) * smoothstep(iris_r, iris_r + 0.08, r)
-    sclera += (0.50 * veins)[..., None] * (np.array([0.62, 0.16, 0.13]) - sclera)
+    deep = gaussian_filter(veins, n / 450)  # vessels lie under a clear skin: each has a soft pink halo
+    veins = gaussian_filter(veins, n / 1800)
+    fade = smoothstep(iris_r, iris_r + 0.08, r)
+    veins = np.clip(veins / np.quantile(veins[veins > 0], 0.97), 0, 1) * fade
+    sclera += (0.25 * np.clip(deep / np.quantile(deep, 0.99), 0, 1) * fade)[..., None] * (np.array([0.66, 0.40, 0.36]) - sclera)
+    sclera += (0.38 * veins)[..., None] * (np.array([0.58, 0.22, 0.19]) - sclera)
     sclera += (0.5 * smoothstep(0.24, 0.42, r) * np.abs(np.cos(theta)) ** 2)[..., None] * (np.array([0.66, 0.36, 0.33]) - sclera)  # pink corners
 
     # iris: inner colour near the pupil, outer colour beyond the collarette, radial fibres, dark rim
@@ -370,7 +374,8 @@ def eye(n, radii, outer, inner, seed):
     wavy = polar(4, 90, 0, 3.0)
     jag = polar(3, 150, 0, 1.0)                                      # the inner colour ends in a ragged starburst
     mix = smoothstep(0.20, 0.36, t + 0.09 * jag + 0.04 * wavy)
-    inner = 0.6 * np.array(inner) + 0.4 * np.array(outer)  # the centre is a tint of the main colour, not a second colour
+    outer, inner = (np.mean(c) + 0.7 * (np.array(c) - np.mean(c)) for c in (outer, inner))  # real irises are greyer than paint
+    inner = 0.35 * inner + 0.65 * outer  # the centre is a tint of the main colour, not a second colour
     iris = inner + mix[..., None] * (np.array(outer) - inner)
     ropes = polar(30, 220, 6, 1.8)                                   # about sixty thick cords, not hundreds of hairlines
     fibres = 0.8 * ropes + 0.2 * polar(90, 1500, 14, 0.9)
@@ -380,12 +385,12 @@ def eye(n, radii, outer, inner, seed):
     collarette = np.exp(-((t - ring) / 0.035) ** 2)
     furrows = sum(np.exp(-((t - c - 0.02 * wavy) / 0.018) ** 2) for c in (0.62, 0.76, 0.88))  # contraction furrows
     ruff = 1 - 0.6 * (1 - smoothstep(0.0, 0.05, t))                  # dark pigment frill at the pupil edge
-    shade = (1 + 0.42 * fibres) * (1 - 0.38 * crypts) * (1 + 0.22 * collarette) * (1 - 0.05 * furrows) * ruff * (1 - 0.82 * smoothstep(0.74, 1.0, t))
+    shade = (1 + 0.42 * fibres) * (1 - 0.38 * crypts) * (1 + 0.12 * collarette) * (1 - 0.05 * furrows) * ruff * (1 - 0.62 * smoothstep(0.70, 1.0, t))
     iris = iris * np.clip(shade, 0.05, 2.2)[..., None]
     spots = smoothstep(2.3, 2.8, polar(44, 120, 1.2, 1.2)) * smoothstep(0.12, 0.3, t) * (1 - smoothstep(0.75, 0.9, t))  # a few brown freckles
     iris += (0.6 * spots)[..., None] * (np.array([0.22, 0.11, 0.04]) - iris)
 
-    edge = 0.030  # soft limbus: the iris edge is never a hard line
+    edge = 0.042  # soft limbus: the iris edge is never a hard line
     sclera += (0.4 * np.exp(-((r - iris_r - 0.015) / 0.03) ** 2))[..., None] * (np.array([0.50, 0.54, 0.60]) - sclera)  # blue-grey ring where the white thins
     out = sclera + (1 - smoothstep(iris_r - edge, iris_r + edge, r))[..., None] * (iris - sclera)
     return out * smoothstep(pupil_r * 0.96, pupil_r * 1.04, r)[..., None]
@@ -403,8 +408,9 @@ def make_set(name, size=4096, eye_size=2048, out=ROOT / "textures"):
     save(wrinkles, folder / "wrinkle.1001.jpg")
     # facial down is pale on light skin; on dark skin pale down shows as light specks, so it darkens with the skin
     dark = 1 - float(np.median(color[::16, ::16].reshape(-1, 3), axis=0).mean())
-    fuzz = [round(c * (1 - 0.7 * float(smoothstep(0.45, 0.65, dark))), 3) for c in FUZZ]
-    (folder / "info.json").write_text(json.dumps({"hair": hair, "fuzz": fuzz, "skin_photo": f"MakeHuman {photo} (CC0)"}))  # read by materials.py
+    deep = round(float(smoothstep(0.45, 0.65, dark)), 3)
+    fuzz = [round(c * (1 - 0.7 * deep), 3) for c in FUZZ]
+    (folder / "info.json").write_text(json.dumps({"hair": hair, "fuzz": fuzz, "deep": deep, "skin_photo": f"MakeHuman {photo} (CC0)"}))  # read by materials.py
     radii = eye_radii(m)
     save(eye(eye_size, radii, outer, inner, seed * 100 + 1), folder / "color.1002.jpg")  # left
     save(eye(eye_size, radii, outer, inner, seed * 100 + 2), folder / "color.1004.jpg")  # right

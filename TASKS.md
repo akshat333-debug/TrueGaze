@@ -9,18 +9,18 @@ All required outputs exist at final quality and are committed: 8 texture sets, L
 
 ## Open, in priority order
 Look tasks come from the 15 Nov council audit (`docs/SELF_AUDIT.md`: estimate 66 of 100, photorealism 33 of 60). Batch 1 to 7, test on stills of sets 01, 03, 07, then render all videos once (about 11 h).
-- [ ] 1. Hero view low-key: black background, raking key, weak rim, lower exposure (1 h). **A**
-- [ ] 2. Lashes: upper shorter and uneven, tapered; lower sparse, no bunches or hooked tips (2 to 3 h). **A**
-- [ ] 3. Wet eye white: glossy coat with a visible highlight; more, finer, blurred, less red vessels (2 h). **B**
-- [ ] 4. Iris: cut saturation about a third, break up the cream collarette blocks, soften the limbus (1 to 2 h). **B**
-- [ ] 5. Half-lit pupil with a hard vertical edge in the close view (`01_close`, `07_close`): find the cause, fix. **B**
-- [ ] 6. Concentric ring pattern in the fine relief lines round the socket: remove. **B**
-- [ ] 7. Light sets: calm the pink rings under the eye. **B**
+- [x] 1. (D-024) Hero view low-key: black background, raking key, weak rim, lower exposure (1 h). **A**
+- [x] 2. (D-024) Lashes: upper shorter and uneven, tapered; lower sparse, no bunches or hooked tips (2 to 3 h). **A**
+- [x] 3. (D-024) Wet eye white: glossy coat with a visible highlight; more, finer, blurred, less red vessels (2 h). **B**
+- [x] 4. (D-024) Iris: cut saturation about a third, break up the cream collarette blocks, soften the limbus (1 to 2 h). **B**
+- [x] 5. (D-024) Half-lit pupil with a hard vertical edge in the close view (`01_close`, `07_close`): find the cause, fix. **B**
+- [x] 6. (D-024) Concentric ring pattern in the fine relief lines round the socket: remove. **B**
+- [x] 7. (D-024) Light sets: calm the pink rings under the eye. **B**
 - [ ] 8. Lid margin as a visible wet shelf between lash roots and eye (3 to 5 h, may not work on GNM's mesh). **A**
 - [ ] 9. Lower lid moves with blink and down-gaze; eyeball pulls back about 1 mm in a blink (2 h). **A**
 - [ ] 10. Slow head sway of a degree or two (2 h). **A**
 - [ ] 11. Set 07 forehead streaks at close range (1 h). **B**
-- [ ] 12. Dark sets: whitish sheen on the lit cheek still reads as a grey patch at small size. Test with down hairs off, then with the coat off, to find the cause (1 to 2 h). **B**
+- [x] 12. (D-024) Dark sets: whitish sheen on the lit cheek still reads as a grey patch at small size. Test with down hairs off, then with the coat off, to find the cause (1 to 2 h). **B**
 - [ ] Full re-render after the batch, then `tools/overview.sh`, `tools/make_deck.py`, `tools/make_demo.py`. **C**
 - [ ] Demo video: upload `outputs/demo.mp4` (voice-over optional), put the link on the deck's demo slide. **C**
 - [ ] Open the deck once in PowerPoint (only checked in LibreOffice). **C**
@@ -38,6 +38,11 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 15 Nov, 08:00 — look batch D-024 done, full re-render started
+- **Done:** audit tasks 1 to 7 and 12 (see D-024). Tested on stills of sets 01, 03, 07 only.
+- **Running:** `renders/tmp/chain2.sh` again (everything, about 11 h; log `renders/tmp/chain2.log`). Until it prints `CHAIN_DONE`, `outputs/`, `uv_maps/`, `docs/*.jpg`, the deck and the demo still show the old look.
+- **Next:** check all videos, commit outputs, rebuild deck and demo. Then tasks 8 to 11 only if time allows another render.
+- **Gotchas:** `renders/tmp/final/` was emptied before the run: old frames there would have been reused. Keep the Mac awake with the lid open.
 ### 15 Nov, 06:15 — dark-skin patch fixed, names in the deck, council audit, new task list
 - **Done:** D-023 (painted grey eye bags and a matt island removed on sets 03, 06, 08; a whitish cheek sheen remains, task 12). Member names and registration numbers in `tools/make_deck.py`. `docs/SELF_AUDIT.md` rewritten as an eight-judge audit against the brief and the reference video; the open list above is built from it.
 - **Running:** `renders/tmp/chain3.sh` (stills of 03, 06, 08, `portability_03`, overviews, set 03 video; log `renders/tmp/chain3.log`).

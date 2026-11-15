@@ -71,16 +71,17 @@ class Lid:
 def lashes(lid, rng):
     """Returns a function V -> centres (n, K, 3), and radii (n, K)."""
     upper = lid.up > 0
-    n = 190 if upper else 85
-    u = np.sort(rng.uniform(0.10, 0.98, n) if upper else rng.uniform(0.22, 0.96, n))
+    n = 190 if upper else 80
+    lo, hi = (0.10, 0.98) if upper else (0.22, 0.96)
+    u = lo + (hi - lo) * (np.arange(n) + rng.uniform(0, 1, n)) / n  # one per slot: pure chance leaves bald gaps
     mid = np.sin(np.pi * u ** 0.85)                                  # longest in the middle of the lid
-    length = (9.5 if upper else 6.5) * MM * (0.5 + 0.5 * mid) * rng.uniform(0.8, 1.15, n)
+    length = (8.0 if upper else 5.0) * MM * (0.5 + 0.5 * mid) * rng.uniform(0.55, 1.15, n)  # uneven: lashes are at every stage of growth
     out = rng.uniform(0.9, 1.6, n) * MM                              # follicles sit on the front edge of the lid,
     row = rng.uniform(0.0, 0.6, n) * MM                              # across the lid's thickness, in a few rows
-    clump = np.repeat(rng.normal(0, 9, n // 3 + 1), 3)[:n]          # neighbours lean together
-    lean = np.radians(-25 + 65 * u + clump + rng.normal(0, 5 if upper else 12, n))   # fan out toward the outer corner
+    clump = np.repeat(rng.normal(0, 4, n // 3 + 1), 3)[:n]  # neighbours lean together, a little: strong bunches look like combs
+    lean = np.radians(-25 + 65 * u + clump + rng.normal(0, 5 if upper else 7, n))   # fan out toward the outer corner
     start = np.radians(rng.normal(-20 if upper else -5, 6, n))      # leave the lid pointing forward
-    end = np.radians(rng.normal(45 if upper else 30, 9, n))         # then curl away from the opening
+    end = np.radians(rng.normal(35 if upper else 18, 9 if upper else 5, n))         # then curl away from the opening
     s = np.linspace(0, 1, K_LASH - 1)
     phi = start[:, None] + (end - start)[:, None] * s
 

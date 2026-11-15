@@ -121,3 +121,16 @@ Format: ID · date · decision · why · alternatives rejected. Never edit an ol
 - **Cause 2:** MakeHuman's dark photo skins have grey eye bags painted in. On dark sets only, the low-frequency tone round the eye (between a 12 px and a 300 px blur at 4K) is flattened by 70%; fine detail stays.
 - **Scope:** only sets 03, 06 and 08 change (their colour and roughness files). The other five sets are byte-identical, so the set 01 videos stay valid. Re-rendered: stills of 03, 06, 08, `portability_03`, overviews, the set 03 video.
 - **Left over:** a broad whitish sheen on the lit cheek of the dark sets. At thumbnail size it still reads as a grey patch, so this is half a fix. Suspects, not yet tested: the pale down hairs, the oil coat.
+
+## D-024 — Look batch from the council audit (15 Nov)
+Tested on stills of sets 01, 03, 07. Amounts tuned by eye against the reference frames.
+- **Half-lit pupil (audit task 5):** the 80 cm fill light was mirrored in the cornea and its edge cut the pupil in half. The fill no longer shows in reflections.
+- **Hero view (1):** key light moved level with the eye and further to the side (it raked the whole face before), fill cut to almost nothing, exposure down half a stop. There is now a real shadow side. Still brighter than the reference: skin fills our frame, theirs is mostly black.
+- **Lashes (2):** upper 9.5 to 8 mm, lower 6.5 to 5 mm, lengths spread wider, one lash per slot along the lid instead of pure chance (no bald gaps), bunching halved, lower lashes straighter. 190 upper and 80 lower per eye.
+- **Eye white (3):** 110 vessels instead of 60 with more fine ones, thinner, less red, each with a soft pink halo as if under a clear skin. No change to wetness: the shell is already clear glass; the dry look came from the highlight being hidden under the lid in these views.
+- **Iris (4):** colours 30% greyer, centre tint closer to the main colour, collarette brightening halved, limbal ring weaker and wider.
+- **Fine lines (6):** arcs round the socket are short now; long ones read as fingerprint rings.
+- **Under-eye colour (7):** the eye-bag flattening of D-023 applies to light sets at half strength; the pink rings are gone.
+- **Dark-skin sheen (12):** tested: not the down hairs. It is the skin's own reflection, which shows far more on dark colour. Reflection and oil coat are halved on dark sets (`deep` in each set's `info.json`). Weaker, not gone.
+- **Not done:** lid margin shelf (8), lower lid and eyeball pull-back (9), head sway (10), set 07 streaks (11).
+- Every set changed, so all stills and all videos are rendered again.
