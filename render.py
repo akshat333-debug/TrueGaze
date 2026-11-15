@@ -31,8 +31,10 @@ SIDES = ("left", "right")
 def black_frames(source):
     """Frame numbers (from 1) whose share of near-black pixels jumps above the clip's usual level.
     Guards against the 13 Nov fault, where both eyeballs rendered solid black part-way through a long run.
-    `source` is anything ffmpeg reads: a frame pattern or a video. Blinks only lower the share, so they pass."""
-    log = subprocess.run(["ffmpeg", "-v", "info", "-i", str(source), "-vf", "blackframe=amount=0:threshold=32", "-f", "null", "-"],
+    `source` is anything ffmpeg reads: a frame pattern or a video. Blinks only lower the share, so they pass.
+    The left fifth is left out: in the hero view it is black background, and head sway changes how much shows.
+    shortcut: assumes the hero camera is on the default side; a hero view from the other side needs the right fifth cut."""
+    log = subprocess.run(["ffmpeg", "-v", "info", "-i", str(source), "-vf", "crop=iw*0.8:ih:iw*0.2:0,blackframe=amount=0:threshold=32", "-f", "null", "-"],
                          capture_output=True, text=True, check=True).stderr
     share = [int(m) for m in re.findall(r"pblack:(\d+)", log)]  # percent of each frame that is near-black
     usual = sorted(share)[len(share) // 2]
