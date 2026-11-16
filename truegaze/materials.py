@@ -121,9 +121,11 @@ def eye(folder, tile):
     centre.name = "eye_centre"  # set by set_eye_centres
     link(vec("SUBTRACT", here.outputs["Object"], centre.outputs[0]), parts.inputs[0])
     x, z = parts.outputs["X"], parts.outputs["Z"]
-    shade = num("SUBTRACT", 1.0, num("MULTIPLY", ramp(z, 0.0000, 0.0045), 0.50))                                   # under the upper lid
+    shade = num("SUBTRACT", 1.0, num("MULTIPLY", ramp(z, -0.0020, 0.0045), 0.80))                                   # under the upper lid
     shade = num("MULTIPLY", shade, num("SUBTRACT", 1.0, num("MULTIPLY", ramp(num("MULTIPLY", z, -1.0), 0.0035, 0.0065), 0.20)))  # along the lower lid
-    shade = num("MULTIPLY", shade, num("SUBTRACT", 1.0, num("MULTIPLY", ramp(num("ABSOLUTE", num("SUBTRACT", x, 0.0), 0.0), 0.0075, 0.0120), 0.35)))  # both corners
+    shade = num("MULTIPLY", shade, num("SUBTRACT", 1.0, num("MULTIPLY", ramp(num("ABSOLUTE", num("SUBTRACT", x, 0.0), 0.0), 0.0075, 0.0120), 0.50)))  # both corners
+    # against dark skin the same eye white looks lit from inside: it is dimmer there
+    shade = num("MULTIPLY", shade, 1.0 - 0.35 * json.loads((folder / "info.json").read_text()).get("deep", 0.0))
     link(num("MULTIPLY", num("ADD", 1.0, num("MULTIPLY", crescent, 1.9)), shade), glow.inputs["Scale"])
     link(glow.outputs["Vector"], bsdf.inputs["Base Color"])
     bsdf.inputs["Specular IOR Level"].default_value = 0.0

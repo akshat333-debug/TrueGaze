@@ -11,6 +11,7 @@ Options: --input Left|Right|"Generate Motion", --seed N, --frame screen|subject 
 --style textured|clay|wire (clay and wire are making-of looks: grey shape, and the mesh drawn on top)
 """
 import argparse
+import hashlib
 import re
 import shutil
 import subprocess
@@ -123,7 +124,11 @@ def render(a):
     out.parent.mkdir(parents=True, exist_ok=True)
     if a.quality == "final":
         # hours of rendering: write single frames and skip the ones already there, so a stopped run resumes
-        frames = ROOT / "renders" / "tmp" / "final" / f"{out.stem}_{a.texture}_{a.seed}_{a.frame}_{a.style}"
+        # the folder name carries a fingerprint of everything that decides the picture, so frames from an
+        # older look or motion are never picked up as "already there"
+        look = hashlib.sha1(b"".join(f.read_bytes() for f in sorted([Path(__file__), ROOT / "assets" / "hair.npz", ROOT / "assets" / "controls.npz",
+                            ROOT / "assets" / "bulge.npz", *(ROOT / "truegaze").glob("*.py"), *(ROOT / "textures" / a.texture).iterdir()]))).hexdigest()[:8]
+        frames = ROOT / "renders" / "tmp" / "final" / f"{out.stem}_{a.texture}_{a.seed}_{a.frame}_{a.style}_{look}"
         sc.render.image_settings.file_format = "PNG"
         sc.render.use_overwrite = False
         sc.render.filepath = str(frames) + "/"

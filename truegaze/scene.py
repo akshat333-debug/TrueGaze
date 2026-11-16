@@ -2,6 +2,7 @@
 
 Blender frame: character faces -Y, up is +Z, the character's left is +X (screen right).
 """
+import json
 import math
 from pathlib import Path
 
@@ -116,11 +117,13 @@ def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
     scene.collection.objects.link(cam)
     scene.camera = cam
     scene["eye_mid"] = eye_mid
+    scene["deep"] = json.loads((ROOT / "textures" / texture_set / "info.json").read_text()).get("deep", 0.0)  # how dark the skin is, 0..1
 
     # dark studio: one softbox key from the side and above (its reflection is the eye highlight), weak fill
     for name, loc, energy, size in [("key", (0.32, -0.38, 0.30), 6, 0.30), ("fill", (-0.45, -0.40, 0.0), 1.2, 0.8)]:
         light = bpy.data.objects.new(name, bpy.data.lights.new(name, "AREA"))
         light.data.energy, light.data.size = energy, size
+        light.data.shape = "DISK"  # a square key mirrors in the cornea as a hard-cornered chip
         light.location = eye_mid + Vector(loc)
         light.visible_glossy = name == "key"  # the fill is 80 cm wide: mirrored in the cornea its edge cut the pupil in half
         light.rotation_euler = (eye_mid - light.location).to_track_quat("-Z", "Y").to_euler()
@@ -151,10 +154,12 @@ def build(texture_set="01", controls_path=ROOT / "assets" / "controls.npz"):
 
 def hero_view(arm, side="left"):
     """Close shot of one eye in the style of the reference video: camera 55 degrees round to the eye's
-    outer side and a little below, hard light raking in from behind the cheek, shallow focus."""
+    outer side and a little below, hard light from high on that side so the brow shades the
+    socket and a third or more of the frame falls into shadow, shallow focus."""
     bpy.context.scene.world.node_tree.nodes["Background"].inputs["Color"].default_value = (0, 0, 0, 1)
     sc = bpy.context.scene
-    sc.view_settings.exposure = -0.5  # low-key, like the reference: most of the frame stays in shadow
+    # low-key, like the reference; dark skin gets a stop more, or the shadowed eye is lost altogether
+    sc.view_settings.exposure = -0.5 + sc.get("deep", 0.0)
     sign = 1 if side == "left" else -1
     eye = arm.matrix_world @ arm.pose.bones[f"{side}_eye"].head + Vector((0, -0.012, 0))  # front of the cornea
     angle = math.radians(66)
@@ -163,7 +168,7 @@ def hero_view(arm, side="left"):
     cam.rotation_euler = (eye - cam.location).to_track_quat("-Z", "Y").to_euler()
     cam.data.lens = 270
     cam.data.dof.use_dof, cam.data.dof.focus_distance, cam.data.dof.aperture_fstop = True, (eye - cam.location).length, 45
-    for name, offset, energy, size in (("key", (sign * 0.50, 0.00, 0.22), 6, 0.08), ("fill", (-sign * 0.15, -0.50, -0.05), 0.02, 0.8)):
+    for name, offset, energy, size in (("key", (sign * 0.30, 0.02, 0.42), 7, 0.08), ("fill", (-sign * 0.15, -0.50, -0.05), 0.25, 0.8)):
         light = bpy.data.objects[name]
         light.location = eye + Vector(offset)
         light.rotation_euler = (eye - light.location).to_track_quat("-Z", "Y").to_euler()
@@ -171,7 +176,7 @@ def hero_view(arm, side="left"):
     materials.set_key_direction((bpy.data.objects["key"].location - eye).normalized())
     # a dim softbox beside the camera: it adds little light, its reflection is the window highlight on the cornea
     catch = bpy.data.objects.new("catch", bpy.data.lights.new("catch", "AREA"))
-    catch.data.energy, catch.data.size = 0.65, 0.35
+    catch.data.energy, catch.data.size = 1.2, 0.35  # also the only light on the eyeball itself, which the brow shades from the key
     catch.data.shape, catch.data.size_y = "RECTANGLE", 0.45
     # window panes: two by three, with dark bars between, so the cornea reflects a window and not a blank card
     catch.data.use_nodes = True
@@ -194,9 +199,9 @@ def hero_view(arm, side="left"):
             nt.links.new(glass.outputs[0], both.inputs[0])
             nt.links.new(pane.outputs[0], both.inputs[1])
             nt.links.new(both.outputs[0], nt.nodes["Emission"].inputs["Strength"])
-    # placed where the cornea mirrors it to the camera: just above the pupil of an eye turned part-way to the camera
+    # placed where the cornea mirrors it to the camera: on the upper iris, clear of the pupil, of an eye turned part-way to the camera
     view = (cam.location - eye).normalized()
-    normal = (Vector((sign * 0.37, -0.93, 0.0)) + 0.6 * view + Vector((0, 0, 0.30))).normalized()
+    normal = (Vector((sign * 0.37, -0.93, 0.0)) + 0.6 * view + Vector((0, 0, 0.55))).normalized()
     catch.location = eye + (2 * normal.dot(view) * normal - view) * 0.45
     catch.rotation_euler = (eye - catch.location).to_track_quat("-Z", "Y").to_euler()
     sc.collection.objects.link(catch)

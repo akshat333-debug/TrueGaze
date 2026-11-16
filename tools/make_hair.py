@@ -22,7 +22,7 @@ from tools.fit_controls import lid_ring  # noqa: E402
 from truegaze.gnm import GNM  # noqa: E402
 
 MM = 0.001
-K_LASH, K_BROW, K_TEAR = 10, 5, 48
+K_LASH, K_BROW, K_TEAR = 16, 5, 48
 
 
 def unit(v):
@@ -88,17 +88,18 @@ def lashes(lid, rng):
     upper = lid.up > 0
     n = 190 if upper else 80
     lo, hi = (0.10, 0.98) if upper else (0.22, 0.96)
-    u = lo + (hi - lo) * (np.arange(n) + rng.uniform(0, 1, n)) / n  # one per slot: pure chance leaves bald gaps
+    # one per slot (pure chance leaves bald gaps); lower lashes stray further from their slot, or they read as a comb
+    u = np.sort(np.clip(lo + (hi - lo) * (np.arange(n) + rng.uniform(0, 1, n) + (0 if upper else rng.normal(0, 1.2, n))) / n, lo, hi))
     mid = np.sin(np.pi * u ** 0.85)                                  # longest in the middle of the lid
     length = (8.0 if upper else 5.0) * MM * (0.5 + 0.5 * mid) * rng.uniform(0.55, 1.15, n)  # uneven: lashes are at every stage of growth
     out = np.maximum(np.interp(u, lid.s, lid.depth) * rng.uniform(0.75, 1.0, n), 0.9 * MM)  # follicles sit on the front edge of the lid margin,
     row = rng.uniform(0.0, 0.6, n) * MM                              # across the lid's thickness, in a few rows
     clump = np.repeat(rng.normal(0, 4, n // 3 + 1), 3)[:n]  # neighbours lean together, a little: strong bunches look like combs
     lean = np.radians(-25 + 65 * u + clump + rng.normal(0, 5 if upper else 7, n))   # fan out toward the outer corner
-    start = np.radians(rng.normal(-20 if upper else -5, 6, n))      # leave the lid pointing forward
-    end = np.radians(rng.normal(35 if upper else 18, 9 if upper else 5, n))         # then curl away from the opening
+    start = np.radians(rng.normal(-14 if upper else -5, 5, n))       # leave the lid pointing forward
+    end = np.radians(rng.normal(27 if upper else 18, 9 if upper else 5, n))         # then curl away from the opening
     s = np.linspace(0, 1, K_LASH - 1)
-    phi = start[:, None] + (end - start)[:, None] * s
+    phi = start[:, None] + (end - start)[:, None] * s ** 0.6        # most of the bend is near the root; the tip runs straight, no hook
 
     def centres(V):
         p, t, r, away = lid.frame(V, u)
@@ -107,7 +108,8 @@ def lashes(lid, rng):
         steps = unit(d) * (length / (K_LASH - 1))[:, None, None]
         return np.concatenate([root[:, None], root[:, None] + np.cumsum(steps, axis=1)], axis=1)
 
-    radii = (0.065 if upper else 0.05) * MM * np.linspace(1, 0.15, K_LASH) * rng.uniform(0.8, 1.2, (n, 1))
+    # a lash keeps its thickness for two thirds of its length and only then tapers to a point
+    radii = (0.06 if upper else 0.048) * MM * (1 - 0.9 * np.linspace(0, 1, K_LASH) ** 2.5) * rng.uniform(0.8, 1.2, (n, 1))
     return centres, radii
 
 

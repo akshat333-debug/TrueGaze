@@ -20,13 +20,14 @@ Look tasks come from the 15 Nov council audit (`docs/SELF_AUDIT.md`: estimate 66
 - [x] 11. (D-025) Set 07 streaks: fold relief halved. **B**
 - [x] 12. (D-024) Dark sets: whitish sheen on the lit cheek still reads as a grey patch at small size. Test with down hairs off, then with the coat off, to find the cause (1 to 2 h). **B**
 - [x] Full re-render after the batch, then `tools/overview.sh`, `tools/make_deck.py`, `tools/make_demo.py` (16 Nov, `528e8ac`). **C**
-Third look batch, from the 16 Nov audit (`docs/SELF_AUDIT.md`: estimate 71.5 of 100, photorealism 38 of 60). Not started; needs Akshat's go-ahead because it costs another full render (about 8.5 h).
-- [ ] 13. Lid shadow on the eyeball under the upper lid (1 to 2 h). **B**
-- [ ] 14. Eye white darker, shaded toward the corners; much darker on dark sets (1 h). **B**
-- [ ] 15. Pupil soft edge and depth; smooth highlight, off the pupil in the hero view (1 to 2 h). **B**
-- [ ] 16. Lashes: taper, smooth curve, crossing pairs; lower lashes unevenly spaced (2 to 3 h). **A**
-- [ ] 17. Pale patch at the crown on all three portability renders: find the cause, fix (stills only). **B**
-- [ ] 18. Hero view: at least a third of the frame in shadow or black (1 h). **A**
+Third look batch, from the 16 Nov audit (`docs/SELF_AUDIT.md`: estimate 71.5 of 100, photorealism 38 of 60). Akshat said go on 16 Nov. Code done (D-026); full re-render running.
+- [x] 13. (D-026) Lid shadow on the eyeball under the upper lid. **B**
+- [x] 14. (D-026) Eye white darker, shaded toward the corners; darker on dark sets. **B**
+- [x] 15. (D-026) Pupil soft edge; round highlight, off the pupil in the hero view. Pupil depth not done. **B**
+- [x] 16. (D-026) Lashes: taper, smooth curve; lower lashes unevenly spaced. **A**
+- [x] 17. (D-026) Pale patch at the crown: seam fill now takes the photo's local tone. **B**
+- [x] 18. (D-026) Hero view: brow shades the socket, a third or more of the frame in shadow. **A**
+- [ ] Full re-render with the D-026 look (`renders/tmp/chain2.sh`, about 9 h), then check frames, commit outputs, run the audit again. **C** in progress
 - [ ] 19. Later, if time: set 03 ashy cheek, iris blocks on 05 / 07 / 08, skin pores, set 04 arc, set 07 streaks.
 - [ ] Watch `outputs/videos/Generate_Motion_hero.mp4` at speed and decide whether the head sway reads as camera drift (if so: halve it in `truegaze/motion.py`, hero re-render about 2.3 h). **Akshat**
 - [ ] Demo video: upload `outputs/demo.mp4` (voice-over optional), put the link on the deck's demo slide. **C**
@@ -45,6 +46,11 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 16 Nov — third look batch D-026 done, full re-render started
+- **Done:** tasks 13 to 18 (see D-026). Files: `truegaze/materials.py`, `truegaze/textures.py`, `truegaze/scene.py`, `tools/make_hair.py`, `assets/hair.npz`, `render.py`. 16 tests and the seam audit pass.
+- **Next:** when `renders/tmp/chain2.sh` prints `CHAIN_DONE`: look at stills of all eight sets, contact sheets of the videos, commit outputs, run the audit again.
+- **Gotchas:** the frame cache no longer needs emptying after a look change (folder names carry a fingerprint), but old folders in `renders/tmp/final/` pile up: delete by hand. The hero view is darker now; a black-frame guard failure there is the first thing to check. Not checked on stills before the render: sets 02, 04, 05, 06, 08 with the new look.
+- **How to run:** `sh renders/tmp/chain2.sh > renders/tmp/chain2.log 2>&1`
 ### 16 Nov, 09:15 — audit run again on the new renders
 - **Done:** `docs/SELF_AUDIT.md` rewritten from the D-025 renders. Estimate 71.5 of 100 (was 66); photorealism 38 of 60 (was 33). No code changed.
 - **Found:** no lid shadow on the eyeball, flat bright eye white, flat hard-edged pupil, wiry lashes; a pale patch at the crown on all three portability renders (old fault, missed before); set 03 ashy cheek still visible.

@@ -161,6 +161,36 @@ def photo_skin(m, n, name):
     return picture, zoom(cover, n / small, order=1)
 
 
+def local_tone(m, n, picture, cover, fallback):
+    """The photo's colour averaged over a few centimetres of the head's surface, as an (n, n, 3) picture.
+    Worked out per vertex and spread along the mesh, so it is the same on both sides of every seam: the
+    generated skin that fills the seams then matches the photo beside it (one tone for the whole head
+    left a pale strip from the crown down the back of the skull)."""
+    from scipy.sparse import coo_matrix
+    sel = m.quad_tiles() == 1001
+    quads, uv = m.quads[sel], m.quad_uvs[sel].reshape(-1, 2)
+    vertex, count = quads.ravel(), len(m.template)
+    step = max(1, n // 512)
+    small, weight = picture[::step, ::step], cover[::step, ::step]
+    rows = np.clip(((1 - uv[:, 1]) * small.shape[0]).astype(int), 0, small.shape[0] - 1)
+    cols = np.clip((uv[:, 0] * small.shape[1]).astype(int), 0, small.shape[1] - 1)
+    w = weight[rows, cols].astype(np.float64)
+    total = np.zeros((count, 4))
+    np.add.at(total, vertex, np.concatenate([small[rows, cols] * w[:, None], w[:, None]], axis=1))
+    a, b = quads.ravel(), np.roll(quads, -1, axis=1).ravel()
+    near = coo_matrix((np.ones(2 * len(a)), (np.r_[a, b], np.r_[b, a])), shape=(count, count)).tocsr()
+    degree = np.maximum(near.sum(axis=1).A1, 1)[:, None]
+    for _ in range(60):
+        total = 0.5 * total + 0.5 * (near @ total) / degree
+    value = np.where(total[:, 3:] > 1e-12, total[:, :3] / np.maximum(total[:, 3:], 1e-12), fallback)
+    points, first = np.unique(uv, axis=0, return_index=True)
+    size = min(n, 512)
+    c = (np.arange(size) + 0.5) / size
+    grid = LinearNDInterpolator(points, value[vertex[first]], fill_value=0)(*np.meshgrid(c, 1 - c))
+    grid = np.where(grid.sum(axis=2, keepdims=True) > 0, grid, fallback)  # outside the UV islands
+    return np.stack([zoom(grid[..., i], n / size, order=1) for i in range(3)], axis=-1).astype(np.float32)
+
+
 def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     """Returns colour (n, n, 3), roughness (n, n), height (n, n) and expression wrinkles (n, n, 3), all 0..1."""
     rng = np.random.default_rng(seed)
@@ -168,8 +198,9 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     k, detail = skin_masks(m, n, seam), 1 - seam
     if photo:  # the generated skin below takes the photo's own tone, so the two blend without an edge
         picture, cover = photo_skin(m, n, photo)
-        cover = cover * (1 - seam)  # on a seam only generated colour is the same on both sides
         tone = np.median(picture[(cover > 0.95) & (k["cheeks"] > 0.5)], axis=0)
+        base = local_tone(m, n, picture, cover, tone)
+        cover = cover * (1 - seam)  # on a seam only generated colour is the same on both sides
         if photo.startswith("old"):  # its wrinkles are painted lines: flat colour renders as orange streaks,
             # so half of each line leaves the colour here and comes back as relief below
             band = lambda x: gaussian_filter(x, n / 4096 * 3) - gaussian_filter(x, n / 4096 * 24)
@@ -178,9 +209,11 @@ def skin(m, n, tone, seed, hair=(0.03, 0.02, 0.012), photo=None):
     else:
         cover = np.zeros((n, n), np.float32)
     tone = np.array(tone, np.float32)
+    if not photo:
+        base = tone
     dark = 1 - tone.mean()  # darker skin shows less redness
 
-    color = np.ones((n, n, 3), np.float32) * tone
+    color = np.ones((n, n, 3), np.float32) * base
     color *= (1 + detail * (0.025 * noise(n, n // 24, rng) + 0.015 * noise(n, n // 160, rng)))[..., None]
     blotch = noise(n, n // 60, rng)  # uneven blood flow
     red = 0.025 * blotch * detail + 0.10 * k["cheeks"] + 0.08 * k["nose"] + 0.06 * k["orbital"]
@@ -347,9 +380,9 @@ def eye(n, radii, outer, inner, seed):
 
     # sclera: off-white, pinker toward the corners, thin red veins that fade before the iris
     # (real eye whites are a warm grey, not paper white: too bright a white is the commonest giveaway of a CG eye)
-    sclera = np.array([0.66, 0.64, 0.62]) * (1 + 0.03 * noise(n, n // 6, rng))[..., None]
+    sclera = np.array([0.53, 0.505, 0.475]) * (1 + 0.03 * noise(n, n // 6, rng))[..., None]
     sclera += smoothstep(0.30, 0.46, r)[..., None] * (np.array([0.66, 0.46, 0.43]) - sclera)
-    sclera *= (1 - 0.45 * smoothstep(iris_r + 0.03, 0.40, r))[..., None]  # darker toward the lids, as real eyes look
+    sclera *= (1 - 0.55 * smoothstep(iris_r + 0.03, 0.40, r))[..., None]  # darker toward the lids, as real eyes look
     # yellowish fatty patches left and right of the iris, where the eye is exposed between the lids
     patch = np.exp(-((r - iris_r - 0.09) / 0.05) ** 2) * np.abs(np.cos(theta)) ** 3 * np.clip(0.5 + 0.6 * noise(n, n // 12, rng), 0, 1)
     sclera += (0.25 * patch)[..., None] * (np.array([0.66, 0.58, 0.38]) - sclera)
@@ -400,7 +433,7 @@ def eye(n, radii, outer, inner, seed):
     edge = 0.042  # soft limbus: the iris edge is never a hard line
     sclera += (0.4 * np.exp(-((r - iris_r - 0.015) / 0.03) ** 2))[..., None] * (np.array([0.50, 0.54, 0.60]) - sclera)  # blue-grey ring where the white thins
     out = sclera + (1 - smoothstep(iris_r - edge, iris_r + edge, r))[..., None] * (iris - sclera)
-    return out * smoothstep(pupil_r * 0.96, pupil_r * 1.04, r)[..., None]
+    return out * smoothstep(pupil_r * 0.88, pupil_r * 1.10, r)[..., None]  # a pupil is a hole seen through a lens: its edge is never crisp
 
 
 def make_set(name, size=4096, eye_size=2048, out=ROOT / "textures"):
