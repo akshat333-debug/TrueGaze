@@ -29,17 +29,19 @@ INPUTS = ["Left", "Right", "Generate Motion"]
 SIDES = ("left", "right")
 
 
-def black_frames(source):
+def black_frames(source, jump=2):
     """Frame numbers (from 1) whose share of near-black pixels jumps above the clip's usual level.
     Guards against the 13 Nov fault, where both eyeballs rendered solid black part-way through a long run.
     `source` is anything ffmpeg reads: a frame pattern or a video. Blinks only lower the share, so they pass.
+    `jump` is the rise in percent that counts: 2 for the front view; the hero view passes 4, because its eye sits in
+    shadow and the share moves by 2 as the gaze turns, while a black eyeball there fills far more of the frame.
     The left fifth is left out: in the hero view it is black background, and head sway changes how much shows.
     shortcut: assumes the hero camera is on the default side; a hero view from the other side needs the right fifth cut."""
     log = subprocess.run(["ffmpeg", "-v", "info", "-i", str(source), "-vf", "crop=iw*0.8:ih:iw*0.2:0,blackframe=amount=0:threshold=32", "-f", "null", "-"],
                          capture_output=True, text=True, check=True).stderr
     share = [int(m) for m in re.findall(r"pblack:(\d+)", log)]  # percent of each frame that is near-black
     usual = sorted(share)[len(share) // 2]
-    return [i + 1 for i, p in enumerate(share) if p >= usual + 2]  # two eyeballs are 3% or more of the frame
+    return [i + 1 for i, p in enumerate(share) if p >= usual + jump]  # front view: two eyeballs are 3% or more of the frame
 
 
 def keyframe(head, arm, frames):
@@ -133,13 +135,13 @@ def render(a):
         sc.render.use_overwrite = False
         sc.render.filepath = str(frames) + "/"
         bpy.ops.render.render(animation=True)
-        bad = black_frames(frames / "%04d.png")
+        bad = black_frames(frames / "%04d.png", 4 if a.view == "hero" else 2)
         if bad:  # delete them and render again; frames that are fine are skipped
             print("BLACK FRAMES, rendering again:", bad)
             for f in bad:
                 (frames / f"{f:04d}.png").unlink()
             bpy.ops.render.render(animation=True)
-            bad = black_frames(frames / "%04d.png")
+            bad = black_frames(frames / "%04d.png", 4 if a.view == "hero" else 2)
             if bad:
                 raise SystemExit(f"frames still too dark after a second render: {bad}. Look at them in {frames}")
         subprocess.run(["ffmpeg", "-y", "-v", "error", "-framerate", str(FPS), "-i", str(frames / "%04d.png"),
