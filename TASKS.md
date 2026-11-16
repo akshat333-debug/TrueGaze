@@ -38,6 +38,11 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 16 Nov, 08:10 — full re-render with the D-025 look finished and committed
+- **Done:** all stills, six videos, overviews, launch-spec frames, `.blend`, deck and demo rebuilt with the D-025 look (finished 07:57). 16 tests pass. Contact sheets of the hero, front, `Left`, `Right` and set 03 videos and both overview sheets were looked at: no black eyes, lid shelf and lashes intact on all eight sets.
+- **Gotchas:** the first run stopped at 23:27 on a false alarm. Head sway shows more of the hero view's black background in some frames, which `black_frames` read as dark eyes. The guard now leaves out the left fifth of the frame (`render.py`). On the finished set 03 `.mp4` the guard still lists 44 frames (dark skin in shadow sits near its threshold after compression); it passed on the rendered frames, and frames 40, 200 and 255 look right.
+- **Not judged:** head sway at speed. In the hero view the eye drifts about a tenth of the frame width. If it reads as camera drift, halve the sway in `truegaze/motion.py` and render the hero video again (about 2.3 h).
+- **Next:** upload `outputs/demo.mp4` and put the link in the deck; open the deck in PowerPoint; watch "Flexpressions"; then the going-public steps.
 ### 15 Nov, 18:30 — second look batch D-025 done, full re-render started
 - **Done:** audit tasks 8 to 11 (see D-025). 16 tests pass, `tools/evaluate_motion.py` passes. `assets/hair.npz` rebuilt (lash roots moved, new `margin_uv`).
 - **Running:** `renders/tmp/chain2.sh` (everything, about 8.5 h; log `renders/tmp/chain2.log`). Until it prints `CHAIN_DONE`, `textures/` (only 01, 03, 07 regenerated so far), `outputs/`, `uv_maps/`, `docs/*.jpg`, the deck and the demo show the D-024 look.
