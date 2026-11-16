@@ -2,10 +2,8 @@
 
 Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + motion, **B** textures + shading, **C** pipeline, tests, docs, deck, video. Full plan: `docs/PLAN.md`.
 
-## Status for whoever picks this up (15 Nov, 04:00)
-Full re-render with the D-021 / D-022 look finished 15 Nov 03:54 and is committed: all stills, overviews, launch-spec frames, `.blend`, six videos (Left, Right, Generate Motion front / hero / wire, Generate Motion on set 03). Every video passed the automatic black-eye check and was looked at on a contact sheet. Deck rebuilt from the new stills. Older status below.
-
-All required outputs exist at final quality and are committed: 8 texture sets, Left / Right / Generate Motion videos (front, hero and wire views), 24 stills, portability proofs, `.blend`, launch-spec sequence, deck. Seam audit, motion evaluation and 14 tests pass. Read the newest handoff note below first, then `DECISIONS.md` (latest D-021).
+## Status for whoever picks this up (16 Nov, 08:30)
+Full re-render with the D-024 / D-025 look finished 16 Nov 07:57 and is committed (`528e8ac`): 8 texture sets, 24 stills, wire and clay stills, portability proofs, overviews, launch-spec frames, `.blend`, six videos (Left, Right, Generate Motion front / hero / wire, Generate Motion on set 03), deck and demo. Seam audit, motion evaluation and 16 tests pass. The deck passes the pptx validator. All twelve look tasks from the 15 Nov audit are done; what is left below needs Akshat. Read the newest handoff note first, then `DECISIONS.md` (latest D-025).
 
 ## Open, in priority order
 Look tasks come from the 15 Nov council audit (`docs/SELF_AUDIT.md`: estimate 66 of 100, photorealism 33 of 60). Batch 1 to 7, test on stills of sets 01, 03, 07, then render all videos once (about 11 h).
@@ -21,7 +19,8 @@ Look tasks come from the 15 Nov council audit (`docs/SELF_AUDIT.md`: estimate 66
 - [x] 10. (D-025) Slow head sway of a degree or two. **A**
 - [x] 11. (D-025) Set 07 streaks: fold relief halved. **B**
 - [x] 12. (D-024) Dark sets: whitish sheen on the lit cheek still reads as a grey patch at small size. Test with down hairs off, then with the coat off, to find the cause (1 to 2 h). **B**
-- [ ] Full re-render after the batch, then `tools/overview.sh`, `tools/make_deck.py`, `tools/make_demo.py`. **C**
+- [x] Full re-render after the batch, then `tools/overview.sh`, `tools/make_deck.py`, `tools/make_demo.py` (16 Nov, `528e8ac`). **C**
+- [ ] Watch `outputs/videos/Generate_Motion_hero.mp4` at speed and decide whether the head sway reads as camera drift (if so: halve it in `truegaze/motion.py`, hero re-render about 2.3 h). **Akshat**
 - [ ] Demo video: upload `outputs/demo.mp4` (voice-over optional), put the link on the deck's demo slide. **C**
 - [ ] Open the deck once in PowerPoint (only checked in LibreOffice). **C**
 - [ ] Watch "Flexpressions" (second reference video; not done, no local copy).
