@@ -20,6 +20,14 @@ Look tasks come from the 15 Nov council audit (`docs/SELF_AUDIT.md`: estimate 66
 - [x] 11. (D-025) Set 07 streaks: fold relief halved. **B**
 - [x] 12. (D-024) Dark sets: whitish sheen on the lit cheek still reads as a grey patch at small size. Test with down hairs off, then with the coat off, to find the cause (1 to 2 h). **B**
 - [x] Full re-render after the batch, then `tools/overview.sh`, `tools/make_deck.py`, `tools/make_demo.py` (16 Nov, `528e8ac`). **C**
+Third look batch, from the 16 Nov audit (`docs/SELF_AUDIT.md`: estimate 71.5 of 100, photorealism 38 of 60). Not started; needs Akshat's go-ahead because it costs another full render (about 8.5 h).
+- [ ] 13. Lid shadow on the eyeball under the upper lid (1 to 2 h). **B**
+- [ ] 14. Eye white darker, shaded toward the corners; much darker on dark sets (1 h). **B**
+- [ ] 15. Pupil soft edge and depth; smooth highlight, off the pupil in the hero view (1 to 2 h). **B**
+- [ ] 16. Lashes: taper, smooth curve, crossing pairs; lower lashes unevenly spaced (2 to 3 h). **A**
+- [ ] 17. Pale patch at the crown on all three portability renders: find the cause, fix (stills only). **B**
+- [ ] 18. Hero view: at least a third of the frame in shadow or black (1 h). **A**
+- [ ] 19. Later, if time: set 03 ashy cheek, iris blocks on 05 / 07 / 08, skin pores, set 04 arc, set 07 streaks.
 - [ ] Watch `outputs/videos/Generate_Motion_hero.mp4` at speed and decide whether the head sway reads as camera drift (if so: halve it in `truegaze/motion.py`, hero re-render about 2.3 h). **Akshat**
 - [ ] Demo video: upload `outputs/demo.mp4` (voice-over optional), put the link on the deck's demo slide. **C**
 - [ ] Open the deck once in PowerPoint (only checked in LibreOffice). **C**
@@ -37,6 +45,10 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 16 Nov, 09:15 — audit run again on the new renders
+- **Done:** `docs/SELF_AUDIT.md` rewritten from the D-025 renders. Estimate 71.5 of 100 (was 66); photorealism 38 of 60 (was 33). No code changed.
+- **Found:** no lid shadow on the eyeball, flat bright eye white, flat hard-edged pupil, wiry lashes; a pale patch at the crown on all three portability renders (old fault, missed before); set 03 ashy cheek still visible.
+- **Next:** Akshat decides whether to run look tasks 13 to 18 (one more full render).
 ### 16 Nov, 08:10 — full re-render with the D-025 look finished and committed
 - **Done:** all stills, six videos, overviews, launch-spec frames, `.blend`, deck and demo rebuilt with the D-025 look (finished 07:57). 16 tests pass. Contact sheets of the hero, front, `Left`, `Right` and set 03 videos and both overview sheets were looked at: no black eyes, lid shelf and lashes intact on all eight sets.
 - **Gotchas:** the first run stopped at 23:27 on a false alarm. Head sway shows more of the hero view's black background in some frames, which `black_frames` read as dark eyes. The guard now leaves out the left fifth of the frame (`render.py`). On the finished set 03 `.mp4` the guard still lists 44 frames (dark skin in shadow sits near its threshold after compression); it passed on the rendered frames, and frames 40, 200 and 255 look right.
