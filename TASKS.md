@@ -2,8 +2,8 @@
 
 Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + motion, **B** textures + shading, **C** pipeline, tests, docs, deck, video. Full plan: `docs/PLAN.md`.
 
-## Status for whoever picks this up (16 Nov, 08:30)
-Full re-render with the D-024 / D-025 look finished 16 Nov 07:57 and is committed (`528e8ac`): 8 texture sets, 24 stills, wire and clay stills, portability proofs, overviews, launch-spec frames, `.blend`, six videos (Left, Right, Generate Motion front / hero / wire, Generate Motion on set 03), deck and demo. Seam audit, motion evaluation and 16 tests pass. The deck passes the pptx validator. All twelve look tasks from the 15 Nov audit are done; what is left below needs Akshat. Read the newest handoff note first, then `DECISIONS.md` (latest D-025).
+## Status for whoever picks this up (17 Nov, 08:15)
+Full re-render with the D-026 look finished 17 Nov 07:59 and is committed: 8 texture sets, 24 stills, portability proofs, overviews, launch-spec frames, `.blend`, six videos (Left, Right, Generate Motion front / hero / wire, Generate Motion on set 03), deck and demo. 16 tests pass, the deck passes the pptx validator, no dark frame in any video. All eighteen look tasks are done; what is left below needs Akshat. Read the newest handoff note first, then `DECISIONS.md` (latest D-026).
 
 ## Open, in priority order
 Look tasks come from the 15 Nov council audit (`docs/SELF_AUDIT.md`: estimate 66 of 100, photorealism 33 of 60). Batch 1 to 7, test on stills of sets 01, 03, 07, then render all videos once (about 11 h).
@@ -20,14 +20,14 @@ Look tasks come from the 15 Nov council audit (`docs/SELF_AUDIT.md`: estimate 66
 - [x] 11. (D-025) Set 07 streaks: fold relief halved. **B**
 - [x] 12. (D-024) Dark sets: whitish sheen on the lit cheek still reads as a grey patch at small size. Test with down hairs off, then with the coat off, to find the cause (1 to 2 h). **B**
 - [x] Full re-render after the batch, then `tools/overview.sh`, `tools/make_deck.py`, `tools/make_demo.py` (16 Nov, `528e8ac`). **C**
-Third look batch, from the 16 Nov audit (`docs/SELF_AUDIT.md`: estimate 71.5 of 100, photorealism 38 of 60). Akshat said go on 16 Nov. Code done (D-026); full re-render running.
+Third look batch, from the 16 Nov audit (`docs/SELF_AUDIT.md`: estimate 71.5 of 100, photorealism 38 of 60). Akshat said go on 16 Nov. Code done (D-026); full re-render done 17 Nov.
 - [x] 13. (D-026) Lid shadow on the eyeball under the upper lid. **B**
 - [x] 14. (D-026) Eye white darker, shaded toward the corners; darker on dark sets. **B**
 - [x] 15. (D-026) Pupil soft edge; round highlight, off the pupil in the hero view. Pupil depth not done. **B**
 - [x] 16. (D-026) Lashes: taper, smooth curve; lower lashes unevenly spaced. **A**
 - [x] 17. (D-026) Pale patch at the crown: seam fill now takes the photo's local tone. **B**
 - [x] 18. (D-026) Hero view: brow shades the socket, a third or more of the frame in shadow. **A**
-- [ ] Full re-render with the D-026 look (`renders/tmp/chain2.sh`, about 9 h), then check frames, commit outputs, run the audit again. **C** in progress
+- [x] Full re-render with the D-026 look, frames checked, outputs committed (17 Nov). **C**
 - [ ] 19. Later, if time: set 03 ashy cheek, iris blocks on 05 / 07 / 08, skin pores, set 04 arc, set 07 streaks.
 - [ ] Watch `outputs/videos/Generate_Motion_hero.mp4` at speed and decide whether the head sway reads as camera drift (if so: halve it in `truegaze/motion.py`, hero re-render about 2.3 h). **Akshat**
 - [ ] Demo video: upload `outputs/demo.mp4` (voice-over optional), put the link on the deck's demo slide. **C**
@@ -46,6 +46,12 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 17 Nov, 08:15 — full re-render with the D-026 look finished and committed
+- **Done:** `Generate_Motion.mp4`, `Left.mp4`, `Right.mp4`, `Generate_Motion_set03.mp4` rendered with the D-026 look (hero and wire were committed in `6042fa7`); deck and `outputs/demo.mp4` (85 s, not in git) rebuilt. Lengths 12 / 9 / 9 / 12 s.
+- **Checked:** no guard message in `renders/tmp/chain4.log`; mean brightness of each eye region measured on every frame of the four videos, lowest frame within 6 % of the median, last three frames normal (the 13 Nov black-eye fault would show as a large drop); one frame per second viewed; 16 tests pass; deck passes the validator.
+- **Seen, not fixed:** in `Left` and `Right` the eye white on the side the eye turns away from shows pink over a wide area.
+- **Next:** audit again on these renders; Akshat's items in the open list.
+- **How to run:** `sh renders/tmp/chain4.sh > renders/tmp/chain4.log 2>&1` (five videos, deck, demo; about 9.5 h)
 ### 16 Nov — third look batch D-026 done, full re-render started
 - **Done:** tasks 13 to 18 (see D-026). Files: `truegaze/materials.py`, `truegaze/textures.py`, `truegaze/scene.py`, `tools/make_hair.py`, `assets/hair.npz`, `render.py`. 16 tests and the seam audit pass.
 - **Next:** when `renders/tmp/chain2.sh` prints `CHAIN_DONE`: look at stills of all eight sets, contact sheets of the videos, commit outputs, run the audit again.
