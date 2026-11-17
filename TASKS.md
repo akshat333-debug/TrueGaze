@@ -28,7 +28,7 @@ Third look batch, from the 16 Nov audit (`docs/SELF_AUDIT.md`: estimate 71.5 of 
 - [x] 17. (D-026) Pale patch at the crown: seam fill now takes the photo's local tone. **B**
 - [x] 18. (D-026) Hero view: brow shades the socket, a third or more of the frame in shadow. **A**
 - [x] Full re-render with the D-026 look, frames checked, outputs committed (17 Nov). **C**
-- [ ] 19. Later, if time: set 03 ashy cheek, iris blocks on 05 / 07 / 08, skin pores, set 04 arc, set 07 streaks.
+- [ ] 19. Later, if time (list in `docs/SELF_AUDIT.md`, 17 Nov): hero eye white flat in shadow, pink eye white in `Left` / `Right`, set 03 ashy cheek, iris blocks on 05 / 07 / 08, skin pores, set 04 arc, set 07 streaks.
 - [ ] Watch `outputs/videos/Generate_Motion_hero.mp4` at speed and decide whether the head sway reads as camera drift (if so: halve it in `truegaze/motion.py`, hero re-render about 2.3 h). **Akshat**
 - [ ] Demo video: upload `outputs/demo.mp4` (voice-over optional), put the link on the deck's demo slide. **C**
 - [ ] Open the deck once in PowerPoint (only checked in LibreOffice). **C**
@@ -46,6 +46,10 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 17 Nov, 08:40 — audit run again on the D-026 renders
+- **Done:** `docs/SELF_AUDIT.md` rewritten. Estimate 74 of 100 (was 71.5); photorealism 40 of 60 (was 38). No code changed.
+- **Found:** hero view eye white on the far side is a flat dark slab (new with D-026); bright crescent on the hero iris; pink outer eye white in `Left` / `Right`; iris still painted; skin still canvas noise.
+- **Next:** Akshat decides: a fourth batch (hero-only fix is 1 to 2 h plus a 2.3 h render) or stop and do the submission steps.
 ### 17 Nov, 08:15 — full re-render with the D-026 look finished and committed
 - **Done:** `Generate_Motion.mp4`, `Left.mp4`, `Right.mp4`, `Generate_Motion_set03.mp4` rendered with the D-026 look (hero and wire were committed in `6042fa7`); deck and `outputs/demo.mp4` (85 s, not in git) rebuilt. Lengths 12 / 9 / 9 / 12 s.
 - **Checked:** no guard message in `renders/tmp/chain4.log`; mean brightness of each eye region measured on every frame of the four videos, lowest frame within 6 % of the median, last three frames normal (the 13 Nov black-eye fault would show as a large drop); one frame per second viewed; 16 tests pass; deck passes the validator.

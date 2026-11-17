@@ -1,61 +1,51 @@
-# Council audit against the brief and the reference (16 Nov)
+# Council audit against the brief and the reference (17 Nov)
 
-Replaces the 15 Nov audit (in git history at `528e8ac`). Run again on the renders made after the D-024 and D-025 look batches. Written to find faults, not to defend the build.
+Replaces the 16 Nov audit (in git history at `6042fa7`). Run again on the renders made after the D-026 look batch. Written to find faults, not to defend the build.
 
-**What was looked at:** the brief and rubric (`docs/hackathondetails.md`); the reference video "Eye Piece" (frames at 4.5, 9, 14.5, 18 s); our stills at full size (`01_front`, `01_close`, `01_hero`); stills at three-quarter size (`03_close`, `03_front`, `07_close`, `07_front`, `04_close`, `08_close`, `06_hero`, `05_front`); both overview sheets; the three portability renders; contact sheets of the hero, front, `Left`, `Right` and set 03 videos; twelve consecutive frames of one blink in the hero video; the numbers printed by `tools/evaluate_motion.py` and `tools/seam_audit.py`, and `outputs/launch_spec/metadata.json`.
+**What was looked at:** our stills at full size (`01_front`, `01_close`, `01_hero`); both overview sheets (all eight sets, front, close and hero); contact sheets, one frame per second, of the front, `Left`, `Right` and set 03 videos and of the demo; mean brightness of each eye region on every frame of those four videos; the test run and the deck validator. The portability renders and the hero video were looked at on 16 Nov after the batch, not again today.
 
-**Limits of this audit:** one reviewer playing eight roles, not eight people. Videos were judged from sampled frames, not watched at speed, so head sway and blink feel are not judged. The second reference ("Flexpressions") was not watched. Scores are estimates of how a strict judge would mark, not a prediction of the result. The same reviewer made the changes being scored, so the rise in score is the least reliable number here.
+**Limits of this audit:** one reviewer playing eight roles, not eight people. Videos were judged from sampled frames, not watched at speed, so head sway and blink feel are not judged. The reference video was not opened again today; comparisons to it rest on the 16 Nov viewing. "Flexpressions" was not watched. Judges 5 to 8 below are carried over from 16 Nov with only the changed lines edited. Scores are estimates of how a strict judge would mark, not a prediction of the result. The same reviewer made the changes being scored, so the rise in score is the least reliable number here.
 
 ## Verdict
 
-| Rubric line | Max | 15 Nov | 16 Nov | Why |
+| Rubric line | Max | 16 Nov | 17 Nov | Why |
 |---|---|---|---|---|
-| Texture photorealism | 60 | 33 | **38** | Faults that were plainly wrong are gone (half-lit pupil, neon iris, lashes out of bare skin). It still reads as CG within a second: flat bright eye white, painted iris, wiry lashes, skin without pores or glints. |
-| Kinematic accuracy | 20 | 16 | **17** | Head sway, lower lid and eyeball pull-back added; all timing still in range. Sway not judged at speed. |
-| Code and UV portability | 20 | 17 | **16.5** | Unchanged build. A pale patch at the crown of every portability render was found in this audit (it was there before and was missed). |
-| **Total** | 100 | 66 | **71.5** | |
+| Texture photorealism | 60 | 38 | **40** | The eye now sits in its socket: lid shadow, darker eye white, soft pupil, hero view half in shadow. It still reads as CG: iris looks painted and smeared, skin has canvas noise instead of pores, lashes are wires. |
+| Kinematic accuracy | 20 | 17 | **17** | Motion code unchanged. |
+| Code and UV portability | 20 | 16.5 | **17** | Crown patch gone. |
+| **Total** | 100 | 71.5 | **74** | |
 
-All five required outputs exist. Two look batches and 17 hours of rendering moved the look score by about five points. The remaining gap is not small faults; it is the three or four things below that make an eye read as real.
+All five required outputs exist. Three look batches and about 27 hours of rendering moved the look score from 33 to about 40. Each batch has bought less than the one before.
 
-## What the two batches fixed (confirmed in the new renders)
-- Half-lit pupil with a hard vertical edge: gone on all eight sets.
-- Iris colour: no longer neon. Limbus is a soft band.
-- Lid margin: a pink wet band now sits between the lash roots and the eye, on both lids.
-- Lashes no longer come in bunches with hooked ends on the lower lid; upper lashes are uneven in length.
-- Down-gaze no longer makes the lower lid cut the iris.
-- Blink in the hero video: lid closes over a visible bulge, crow's feet appear, lashes blur. No broken frame in twelve.
-- Painted grey eye bags on dark sets: gone.
+## What the third batch fixed (confirmed in the new renders)
+- Lid shadow: the top of the eyeball is darker under the upper lid in front and close views, on all eight sets.
+- Eye white: no longer brighter than the skin on dark sets (03, 06, 08); shaded toward the corners.
+- Pupil edge is soft in the close view. The hero highlight sits above the pupil, not on it.
+- Hero view: brow and nose side are in shadow, about half the frame; the black strip at the left is larger.
+- Lower lashes are unevenly spaced; upper lashes taper.
+- Crown patch on the portability heads: gone.
 
-## The eight judges
+## New or remaining look faults
 
-### 1. Blender and rendering lead — 5.5/10 (was 5)
-- **No lid shadow on the eyeball.** In the reference the upper lid and lashes throw a dark band across the top third of the eye. Ours is lit evenly from lid to lid in every view. This is the main reason the front view reads as a doll.
-- Hero view is darker than before but still mid-key. The reference frame is more than half black or deep shadow; ours shows a sliver of black at the left edge and bright skin everywhere else.
-- The highlight in the close view is a small jagged white shape with visible steps. In the hero view the four-pane window sits squarely on the pupil.
-- Denoising gives skin an oil-paint smear in stills and videos.
+### 1. Blender and rendering lead — 6/10 (was 5.5)
+- **Hero view, eye white on the far side of the iris is one flat dark grey-blue slab** with a hard edge against the lid. It reads as a painted shape, not a wet ball in shadow. New with D-026.
+- Hero view: a bright crescent sits on the lower left of the iris (light caught at the cornea edge). Reads as an artefact.
+- Close view: a hard white vertical bar at the inner edge of the eye, next to the pink corner bead.
+- Denoising still gives skin an oil-paint smear.
 
-### 2. Colour expert — 5.5/10 (was 5)
-- **Eye white is one flat pale grey-lilac**, as bright at the corners as beside the iris, and brighter than the skin round it on dark sets (03, 06, 08), where it glows.
-- Iris fibres read as radial brush strokes. Set 07 has blocky white patches, sets 05 and 08 have bright orange blocks next to dark gaps.
-- Light skin is one even peach. No redness at the nose side, no blue-grey under the eye, no blotch.
-- Set 03 front view: the lit cheek under the eye still shows a grey, ashy patch with a coarse texture. D-024 reduced it; it is still the first thing seen on that still.
-- Set 07 has an orange cast round both eyes that reads as fake tan.
+### 2. Colour expert — 6/10 (was 5.5)
+- Iris still reads as radial brush strokes; in `01_close` it looks smeared, as if motion-blurred. White and orange blocks on sets 05, 07, 08 unchanged.
+- In `Left` and `Right`, the eye that turns toward the nose shows a wide pink area on its outer white. Reads as an irritated eye.
+- Set 03 front view: ashy patch on the lit cheek still there.
+- Light skin still one even peach.
 
-### 3. Doctor (eye anatomy) — 5.5/10 (was 4)
-- Lid margin: now present. Good.
-- **Pupil is a flat black disc with a hard edge.** A real pupil is a hole: its edge is soft at this size and it sits behind the cornea with visible depth.
-- Lashes are thin single wires with kinks along their length. Real lashes are thicker at the root, taper, curve smoothly, and cross each other in twos and threes.
-- Lower lashes are evenly spaced like a comb.
-- A hard dark line runs along the lower lid edge in front views (sets 03, 07) and reads as eyeliner.
-- Inner-corner tissue is still a round pink bead.
-- Vessels are still thin, bright red and sharp.
+### 3. Doctor (eye anatomy) — 6/10 (was 5.5)
+- Pupil still has no depth: it is a dark disc on the iris surface.
+- Upper lashes in the close view: still single wires, with small hooks and forks at the tips. No crossing pairs.
+- Inner-corner tissue still a round pink bead. Vessels still thin, sharp, bright red.
 
 ### 4. Character designer — 6/10 (unchanged)
-- Eye shape, socket depth and brows hold up in the front view.
-- Set 04 close view: one long raised arc sweeps over the upper lid from the inner corner to the temple. Fainter arcs are still visible on set 01. The ring pattern is reduced, not gone.
-- Set 07: forehead and under-eye lines still read as drawn wavy streaks in the front view.
-- Brow hairs still stand up like stubble at the top edge of close and hero frames.
-- Eight sets still share one face and one lash style.
+- Not looked at again in detail. Set 04 arc, set 07 streaks, stubble-like brow hairs at the frame top: assumed unchanged; the brow hairs are visible in `01_hero` and `01_close`.
 
 ### 5. Animator — 7.5/10 (was 7)
 - Blink is good.
@@ -72,11 +62,11 @@ All five required outputs exist. Two look batches and 17 hours of rendering move
 - Head sway range (0.3 to 2.5 degrees) is our own choice, not from a paper; the script prints it as a note, not a sourced check.
 - Still missing: upward roll under the closed lid, torsion, pupil reaction.
 
-### 7. Pipeline and portability engineer — 8/10 (was 8.5)
+### 7. Pipeline and portability engineer — 8.5/10 (was 8)
 - `./reproduce.sh` rebuilds everything; a fresh clone runs 16 tests and the motion check with nothing missing (checked 15 Nov).
 - Seam step on the front of the face: at most 6 of 255 on every set.
-- **Crown patch:** all three portability renders show a pale rectangle at the top of the skull. Cause not looked for. It is outside the eye region, but it is on the image that is meant to prove the textures wrap.
-- The black-frame guard gave a false alarm on the hero view once the head moved (fixed by leaving out the left fifth of the frame) and still lists 44 frames on the finished set 03 video. It is a weaker guard than it was.
+- Crown patch on the portability renders: gone (seam fill takes the photo's local tone, D-026). A small red spot sits at the nostril on `portability_03`; cause not looked for.
+- The black-frame guard gave a false alarm on the hero view once the head moved (fixed by leaving out the left fifth of the frame); the hero view now needs a wider margin (4 instead of 2). It is a weaker guard than it was, so on 17 Nov the eye regions of the four front videos were also measured frame by frame: no dark frame.
 - Docker image builds; videos run out of memory in it on the M3; not tried on Linux.
 - Lashes, brows and tear line are generated mesh, so textures alone give no lashes on a stock head.
 
@@ -86,22 +76,18 @@ All five required outputs exist. Two look batches and 17 hours of rendering move
 
 ## What to do, in order of points per hour
 
-Any change to shared shading or to set 01 means rendering the five set 01 videos again (about 8.5 hours for everything). Stills-only changes cost about 45 minutes. Batch, test on stills of sets 01, 03 and 07, render once.
+Any change to shared shading or to set 01 means rendering the five set 01 videos again (about 9.5 hours). The form is due 21 Nov. There is time for one more batch at most, and a fourth batch is expected to buy two or three points.
 
-| # | Change | Judge | Cost | Renders needed |
-|---|---|---|---|---|
-| 1 | Lid shadow on the eyeball: darken the top of the eye under the upper lid (shading term or a real shadow from lid and lashes) | 1, 2 | 1 to 2 h | all |
-| 2 | Eye white: darker overall, shaded toward the corners, slight yellow at the corners; much darker on dark sets | 2 | 1 h | all |
-| 3 | Pupil: soft edge and depth; highlight: smooth shape, moved off the pupil in the hero view | 3, 1 | 1 to 2 h | all |
-| 4 | Lashes: thicker at the root with taper, smooth curve without kinks, pairs that cross; lower lashes unevenly spaced | 3 | 2 to 3 h | all |
-| 5 | Crown patch on the portability heads: find the cause, fix | 7 | 1 h to find | 3 portability stills |
-| 6 | Hero view: move the camera or key so at least a third of the frame is shadow or black | 1 | 1 h | hero stills, hero video |
-| 7 | Set 03 ashy cheek patch | 2 | 1 to 2 h, tried once already | dark-set stills, set 03 video |
-| 8 | Iris: finer fibres, remove the white and orange blocks on sets 05, 07, 08 | 2 | 2 h | stills of those sets |
-| 9 | Skin: visible pores and broken-up shine instead of canvas noise | 1 | 3 to 5 h, uncertain | all |
-| 10 | Set 04 arc over the lid; set 07 streaks | 4 | 1 to 2 h | stills |
+| # | Change | Cost | Renders needed |
+|---|---|---|---|
+| 1 | Hero view: lift the fill on the eyeball so the far-side eye white is shaded, not flat; remove the crescent on the iris | 1 to 2 h | hero stills, hero video (2.3 h) |
+| 2 | Pink area on the outer eye white when the eye turns in | 1 h | all front videos |
+| 3 | Iris: finer fibres, no smear, no blocks on 05 / 07 / 08 | 2 h | stills, set 01 videos |
+| 4 | White bar at the inner eye edge in the close view | 1 h to find | stills |
+| 5 | Skin pores instead of canvas noise | 3 to 5 h, uncertain | all |
+| 6 | Set 03 ashy cheek | 1 to 2 h, tried twice | dark-set stills, set 03 video |
 
-Items 1 to 3 are the cheapest and act on the first thing a judge looks at. Item 5 is small and removes a visible fault from a proof image. Item 9 is the largest remaining gap to the reference and the least certain.
+Item 1 is the only one that touches the first frame of the demo and needs only the hero video rendered again. The submission steps (demo link, PowerPoint check, history purge, clean-clone rebuild, public repo) are worth more than any row here if time runs short.
 
 ## Not in doubt
 The brief's required outputs, the motion numbers, the seam numbers and the rebuild script are solid and backed by scripts. The gap is still the look.
