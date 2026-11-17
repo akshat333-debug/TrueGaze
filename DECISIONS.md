@@ -154,3 +154,4 @@ From the 16 Nov audit (tasks 13 to 18). Tested on stills of sets 01, 03 and 07 a
 - **Hero view (18):** key moved high on the camera's side (was level, raking), so the brow shades the socket and the cheek and brow catch the light; fill 0.25, window light 1.2 because it is now the only light on the eyeball. Dark sets get up to one stop more exposure in this view, or the eye is lost.
 - **Frame cache:** final-quality frame folders now carry a fingerprint of the code, hair and texture set, so frames from an older look cannot be reused by mistake. Old folders under `renders/tmp/final/` are dead weight and can be deleted by hand.
 - Every set and the lashes changed, so all stills and all videos are rendered again.
+- **Outcome (17 Nov):** all renders done and pushed (`6042fa7`, `779c3ed`). Audit estimate 74 of 100 (was 71.5). New fault from this batch: in the hero view the eye white on the far side of the iris is a flat dark slab. Not fixed.
