@@ -20,7 +20,7 @@ Every number below is printed by a script in this repo; the command is next to i
 | Seams on the face | **step of 4 of 255 or less** on all 8 sets (142 seam edges measured) | `python3 tools/seam_audit.py` |
 | Eye motion | **15 of 15** numbers inside published ranges: saccades 5–30°, blink timing and rate, vergence, fixation drift | `python3 tools/evaluate_motion.py` |
 | Launch-spec direction check | **5 of 5** (Left, Right, Up, Down, Reset), judged from the pupils found in the rendered pixels, not from our own labels | `wrapper/eyes.py -- --check` |
-| Pupil labels vs. the image | **0.96 px** mean, 1.78 px max, between `pupil_center_2D` (refracted by the cornea) and the pupil found in each of the 10 frames | `outputs/launch_spec/metadata.json` → `label_error_px` |
+| Pupil labels vs. the image | **1.16 px** mean, 2.92 px max, between `pupil_center_2D` (refracted by the cornea) and the pupil found in each of the 10 frames | `outputs/launch_spec/metadata.json` → `label_error_px` |
 | Skin fit onto GNM | **0.5 mm** median, lids and lip line pinned | `tools/transfer_skin.py` |
 | UV portability | sets wrap onto stock and random GNM identities with none of our rig | `apply_textures.py` |
 | Rebuild | **one command** from a fresh clone, downloads pinned by SHA-256 | `./reproduce.sh` |

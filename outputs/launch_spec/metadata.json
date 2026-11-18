@@ -1,7 +1,9 @@
 {
  "units": {
   "eye_rotation": "degrees, XYZ Euler in the world frame (X right, Y away from camera, Z up), relative to straight ahead",
-  "pupil_center_2D": "pixels, origin top-left of the 1024x1024 render",
+  "pupil_center_2D": "pixels, origin top-left of the 1024x1024 render; where the pupil centre appears, refracted by the cornea",
+  "pupil_center_2D_unrefracted": "pixels, straight pinhole projection of the 3D pupil centre (no cornea)",
+  "pupil_center_2D_found": "pixels, pupil centre found in the rendered PNG by find_pupil (no labels used)",
   "theta": "radians"
  },
  "fixation_distance_m": 0.35,
@@ -12,6 +14,38 @@
   "Up": true,
   "Down": true,
   "Reset": true
+ },
+ "direction_check_shift_px": {
+  "Left": {
+   "L": -19.34,
+   "R": -19.7
+  },
+  "Right": {
+   "L": 19.57,
+   "R": 19.09
+  },
+  "Up": {
+   "L": -18.35,
+   "R": -18.84
+  },
+  "Down": {
+   "L": 20.03,
+   "R": 20.19
+  },
+  "Reset": {
+   "L": 0.0,
+   "R": 0.0
+  }
+ },
+ "label_error_px": {
+  "refracted": {
+   "mean": 1.16,
+   "max": 2.92
+  },
+  "unrefracted": {
+   "mean": 1.35,
+   "max": 3.52
+  }
  },
  "frames": [
   {
@@ -27,6 +61,10 @@
     -5.037
    ],
    "pupil_center_2D_L": [
+    817.62,
+    492.31
+   ],
+   "pupil_center_2D_unrefracted_L": [
     817.69,
     493.21
    ],
@@ -36,8 +74,20 @@
     5.0383
    ],
    "pupil_center_2D_R": [
+    206.31,
+    492.81
+   ],
+   "pupil_center_2D_unrefracted_R": [
     206.24,
     493.71
+   ],
+   "pupil_center_2D_found_L": [
+    817.43,
+    492.3
+   ],
+   "pupil_center_2D_found_R": [
+    203.75,
+    492.39
    ],
    "camera_matrix": {
     "intrinsics": [
@@ -98,6 +148,10 @@
     -0.2395
    ],
    "pupil_center_2D_L": [
+    829.11,
+    495.9
+   ],
+   "pupil_center_2D_unrefracted_L": [
     828.66,
     496.64
    ],
@@ -107,8 +161,20 @@
     9.7673
    ],
    "pupil_center_2D_R": [
+    217.64,
+    496.64
+   ],
+   "pupil_center_2D_unrefracted_R": [
     217.05,
     497.36
+   ],
+   "pupil_center_2D_found_L": [
+    828.41,
+    495.54
+   ],
+   "pupil_center_2D_found_R": [
+    214.75,
+    496.21
    ],
    "camera_matrix": {
     "intrinsics": [
@@ -169,6 +235,10 @@
     2.7314
    ],
    "pupil_center_2D_L": [
+    836.3,
+    505.66
+   ],
+   "pupil_center_2D_unrefracted_L": [
     835.52,
     505.95
    ],
@@ -178,8 +248,20 @@
     12.6283
    ],
    "pupil_center_2D_R": [
+    224.56,
+    506.31
+   ],
+   "pupil_center_2D_unrefracted_R": [
     223.65,
     506.59
+   ],
+   "pupil_center_2D_found_L": [
+    835.88,
+    504.92
+   ],
+   "pupil_center_2D_found_R": [
+    223.23,
+    505.98
    ],
    "camera_matrix": {
     "intrinsics": [
@@ -240,6 +322,10 @@
     2.7314
    ],
    "pupil_center_2D_L": [
+    836.3,
+    517.8
+   ],
+   "pupil_center_2D_unrefracted_L": [
     835.52,
     517.54
    ],
@@ -249,8 +335,20 @@
     12.6283
    ],
    "pupil_center_2D_R": [
+    224.56,
+    518.17
+   ],
+   "pupil_center_2D_unrefracted_R": [
     223.65,
     517.92
+   ],
+   "pupil_center_2D_found_L": [
+    836.16,
+    516.78
+   ],
+   "pupil_center_2D_found_R": [
+    223.81,
+    517.5
    ],
    "camera_matrix": {
     "intrinsics": [
@@ -311,6 +409,10 @@
     -0.2395
    ],
    "pupil_center_2D_L": [
+    829.11,
+    527.56
+   ],
+   "pupil_center_2D_unrefracted_L": [
     828.66,
     526.85
    ],
@@ -320,8 +422,20 @@
     9.7673
    ],
    "pupil_center_2D_R": [
+    217.64,
+    527.84
+   ],
+   "pupil_center_2D_unrefracted_R": [
     217.05,
     527.15
+   ],
+   "pupil_center_2D_found_L": [
+    829.07,
+    526.74
+   ],
+   "pupil_center_2D_found_R": [
+    216.99,
+    527.39
    ],
    "camera_matrix": {
     "intrinsics": [
@@ -382,6 +496,10 @@
     -5.037
    ],
    "pupil_center_2D_L": [
+    817.62,
+    531.15
+   ],
+   "pupil_center_2D_unrefracted_L": [
     817.69,
     530.28
    ],
@@ -391,8 +509,20 @@
     5.0383
    ],
    "pupil_center_2D_R": [
+    206.31,
+    531.67
+   ],
+   "pupil_center_2D_unrefracted_R": [
     206.24,
     530.8
+   ],
+   "pupil_center_2D_found_L": [
+    817.39,
+    530.68
+   ],
+   "pupil_center_2D_found_R": [
+    205.48,
+    531.39
    ],
    "camera_matrix": {
     "intrinsics": [
@@ -453,6 +583,10 @@
     -9.7648
    ],
    "pupil_center_2D_L": [
+    806.3,
+    527.33
+   ],
+   "pupil_center_2D_unrefracted_L": [
     806.89,
     526.63
    ],
@@ -462,8 +596,20 @@
     0.2396
    ],
    "pupil_center_2D_R": [
+    194.82,
+    528.08
+   ],
+   "pupil_center_2D_unrefracted_R": [
     195.27,
     527.37
+   ],
+   "pupil_center_2D_found_L": [
+    806.01,
+    526.67
+   ],
+   "pupil_center_2D_found_R": [
+    194.1,
+    527.92
    ],
    "camera_matrix": {
     "intrinsics": [
@@ -524,6 +670,10 @@
     -12.6251
    ],
    "pupil_center_2D_L": [
+    799.39,
+    517.66
+   ],
+   "pupil_center_2D_unrefracted_L": [
     800.29,
     517.4
    ],
@@ -533,8 +683,20 @@
     -2.7321
    ],
    "pupil_center_2D_R": [
+    187.63,
+    518.32
+   ],
+   "pupil_center_2D_unrefracted_R": [
     188.41,
     518.06
+   ],
+   "pupil_center_2D_found_L": [
+    798.94,
+    516.73
+   ],
+   "pupil_center_2D_found_R": [
+    186.79,
+    517.27
    ],
    "camera_matrix": {
     "intrinsics": [
@@ -595,6 +757,10 @@
     -12.6251
    ],
    "pupil_center_2D_L": [
+    799.39,
+    505.8
+   ],
+   "pupil_center_2D_unrefracted_L": [
     800.29,
     506.09
    ],
@@ -604,8 +770,20 @@
     -2.7321
    ],
    "pupil_center_2D_R": [
+    187.63,
+    506.16
+   ],
+   "pupil_center_2D_unrefracted_R": [
     188.41,
     506.46
+   ],
+   "pupil_center_2D_found_L": [
+    799.15,
+    504.78
+   ],
+   "pupil_center_2D_found_R": [
+    186.71,
+    505.07
    ],
    "camera_matrix": {
     "intrinsics": [
@@ -666,6 +844,10 @@
     -9.7648
    ],
    "pupil_center_2D_L": [
+    806.3,
+    496.13
+   ],
+   "pupil_center_2D_unrefracted_L": [
     806.89,
     496.86
    ],
@@ -675,8 +857,20 @@
     0.2396
    ],
    "pupil_center_2D_R": [
+    194.82,
+    496.4
+   ],
+   "pupil_center_2D_unrefracted_R": [
     195.27,
     497.14
+   ],
+   "pupil_center_2D_found_L": [
+    806.2,
+    495.84
+   ],
+   "pupil_center_2D_found_R": [
+    192.46,
+    495.01
    ],
    "camera_matrix": {
     "intrinsics": [
