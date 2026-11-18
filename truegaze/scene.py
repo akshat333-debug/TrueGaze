@@ -174,6 +174,7 @@ def hero_view(arm, side="left"):
         light.rotation_euler = (eye - light.location).to_track_quat("-Z", "Y").to_euler()
         light.data.energy, light.data.size = energy, size
     materials.set_key_direction((bpy.data.objects["key"].location - eye).normalized())
+    materials.set_eye_wrap(0.35)  # the eye white on the side away from the key: dim gradient, not a flat dark slab
     # a dim softbox beside the camera: it adds little light, its reflection is the window highlight on the cornea
     catch = bpy.data.objects.new("catch", bpy.data.lights.new("catch", "AREA"))
     catch.data.energy, catch.data.size = 1.2, 0.35  # also the only light on the eyeball itself, which the brow shades from the key

@@ -2,8 +2,8 @@
 
 Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + motion, **B** textures + shading, **C** pipeline, tests, docs, deck, video. Full plan: `docs/PLAN.md`.
 
-## Status for whoever picks this up (18 Nov)
-Full re-render with the D-026 look finished 17 Nov 07:59 and is committed: 8 texture sets, 24 stills, portability proofs, overviews, launch-spec frames, `.blend`, six videos (Left, Right, Generate Motion front / hero / wire, Generate Motion on set 03), deck and demo. 16 tests pass, the deck passes the pptx validator, no dark frame in any video. All eighteen look tasks are done; what is left below needs Akshat. Read the newest handoff note first, then `DECISIONS.md` (latest D-026).
+## Status for whoever picks this up (19 Nov)
+D-027 batch in progress: launch-spec labels refracted and checked against the pixels, zip with the brief's layout, and a fourth look batch (hero far-side eye white, pink eye white, inner-corner bar, iris, skin bump). Code and textures committed; full re-render running (`renders/tmp/chain5.sh`, log `renders/tmp/chain5.log`, about 10 h). Read the newest handoff note first, then `DECISIONS.md` (latest D-027).
 
 ## Open, in priority order
 Look tasks come from the 15 Nov council audit (`docs/SELF_AUDIT.md`: estimate 66 of 100, photorealism 33 of 60). Batch 1 to 7, test on stills of sets 01, 03, 07, then render all videos once (about 11 h).
@@ -28,12 +28,14 @@ Third look batch, from the 16 Nov audit (`docs/SELF_AUDIT.md`: estimate 71.5 of 
 - [x] 17. (D-026) Pale patch at the crown: seam fill now takes the photo's local tone. **B**
 - [x] 18. (D-026) Hero view: brow shades the socket, a third or more of the frame in shadow. **A**
 - [x] Full re-render with the D-026 look, frames checked, outputs committed (17 Nov). **C**
-- [ ] 19. Later, if time (list in `docs/SELF_AUDIT.md`, 17 Nov): hero eye white flat in shadow, pink eye white in `Left` / `Right`, set 03 ashy cheek, iris blocks on 05 / 07 / 08, skin pores, set 04 arc, set 07 streaks.
+- [x] 19. (D-027) Hero far-side eye white, pink eye white in `Left` / `Right`, inner-corner bar, iris, skin bump. Not done: set 03 ashy cheek, set 04 arc, set 07 streaks.
+- [x] 20. (D-027) Direction check from the rendered pixels; refracted pupil labels; launch zip with the root layout, tested from a clean unzip. **C**
+- [ ] 21. Full re-render with the D-027 look (`renders/tmp/chain5.sh`), check frames, commit outputs. **C**
 - [ ] Watch `outputs/videos/Generate_Motion_hero.mp4` at speed and decide whether the head sway reads as camera drift (if so: halve it in `truegaze/motion.py`, hero re-render about 2.3 h). **Akshat**
-- [ ] Demo video: upload `outputs/demo.mp4` (voice-over optional), put the link on the deck's demo slide. **C**
+- [ ] Demo video: upload `outputs/demo.mp4` (voice-over optional), put the link on the deck's demo slide. Akshat: only once the project is final. **C**
 - [ ] Open the deck once in PowerPoint (only checked in LibreOffice). **C**
 - [ ] Watch "Flexpressions" (second reference video; not done, no local copy).
-- [ ] **Before making the repo public (not now; Akshat said on 15 Nov to keep it for the time being):** remove the reference video `Eye Piece - Chris Jones (1080p, h264).mp4` from the repo **and from git history**.
+- [ ] **Before the final submission:** delete the reference video `Eye Piece - Chris Jones (1080p, h264).mp4` and commit (Akshat, 18 Nov: delete, no history purge; it stays in old commits).
 - [ ] 21 Nov: regenerate from a clean clone, make repo public, submit the form (https://forms.gle/86xENrtqhx988hBt8). 22 Nov is buffer only.
 
 ## How to run
@@ -46,6 +48,13 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 19 Nov — labels checked against pixels, launch zip, fourth look batch (D-027)
+- Done: `wrapper/eyes.py`: refracted `pupil_center_2D`, `find_pupil` on the renders, direction check on the pixels, launch camera forced, `--sequence` saves `scene.blend`. `tools/make_launch_zip.py` + `docs/launch_bundle_README.md`. Look: hero eye wrap, eye-texture corner pink cut, plica removed, iris fibres straighter and sharper, eye scattering on the white only, skin bump weaker. README: related work, label-error row, render count (8 required of 33). Deck reads the label error from the metadata and refuses to build if the direction check fails.
+- Checked on a scratch run before the batch: direction 5 of 5 (shifts about 19 px), label error 0.96 px mean, 1.78 max; same 5 of 5 from a clean unzip of the zip. A/B renders of every look change on set 01 (scratchpad, not kept).
+- Next: let `chain5.sh` finish, look at every still and video frame (black-frame guard runs in render.py), refill the README label numbers from `outputs/launch_spec/metadata.json`, commit outputs, audit again.
+- Gotchas: `VITVellore_ZeroDrift.zip` is git-ignored (72 MB); upload it with the form. The detector threshold is frozen; do not tune it on the launch frames.
+- Run: `blender --background --python wrapper/eyes.py -- --sequence outputs/launch_spec && python3 tools/make_launch_zip.py`
+
 ### 18 Nov — final repo audit, README rewrite, licence
 - **Done:** README rewritten for judges (motion GIF `docs/motion.gif`, numbers table with the command behind each number, video links, results and limitations, team, licence). `LICENSE` added (Apache 2.0, same as GNM; team to confirm). Deck: "14 unit tests" was stale (16), seam step now 4 of 255 (re-measured), limitation about "one face" corrected (set 03 has a video); deck rebuilt and validated. `docs/ASSETS.md`: GNM row was "planned", texture row said "no outside data" (skin colour is MakeHuman CC0), reference video had no row; all fixed. GitHub description and topics set.
 - **Checked today:** 16 tests pass; `evaluate_motion.py` 15 of 15 in range; `seam_audit.py` PASS (front step at most 4 on all sets); launch spec 10 frames at 1024², direction check 5 of 5; every relative link in the README resolves.

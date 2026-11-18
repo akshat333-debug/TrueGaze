@@ -19,7 +19,8 @@ Every number below is printed by a script in this repo; the command is next to i
 | Texture sets | **8**, light to dark skin, six eye colours, left and right iris always distinct | `python3 -m truegaze.textures` |
 | Seams on the face | **step of 4 of 255 or less** on all 8 sets (142 seam edges measured) | `python3 tools/seam_audit.py` |
 | Eye motion | **15 of 15** numbers inside published ranges: saccades 5–30°, blink timing and rate, vergence, fixation drift | `python3 tools/evaluate_motion.py` |
-| Launch-spec direction check | **5 of 5** (Left, Right, Up, Down, Reset) | `outputs/launch_spec/metadata.json` |
+| Launch-spec direction check | **5 of 5** (Left, Right, Up, Down, Reset), judged from the pupils found in the rendered pixels, not from our own labels | `wrapper/eyes.py -- --check` |
+| Pupil labels vs. the image | **0.96 px** mean, 1.78 px max, between `pupil_center_2D` (refracted by the cornea) and the pupil found in each of the 10 frames | `outputs/launch_spec/metadata.json` → `label_error_px` |
 | Skin fit onto GNM | **0.5 mm** median, lids and lip line pinned | `tools/transfer_skin.py` |
 | UV portability | sets wrap onto stock and random GNM identities with none of our rig | `apply_textures.py` |
 | Rebuild | **one command** from a fresh clone, downloads pinned by SHA-256 | `./reproduce.sh` |
@@ -49,7 +50,7 @@ Demo video (85 s, cut by `tools/make_demo.py`): *link added at submission.*
 | 5–10 UV texture maps, face + distinct left/right iris | `textures/01` … `08`, one overview sheet each in `uv_maps/` | `python3 -m truegaze.textures` |
 | Python script with inputs `Left`, `Right`, `Generate Motion` | `render.py` | — |
 | A video for each input, ≤ 15 s | `outputs/videos/` (9, 9 and 12 s) | `render.py --all` |
-| 5–10 renders with different textures | `outputs/renders/` (24: front, close and hero view of all 8 sets; wire and clay of set 01) | `tools/stills.py` |
+| 5–10 renders with different textures | **the 8 required renders: `outputs/renders/01_front.png` … `08_front.png`**, one per texture set. The folder also holds 25 extra views: close and hero of every set, clay and wire of set 01, and 3 UV-portability proofs (33 PNGs in all) | `tools/stills.py` |
 | `.blend` with an expression on the Timeline | `outputs/scene.blend` (eyes, lids, brows and pupil keyed; textures packed) | `render.py --input "Generate Motion" --blend outputs/scene.blend` |
 | Launch spec: `eyes.move(h, v)`, `reset()`, `render()`, 10 clockwise frames at 1024², per-frame JSON | `wrapper/eyes.py`, `outputs/launch_spec/` | `wrapper/eyes.py -- --sequence outputs/launch_spec` |
 
@@ -61,7 +62,7 @@ Demo video (85 s, cut by `tools/make_demo.py`): *link added at submission.*
 | README with reproducible setup and Docker file | this file, `reproduce.sh`, `Dockerfile` |
 | Deck named `CollegeName_TeamName` | `VITVellore_ZeroDrift.pptx`, built from the organizers' template by `tools/make_deck.py` |
 | Demo video, 3 minutes or less | `outputs/demo.mp4` (85 s, not in git; uploaded, link above) |
-| Launch-spec bundle (`scene.blend`, `wrapper/eyes.py`, `renders/`, `metadata.json`, `README.md`) | in place in the repo; as one zip: `zip -r VITVellore_ZeroDrift.zip outputs/scene.blend wrapper outputs/launch_spec README.md` |
+| Launch-spec bundle (`scene.blend`, `wrapper/eyes.py`, `renders/`, `metadata.json`, `README.md`) | `python3 tools/make_launch_zip.py` writes `VITVellore_ZeroDrift.zip` with exactly that layout at the zip root (plus `wrapper/truegaze/`, which `eyes.py` imports). Tested from a clean unzip: `blender --background scene.blend --python wrapper/eyes.py -- --check` passes 5 of 5 |
 
 ## Run it
 
@@ -102,6 +103,16 @@ Final quality renders single frames with Cycles and joins them with `ffmpeg`. A 
 - **Skin moved in 3D, not painted.** Public-domain MakeHuman skins are carried onto GNM by fitting one head to the other (median 0.5 mm), then resampled into GNM's UV layout.
 - **The eye pushes the face.** Fitted shapes sink the eye 2.9 mm into a socket, lift the lid 1.6 mm over the cornea and drag nearby skin up to 2.7 mm as the eye turns. Lashes follow the lid.
 - **Nothing hand-made, licence-clean.** No hand-edited `.blend`, no painted texture, no photo or scan of an identifiable person. GNM is Apache 2.0, MakeHuman skins are CC0.
+
+## Related work
+
+Synthetic eyes for gaze research are an established line of work; TrueGaze sits with the scripted Blender pipelines.
+- **SynthesEyes** (Wood et al., ICCV 2015) and **UnityEyes** (Wood et al., ETRA 2016): rendered eye regions with refracting corneas and randomised lighting, used to train gaze estimators.
+- **EyeRender** (Świrski & Dodgson, 2014) and **RIT-Eyes** (Nair et al., 2020): Blender eye models with a refracting cornea and per-image pupil, iris and sclera labels. Both account for corneal refraction in their ground truth; our `pupil_center_2D` does too.
+- **NVGaze** (Kim et al., CHI 2019) and **Microsoft Face Synthetics** (Wood et al., ICCV 2021): large rendered datasets; Face Synthetics reports landmark models trained on synthetic data alone matching real-data training.
+- **GazeGene** (CVPR 2025): MetaHuman heads with full 3D eye labels (eyeball centre, optic axis, iris contour).
+
+What TrueGaze adds within a hackathon budget: an open, Apache-licensed head (GNM) instead of a non-commercial one; controls solved inside GNM's own expression space; soft tissue that moves with the eye; motion checked against measured human ranges; and labels checked against the rendered pixels. We do not claim downstream gaze-estimation results: training and testing a gaze network on real data was out of scope.
 
 ## How it works
 

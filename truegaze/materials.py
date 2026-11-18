@@ -27,7 +27,7 @@ def skin(folder):
     nt.links.new(_image(nt, folder / "color.1001.jpg").outputs["Color"], bsdf.inputs["Base Color"])
     nt.links.new(_image(nt, folder / "roughness.1001.jpg", data=True).outputs["Color"], bsdf.inputs["Roughness"])
     bump = nt.nodes.new("ShaderNodeBump")
-    bump.inputs["Strength"].default_value = 0.5
+    bump.inputs["Strength"].default_value = 0.35  # 0.5 read as orange peel in close views
     bump.inputs["Distance"].default_value = 0.0006  # m: pores are a fraction of a millimetre deep
     # expression wrinkles: a second height map, revealed by how far the brows are raised and the eyes squeezed.
     # The two Value nodes are driven by the head's shape keys (see drive_wrinkles).
@@ -48,7 +48,7 @@ def skin(folder):
     # relief finer than the texture can hold: breaks highlights into the pin-point glints of real skin
     grain, micro = nt.nodes.new("ShaderNodeTexVoronoi"), nt.nodes.new("ShaderNodeBump")  # cells, like skin's own micro-pattern
     grain.inputs["Scale"].default_value = 3500
-    micro.inputs["Strength"].default_value = 0.35
+    micro.inputs["Strength"].default_value = 0.2
     micro.inputs["Distance"].default_value = 0.00008
     nt.links.new(nt.nodes.new("ShaderNodeTexCoord").outputs["Object"], grain.inputs["Vector"])
     nt.links.new(grain.outputs["Distance"], micro.inputs["Height"])
@@ -134,10 +134,29 @@ def eye(folder, tile):
     relief.inputs["Distance"].default_value = 0.0003
     nt.links.new(nt.nodes["Image Texture"].outputs["Color"], relief.inputs["Height"])
     nt.links.new(relief.outputs["Normal"], bsdf.inputs["Normal"])
-    bsdf.inputs["Subsurface Weight"].default_value = 0.25  # the white of the eye glows a little, it is not paint
+    # the white of the eye glows a little, it is not paint; the iris does not: scattering 1.5 mm wide smeared its fibres
+    link(num("MULTIPLY", ramp(radius, 0.16, 0.19), 0.25), bsdf.inputs["Subsurface Weight"])
     bsdf.inputs["Subsurface Radius"].default_value = (1.0, 0.6, 0.5)
     bsdf.inputs["Subsurface Scale"].default_value = 0.0015
+    # light wrap: the eye white passes light round the eyeball, so the side facing away is dim, not black.
+    # Off (0) by default; hero_view turns it up, where the only light is a hard key from one side.
+    wrap, emit, total = new("ShaderNodeValue"), new("ShaderNodeEmission"), new("ShaderNodeAddShader")
+    wrap.name = "eye_wrap"
+    wrap.outputs[0].default_value = 0.0
+    link(glow.outputs["Vector"], emit.inputs["Color"])
+    link(wrap.outputs[0], emit.inputs["Strength"])
+    link(bsdf.outputs["BSDF"], total.inputs[0])
+    link(emit.outputs["Emission"], total.inputs[1])
+    link(total.outputs["Shader"], nt.nodes["Material Output"].inputs["Surface"])
     return mat
+
+
+def set_eye_wrap(amount):
+    """Strength of the eye-white light wrap (see eye()); 0 turns it off."""
+    for mat in bpy.data.materials:
+        node = mat.node_tree.nodes.get("eye_wrap") if mat.use_nodes else None
+        if node:
+            node.outputs[0].default_value = amount
 
 
 def cornea():

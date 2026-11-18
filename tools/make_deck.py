@@ -10,6 +10,7 @@ Run: python3 tools/make_deck.py        -> VITVellore_ZeroDrift.pptx
 """
 import copy
 import io
+import json
 import subprocess
 from pathlib import Path
 
@@ -23,6 +24,9 @@ from pptx.util import Inches, Pt
 ROOT = Path(__file__).resolve().parent.parent
 MEMBERS = ["Akshat Agrawal (23MIC0079)", "Hemang Dubey (23MIC0069)", "Ishita Solanki (23MID0443)"]
 REPO = "github.com/akshat333-debug/TrueGaze"
+LAUNCH = json.loads((ROOT / "outputs" / "launch_spec" / "metadata.json").read_text())
+LABEL_ERR = LAUNCH["label_error_px"]["refracted"]  # written by wrapper/eyes.py --sequence
+assert all(LAUNCH["direction_check"].values()), "direction check failed: fix before building the deck"
 
 WHITE, TEXT, MUTED = RGBColor(0xFF, 0xFF, 0xFF), RGBColor(0xE8, 0xED, 0xF5), RGBColor(0x9A, 0xA8, 0xC0)
 CYAN, GREEN, AMBER, PANEL = RGBColor(0x00, 0xB4, 0xD8), RGBColor(0x00, 0xE5, 0xB0), RGBColor(0xF5, 0x9E, 0x0B), RGBColor(0x0D, 0x1B, 0x3E)
@@ -188,7 +192,7 @@ columns = [
     ("Fit once", GREEN, ["Lid and brow controls", "Socket, bulge, skin drag", "Lashes, brows, down", "Skin transfer in 3D"]),
     ("Generate", GREEN, ["8 texture sets\n(UDIM 1001, 1002, 1004)", "Motion engine\n(gaze, lids, blinks)"]),
     ("Build and render", AMBER, ["Scene from script\n(Blender 4.5, bpy)", "render.py\nCycles on Metal"]),
-    ("Outputs", AMBER, ["3 videos", "24 stills", "scene.blend", "Launch-spec frames\nand metadata"]),
+    ("Outputs", AMBER, ["6 videos", "33 stills", "scene.blend", "Launch-spec frames\nand metadata"]),
 ]
 for c, (name, accent, boxes) in enumerate(columns):
     x = 0.4 + c * 1.87
@@ -202,7 +206,7 @@ for c, (name, accent, boxes) in enumerate(columns):
         arrow.fill.fore_color.rgb = MUTED
         arrow.line.fill.background()
 text(s_arch, 0.4, 4.6, 9.2, 0.7, [
-    [("Checks on every build: ", CYAN, True), ("seam audit, motion evaluation against published ranges, 16 unit tests, direction check.", TEXT, False)],
+    [("Checks on every build: ", CYAN, True), ("seam audit, motion evaluation against published ranges, 16 unit tests, direction check on the rendered pixels.", TEXT, False)],
     [("Stack: ", CYAN, True), ("Python 3, NumPy, SciPy, Pillow, Blender 4.5 LTS (bpy, Cycles), ffmpeg. No trained model, no GPU server.", TEXT, False)],
 ], size=11, gap=3)
 
@@ -246,11 +250,11 @@ table(s_kin, 0.4, 1.7, [3.0, 1.3, 1.9, 0.9], [
     ["Blink rate at rest", "16.7 per min", "10 to 20 per min", "in range"],
     ["Vergence on a 35 cm target, per eye", "5.1 degrees", "5.06 degrees (geometry)", "in range"],
 ], size=10.5, row_h=0.31)
-card(s_kin, 7.75, 1.7, 1.85, 1.15, "5 of 5", "Left, Right, Up, Down, Reset pass the direction check", accent=AMBER)
+card(s_kin, 7.75, 1.7, 1.85, 1.15, "5 of 5", "Left, Right, Up, Down, Reset, judged from the pupils found in the renders", accent=AMBER)
 card(s_kin, 7.75, 3.0, 1.85, 1.18, "4 fixed", "The check found four numbers off. All four were corrected", accent=AMBER)
 text(s_kin, 0.4, 4.35, 9.2, 0.9, [
     "Also in the motion: both eyes converge, upper lids follow vertical gaze, large gaze jumps trigger a blink, the eye never freezes (drift and micro-saccades), pupils fluctuate.",
-    [("Source: tools/evaluate_motion.py, which lists the papers. Direction check: outputs/launch_spec/metadata.json", MUTED, False)],
+    [("Source: tools/evaluate_motion.py, which lists the papers. Direction check and pupil-label error: outputs/launch_spec/metadata.json", MUTED, False)],
 ], size=11, gap=4)
 
 # 8 portability
@@ -321,7 +325,7 @@ text(s_brownie2, 6.55, 1.7, 3.05, 3.5, [
     [("Blink follows the eyeball: ", CYAN, True), ("a half-closed shape keeps the lid on the curve.", TEXT, False)],
     [("Wrinkles on demand: ", CYAN, True), ("forehead lines deepen as brows rise, crow's feet as lids close.", TEXT, False)],
     [("Light pooling in the iris: ", CYAN, True), ("computed in the shader. An approximation, not traced light.", TEXT, False)],
-    [("Inner corner: ", CYAN, True), ("pink tissue and its fine ridge, which GNM lacks.", TEXT, False)],
+    [("Inner corner: ", CYAN, True), ("pink tissue, which GNM lacks.", TEXT, False)],
     [("Motion blur: ", CYAN, True), ("fast saccades smear like on a real camera.", TEXT, False)],
 ], size=11, gap=7)
 picture(s_brownie2, video_frames("Generate_Motion_hero", (0.6, 1.0, 2.6, 5.2)), 0.4, 3.8, 5.9)
@@ -333,10 +337,10 @@ headline(s_limits, "What works, and what a close look will still find")
 card(s_limits, 0.4, 1.7, 4.5, 3.3, "Results", [
     "All six required outputs, rebuilt by one script.",
     "8 texture sets; seam step 4 of 255 or less on the face.",
-    "Every sourced motion check in range; direction check 5 of 5.",
+    "Every sourced motion check in range; direction check 5 of 5 from the pixels.",
+    f"Pupil labels refracted by the cornea: {LABEL_ERR['mean']} px mean, {LABEL_ERR['max']} px max from the pupil found in the image.",
     "Textures wrap onto stock and random GNM heads.",
-    "Skin fit to the photo source: median 0.5 mm.",
-    "16 unit tests pass.",
+    "Skin fit to the photo source: median 0.5 mm; 16 unit tests pass.",
 ], accent=GREEN, size=13)
 card(s_limits, 5.1, 1.7, 4.5, 3.3, "Limits", [
     "Iris light pooling is a shader estimate, not traced caustics.",

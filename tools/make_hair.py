@@ -206,22 +206,6 @@ def caruncle(upper, lower):
     return centres, (np.array([0.3, 0.65, 0.85, 0.85, 0.7, 0.45, 0.12]) * MM)[None]
 
 
-def plica(upper, lower):
-    """Plica semilunaris: the thin pink fold of membrane on the eyeball beside the caruncle. Modelled as its
-    visible free edge: a fine ridge, half sunk into the eyeball, running from the upper lid to the lower.
-    (A flat ribbon was tried first and stood off the curved eyeball like a panel.)"""
-    u, s = np.array([0.165]), np.linspace(0.0, 1.0, 9)[:, None]
-
-    def centres(V):
-        (p1, t1, _, _), (p2, _, _, _) = upper.frame(V, u), lower.frame(V, u)
-        a, b = p1[0] - upper.centre, p2[0] - upper.centre
-        radius = (1 - s) * np.linalg.norm(a) + s * np.linalg.norm(b) - 0.05 * MM
-        bow = -t1[0] * 0.8 * MM * np.sin(np.pi * s)  # a crescent: its middle sits nearer the nose than its ends
-        return (upper.centre + unit((1 - s) * a + s * b + bow) * radius)[None]
-
-    return centres, (0.22 * MM * np.sin(np.pi * np.linspace(0.03, 0.97, 9)) ** 0.7)[None]
-
-
 def skin_uv(m):
     """UV position of every vertex in the skin tile (seams are far from the brows and lids)."""
     sel = m.quad_tiles() == 1001
@@ -255,7 +239,7 @@ if __name__ == "__main__":
             fronts.append(gaussian_filter1d(skin_uv(m)[lid.front], 2.0, axis=0, mode="nearest"))
             print(side, "upper" if lid.up > 0 else "lower", "margin depth mm:", np.round(lid.depth[::4] / MM, 1))
         parts.append((*caruncle(*lids), 8, 3))
-        parts.append((*plica(*lids), 6, 3))
+        # no plica: a ridge on the eyeball read as a bright bar in the inner corner whatever its size (18 Nov)
         for ring, front in zip(rings, fronts):
             resample = lambda r, n: np.stack([np.interp(np.linspace(0, len(r) - 1, n), np.arange(len(r)), r[:, i]) for i in range(2)], axis=1)
             lash_uv.append(resample(front, 12 * len(ring)))  # lashes root on the front edge of the margin

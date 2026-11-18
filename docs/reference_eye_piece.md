@@ -76,7 +76,7 @@ All 682 posts by the author were downloaded; beyond the 49 eye posts, the 112 wi
 | Item | How he does it | How we did it | Honest difference |
 |---|---|---|---|
 | Light pooling in the iris | real refracted caustics; months of trouble, usable only once path guiding arrived | computed in the iris shader: for each iris point, how far it lies on the side away from the key light, as a crescent near the rim (`materials.eye`, `set_key_direction`) | an approximation of where the light gathers, not traced light; follows the key light only |
-| Plica semilunaris | a thin modelled flap, "the most time I've spent per millimetre" | its visible free edge as a fine curved ridge beside the caruncle, following both lids (`tools/make_hair.py`) | no membrane surface behind the edge |
+| Plica semilunaris | a thin modelled flap, "the most time I've spent per millimetre" | none since 19 Nov: the ridge we had read as a bright bar and was removed (D-027) | no plica |
 | Wrinkles that change with expression | two sculpted wrinkle height maps, revealed by masks "driven directly by the shape key values" (he gave up on tension maps for the face) | same scheme: `wrinkle.1001` map (red = forehead lines, green = crow's feet and under-eye lines) faded in by drivers on brow raise and lid closure (`materials.drive_wrinkles`) | lines are drawn by rule, not sculpted; two expression groups, not fifty |
 
 Also taken from the wider thread: Christensen-Burley scattering for the eyeball (random walk "creates a grey outline at the limbus"), random-walk skin mode for skin, Voronoi cells for the finest skin relief ("the finest bump is Voronoi"), and his remark that darker skin is "less translucent and more reflective" (already true of our sets through roughness and tone).

@@ -376,7 +376,7 @@ def eye(n, radii, outer, inner, seed):
         return map_coordinates(g, [t * (nr - 1), ((theta + bend + np.pi) / (2 * np.pi) % 1) * nt], order=1, mode="nearest")
 
     bend = 0.0
-    bend = 0.045 * polar(10, 40, 1.5, 2.5)  # fibres wander sideways on their way out, they are not ruler-straight
+    bend = 0.02 * polar(10, 40, 1.5, 2.5)  # fibres wander sideways on their way out, they are not ruler-straight (0.045 swirled like paint)
 
     # sclera: off-white, pinker toward the corners, thin red veins that fade before the iris
     # (real eye whites are a warm grey, not paper white: too bright a white is the commonest giveaway of a CG eye)
@@ -407,7 +407,9 @@ def eye(n, radii, outer, inner, seed):
     veins = np.clip(veins / np.quantile(veins[veins > 0], 0.97), 0, 1) * fade
     sclera += (0.25 * np.clip(deep / np.quantile(deep, 0.99), 0, 1) * fade)[..., None] * (np.array([0.66, 0.40, 0.36]) - sclera)
     sclera += (0.38 * veins)[..., None] * (np.array([0.58, 0.22, 0.19]) - sclera)
-    sclera += (0.5 * smoothstep(0.24, 0.42, r) * np.abs(np.cos(theta)) ** 2)[..., None] * (np.array([0.66, 0.36, 0.33]) - sclera)  # pink corners
+    # pink corners, kept faint: this map turns with the eyeball, so pink painted here slid into view beside the
+    # iris whenever the eye turned in; the redness of the corners themselves belongs to the lids, which stay put
+    sclera += (0.18 * smoothstep(0.30, 0.44, r) * np.abs(np.cos(theta)) ** 2)[..., None] * (np.array([0.66, 0.36, 0.33]) - sclera)
 
     # iris: inner colour near the pupil, outer colour beyond the collarette, radial fibres, dark rim
     t = np.clip((r - pupil_r) / (iris_r - pupil_r), 0, 1)
@@ -417,7 +419,7 @@ def eye(n, radii, outer, inner, seed):
     outer, inner = (np.mean(c) + 0.7 * (np.array(c) - np.mean(c)) for c in (outer, inner))  # real irises are greyer than paint
     inner = 0.35 * inner + 0.65 * outer  # the centre is a tint of the main colour, not a second colour
     iris = inner + mix[..., None] * (np.array(outer) - inner)
-    ropes = polar(30, 220, 6, 1.8)                                   # about sixty thick cords, not hundreds of hairlines
+    ropes = polar(30, 220, 6, 1.2)                                   # about sixty thick cords, not hundreds of hairlines
     fibres = 0.8 * ropes + 0.2 * polar(90, 1500, 14, 0.9)
     # crypts: dark pits that open between cords, mostly around the collarette
     crypts = smoothstep(0.1, 0.9, -ropes) * smoothstep(0.1, 1.0, polar(20, 90, 1.2, 1.2)) * smoothstep(0.2, 0.38, t) * (1 - smoothstep(0.55, 0.8, t))
@@ -425,7 +427,7 @@ def eye(n, radii, outer, inner, seed):
     collarette = np.exp(-((t - ring) / 0.035) ** 2)
     furrows = sum(np.exp(-((t - c - 0.02 * wavy) / 0.018) ** 2) for c in (0.62, 0.76, 0.88))  # contraction furrows
     ruff = 1 - 0.6 * (1 - smoothstep(0.0, 0.05, t))                  # dark pigment frill at the pupil edge
-    shade = (1 + 0.42 * fibres) * (1 - 0.38 * crypts) * (1 + 0.12 * collarette) * (1 - 0.05 * furrows) * ruff * (1 - 0.62 * smoothstep(0.70, 1.0, t))
+    shade = (1 + 0.42 * fibres) * (1 - 0.55 * crypts) * (1 + 0.12 * collarette) * (1 - 0.12 * furrows) * ruff * (1 - 0.62 * smoothstep(0.70, 1.0, t))
     iris = iris * np.clip(shade, 0.05, 2.2)[..., None]
     spots = smoothstep(2.3, 2.8, polar(44, 120, 1.2, 1.2)) * smoothstep(0.12, 0.3, t) * (1 - smoothstep(0.75, 0.9, t))  # a few brown freckles
     iris += (0.6 * spots)[..., None] * (np.array([0.22, 0.11, 0.04]) - iris)
