@@ -202,7 +202,7 @@ for c, (name, accent, boxes) in enumerate(columns):
         arrow.fill.fore_color.rgb = MUTED
         arrow.line.fill.background()
 text(s_arch, 0.4, 4.6, 9.2, 0.7, [
-    [("Checks on every build: ", CYAN, True), ("seam audit, motion evaluation against published ranges, 14 unit tests, direction check.", TEXT, False)],
+    [("Checks on every build: ", CYAN, True), ("seam audit, motion evaluation against published ranges, 16 unit tests, direction check.", TEXT, False)],
     [("Stack: ", CYAN, True), ("Python 3, NumPy, SciPy, Pillow, Blender 4.5 LTS (bpy, Cycles), ffmpeg. No trained model, no GPU server.", TEXT, False)],
 ], size=11, gap=3)
 
@@ -259,7 +259,7 @@ headline(s_port, "The textures fit any GNM head, and the seams are measured")
 for i, name in enumerate(("portability_03", "portability_05_identity3", "portability_07_identity11")):
     picture(s_port, ROOT / "outputs" / "renders" / f"{name}.png", 0.4 + i * 2.05, 1.7, 1.95, crop=(0.15, 0.1, 0.85, 0.9))
 text(s_port, 0.4, 4.02, 6.1, 0.5, "Stock GNM heads straight from Google's weights, one template face and two random identities, wearing our sets. None of our rig is on them (apply_textures.py).", size=10, color=MUTED)
-card(s_port, 6.75, 1.7, 2.85, 1.05, "Seam step 6 of 255 or less", "On the front of the face, all 8 sets. 142 seam edges checked (tools/seam_audit.py).", accent=GREEN)
+card(s_port, 6.75, 1.7, 2.85, 1.05, "Seam step 4 of 255 or less", "On the front of the face, all 8 sets. 142 seam edges checked (tools/seam_audit.py).", accent=GREEN)
 card(s_port, 6.75, 2.87, 2.85, 1.05, "Fresh clone to finished videos", "./reproduce.sh rebuilds every asset and output. Downloads are pinned by SHA-256.", accent=GREEN)
 card(s_port, 6.75, 4.04, 2.85, 1.2, "Plain GNM layout", "Files are named by GNM's UDIM tile. The .blend plays with no script permission.", accent=GREEN)
 text(s_port, 0.4, 4.7, 6.1, 0.5, "The seam audit caught two real regressions during the build, before any render showed them.", size=12)
@@ -332,7 +332,7 @@ header(s_limits, "RESULTS & LIMITATIONS")
 headline(s_limits, "What works, and what a close look will still find")
 card(s_limits, 0.4, 1.7, 4.5, 3.3, "Results", [
     "All six required outputs, rebuilt by one script.",
-    "8 texture sets; seam step 6 of 255 or less on the face.",
+    "8 texture sets; seam step 4 of 255 or less on the face.",
     "Every sourced motion check in range; direction check 5 of 5.",
     "Textures wrap onto stock and random GNM heads.",
     "Skin fit to the photo source: median 0.5 mm.",
@@ -343,7 +343,7 @@ card(s_limits, 5.1, 1.7, 4.5, 3.3, "Limits", [
     "The upper lid creases in shading only; it does not fold into itself.",
     "Skin wrinkles are drawn by rule, not sculpted.",
     "Sheen on dark skin was tuned by eye, not measured.",
-    "The three videos use one face (set 01); the other sets are stills.",
+    "The required videos use set 01; a fourth shows set 03; other sets are stills.",
     "Motion is checked against published ranges, not our own eye recordings.",
 ], accent=AMBER, size=13)
 

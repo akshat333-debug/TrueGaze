@@ -1,5 +1,7 @@
 # Improvement list (14 Nov)
 
+Historical (14 Nov). The current list of faults and next steps is `docs/SELF_AUDIT.md`.
+
 Two inputs: an outside frame-by-frame review of our renders against "Eye Piece" (pasted by Akshat), and a web search across papers, engine docs and artist forums. Every claim in the review was checked against this repo before it was accepted.
 
 ## 1. The outside review, checked

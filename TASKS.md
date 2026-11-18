@@ -2,7 +2,7 @@
 
 Status: `todo` / `in progress (owner)` / `done (commit)`. Owners: **A** rig + motion, **B** textures + shading, **C** pipeline, tests, docs, deck, video. Full plan: `docs/PLAN.md`.
 
-## Status for whoever picks this up (17 Nov, 08:15)
+## Status for whoever picks this up (18 Nov)
 Full re-render with the D-026 look finished 17 Nov 07:59 and is committed: 8 texture sets, 24 stills, portability proofs, overviews, launch-spec frames, `.blend`, six videos (Left, Right, Generate Motion front / hero / wire, Generate Motion on set 03), deck and demo. 16 tests pass, the deck passes the pptx validator, no dark frame in any video. All eighteen look tasks are done; what is left below needs Akshat. Read the newest handoff note first, then `DECISIONS.md` (latest D-026).
 
 ## Open, in priority order
@@ -46,6 +46,11 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 
 ---
 ## Handoff notes (newest on top)
+### 18 Nov — final repo audit, README rewrite, licence
+- **Done:** README rewritten for judges (motion GIF `docs/motion.gif`, numbers table with the command behind each number, video links, results and limitations, team, licence). `LICENSE` added (Apache 2.0, same as GNM; team to confirm). Deck: "14 unit tests" was stale (16), seam step now 4 of 255 (re-measured), limitation about "one face" corrected (set 03 has a video); deck rebuilt and validated. `docs/ASSETS.md`: GNM row was "planned", texture row said "no outside data" (skin colour is MakeHuman CC0), reference video had no row; all fixed. GitHub description and topics set.
+- **Checked today:** 16 tests pass; `evaluate_motion.py` 15 of 15 in range; `seam_audit.py` PASS (front step at most 4 on all sets); launch spec 10 frames at 1024², direction check 5 of 5; every relative link in the README resolves.
+- **Blocking public release:** the reference video is still in the repo and in history (Akshat's word needed to purge). Demo link not yet in README or deck.
+- **Next:** Akshat: upload demo, give link; say go for the purge, clean-clone rebuild, public, form.
 ### 17 Nov, 08:40 — audit run again on the D-026 renders
 - **Done:** `docs/SELF_AUDIT.md` rewritten. Estimate 74 of 100 (was 71.5); photorealism 40 of 60 (was 38). No code changed.
 - **Found:** hero view eye white on the far side is a flat dark slab (new with D-026); bright crescent on the hero iris; pink outer eye white in `Left` / `Right`; iris still painted; skin still canvas noise.

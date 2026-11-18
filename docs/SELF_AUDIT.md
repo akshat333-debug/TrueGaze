@@ -64,7 +64,7 @@ All five required outputs exist. Three look batches and about 27 hours of render
 
 ### 7. Pipeline and portability engineer — 8.5/10 (was 8)
 - `./reproduce.sh` rebuilds everything; a fresh clone runs 16 tests and the motion check with nothing missing (checked 15 Nov).
-- Seam step on the front of the face: at most 6 of 255 on every set.
+- Seam step on the front of the face: at most 4 of 255 on every set (17 Nov).
 - Crown patch on the portability renders: gone (seam fill takes the photo's local tone, D-026). A small red spot sits at the nostril on `portability_03`; cause not looked for.
 - The black-frame guard gave a false alarm on the hero view once the head moved (fixed by leaving out the left fifth of the frame); the hero view now needs a wider margin (4 instead of 2). It is a weaker guard than it was, so on 17 Nov the eye regions of the four front videos were also measured frame by frame: no dark frame.
 - Docker image builds; videos run out of memory in it on the M3; not tried on Linux.
