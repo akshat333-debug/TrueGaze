@@ -217,3 +217,9 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 - Next: Day 1 spike above. Go/no-go on GNM by end of 13 Nov.
 - Gotchas: GNM has no skin texture. On Akshat's Mac use `/opt/homebrew/bin/git` and `/opt/anaconda3/bin/python3` until `sudo xcodebuild -license accept` is run. 8 GB RAM: keep one 4K tile, 1024² renders.
 - Run Blender headless: `/Applications/Blender.app/Contents/MacOS/Blender --background --python <script.py>`
+
+### Handoff 19 Nov (GazeBase comparison)
+- Done: `tools/gazebase_compare.py` compares motion.py with GazeBase v2.0 (CC BY 4.0, 322 subjects, Round 1 S1) -> `outputs/gazebase_comparison.json`. Measurement only, nothing tuned.
+- Result: saccade duration within 0-10 ms of human; our peak velocity 15-20% low; fixation dispersion median 0.124 vs 0.141 deg (our tail narrower); micro-saccades 0.9/s vs 2.6/s; blinks 13.3 vs 11.3/min.
+- Run: `python3 tools/gazebase_compare.py ~/datasets/GazeBase/GazeBase_v2_0.zip` (~6 min; data not in repo).
+- Open: tune or not (would need held-out subject split and a full video re-render).

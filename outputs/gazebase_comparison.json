@@ -1,0 +1,147 @@
+{
+ "source": "GazeBase v2.0, Round 1, session 1 (CC BY 4.0)",
+ "human": {
+  "subjects": 322,
+  "duration_fit": {
+   "intercept_ms": 27.0,
+   "slope_ms_per_deg": 1.97,
+   "n": 40539
+  },
+  "main_sequence": [
+   {
+    "bin_deg": [
+     4,
+     8
+    ],
+    "n": 9884,
+    "duration_ms": 36.0,
+    "peak_velocity": 322.0
+   },
+   {
+    "bin_deg": [
+     8,
+     12
+    ],
+    "n": 10332,
+    "duration_ms": 45.0,
+    "peak_velocity": 412.0
+   },
+   {
+    "bin_deg": [
+     12,
+     16
+    ],
+    "n": 8996,
+    "duration_ms": 53.0,
+    "peak_velocity": 479.0
+   },
+   {
+    "bin_deg": [
+     16,
+     20
+    ],
+    "n": 5949,
+    "duration_ms": 60.0,
+    "peak_velocity": 531.0
+   },
+   {
+    "bin_deg": [
+     20,
+     25
+    ],
+    "n": 3914,
+    "duration_ms": 69.0,
+    "peak_velocity": 575.0
+   },
+   {
+    "bin_deg": [
+     25,
+     30
+    ],
+    "n": 1464,
+    "duration_ms": 76.0,
+    "peak_velocity": 638.0
+   }
+  ],
+  "fixation_dispersion_deg": {
+   "median": 0.141,
+   "p10": 0.075,
+   "p90": 0.317,
+   "windows": 3489
+  },
+  "micro_saccades_per_s": 2.6,
+  "blinks_per_min": 11.3,
+  "blink_loss_ms_median": 110
+ },
+ "truegaze": {
+  "duration_fit": {
+   "intercept_ms": 21.5,
+   "slope_ms_per_deg": 2.34,
+   "n": 25
+  },
+  "main_sequence": [
+   {
+    "bin_deg": [
+     4,
+     8
+    ],
+    "n": 4,
+    "duration_ms": 36.0,
+    "peak_velocity": 267.0
+   },
+   {
+    "bin_deg": [
+     8,
+     12
+    ],
+    "n": 4,
+    "duration_ms": 47.0,
+    "peak_velocity": 350.0
+   },
+   {
+    "bin_deg": [
+     12,
+     16
+    ],
+    "n": 4,
+    "duration_ms": 55.0,
+    "peak_velocity": 406.0
+   },
+   {
+    "bin_deg": [
+     16,
+     20
+    ],
+    "n": 4,
+    "duration_ms": 65.0,
+    "peak_velocity": 446.0
+   },
+   {
+    "bin_deg": [
+     20,
+     25
+    ],
+    "n": 5,
+    "duration_ms": 75.0,
+    "peak_velocity": 481.0
+   },
+   {
+    "bin_deg": [
+     25,
+     30
+    ],
+    "n": 4,
+    "duration_ms": 86.0,
+    "peak_velocity": 506.0
+   }
+  ],
+  "fixation_dispersion_deg": {
+   "median": 0.124,
+   "p10": 0.09,
+   "p90": 0.178
+  },
+  "micro_saccades_per_s": 0.91,
+  "blinks_per_min": 13.3,
+  "blink_closed_ms": 198
+ }
+}
