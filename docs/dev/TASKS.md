@@ -238,3 +238,7 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 - Done: `tools/make_demo.py` rebuilt: 12 segments, Sarvam Bulbul v4-flash voice `shubh_en_ads` (en-IN), 37 captions snapped to speech pauses, chips naming each shot, annotated launch frames (label ring vs found-pupil dot), terminal shots replaying real runs of `render.py --input Left` and `wrapper/eyes.py --check`. 168 s, -16 LUFS. Every segment checked with Sarvam speech-to-text.
 - Gotchas: key via `SARVAM_API_KEY` env only, never committed; voice cached in `renders/tmp/voice/`. "saccade" is mispronounced mid-sentence; `SAY` map gives spoken spellings. Concat demuxer stops at a segment with different colour tags, so the final join uses the concat filter.
 - Next: upload `outputs/demo.mp4`, put link in README.
+
+### Handoff 19 Nov (demo uploaded)
+- Demo on YouTube, unlisted: https://youtu.be/ydB1k3vBDyk. Linked in README and docs/OUTPUTS.md.
+- Next: repo public, form by 21 Nov with VITVellore_ZeroDrift.zip.
