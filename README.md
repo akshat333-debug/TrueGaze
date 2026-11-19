@@ -23,6 +23,21 @@
 
 Every number is printed by a script in this repo. Commands and full tables: **[docs/RESULTS.md](docs/RESULTS.md)**.
 
+## Deliverables
+
+| Track 1 requirement | Open it |
+|---|---|
+| 5–10 UV texture maps, face + distinct L/R iris | [`textures/01` … `08`](textures/) · overview sheets in [`uv_maps/`](uv_maps/) |
+| Script with `Left` / `Right` / `Generate Motion` | [`render.py`](render.py) |
+| A video per input, ≤ 15 s | [`Left.mp4`](outputs/videos/Left.mp4) · [`Right.mp4`](outputs/videos/Right.mp4) · [`Generate_Motion.mp4`](outputs/videos/Generate_Motion.mp4) · extras: [hero](outputs/videos/Generate_Motion_hero.mp4), [set 03](outputs/videos/Generate_Motion_set03.mp4), [wireframe](outputs/videos/Generate_Motion_wire.mp4) |
+| 5–10 renders with different textures | [`outputs/renders/01_front.png` … `08_front.png`](outputs/renders/) (+ 25 extra views) |
+| `.blend` with an expression on the Timeline | [`outputs/scene.blend`](outputs/scene.blend) |
+| Launch spec: `eyes.move / reset / render`, 10 frames, metadata | [`wrapper/eyes.py`](wrapper/eyes.py) · [`outputs/launch_spec/`](outputs/launch_spec/) · bundle: `python3 tools/make_launch_zip.py` |
+| Deck | [`VITVellore_ZeroDrift.pptx`](VITVellore_ZeroDrift.pptx) |
+| Demo video, ≤ 3 min | *link added at submission* |
+
+Where each one comes from and how to rebuild it: [docs/OUTPUTS.md](docs/OUTPUTS.md).
+
 ## Why it beats the usual approach
 
 | | Usual synthetic eyes | TrueGaze |
