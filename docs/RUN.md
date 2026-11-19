@@ -40,6 +40,8 @@ python3 tools/plot_main_sequence.py
 
 ## Demo video
 
+Published (unlisted): https://youtu.be/ydB1k3vBDyk. To rebuild it:
+
 ```bash
 SARVAM_API_KEY=... python3 tools/make_demo.py   # outputs/demo.mp4: narrated, captioned, under 3 min
 ```

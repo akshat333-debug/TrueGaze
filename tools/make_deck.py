@@ -304,7 +304,7 @@ text(s_demo, 6.3, 1.7, 3.3, 2.8, [
     [("Time: ", CYAN, True), ("draft videos in about 40 minutes; final quality takes hours.", TEXT, False)],
     [("Videos: ", CYAN, True), ("outputs/videos/ in the repo.", TEXT, False)],
 ], size=12, gap=9)
-text(s_demo, 0.4, 4.7, 9.2, 0.4, [[("Repo: ", CYAN, True), (REPO, WHITE, True)]], size=14)
+text(s_demo, 0.4, 4.7, 9.2, 0.4, [[("Repo: ", CYAN, True), (REPO, WHITE, True), ("     Demo: ", CYAN, True), ("youtu.be/ydB1k3vBDyk", WHITE, True)]], size=14)
 
 # 11 brownie: soft tissue
 header(s_brownie, "BROWNIE SLIDES · SOFT TISSUE")
@@ -353,7 +353,7 @@ card(s_limits, 5.1, 1.7, 4.5, 3.3, "Impact for Samsung XR", [
 for shape in s_thanks.shapes:
     if shape.name == "Text 25":
         run = shape.text_frame.paragraphs[0].add_run()
-        run.text, run.font.size, run.font.name = f"Team Zero Drift · VIT Vellore · {REPO}", Pt(10), "Calibri"
+        run.text, run.font.size, run.font.name = f"Team Zero Drift · VIT Vellore · {REPO} · Demo: youtu.be/ydB1k3vBDyk", Pt(10), "Calibri"
         run.font.color.rgb = WHITE
 
 out = ROOT / "VITVellore_ZeroDrift.pptx"

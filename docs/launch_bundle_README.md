@@ -1,6 +1,6 @@
 # TrueGaze launch-spec bundle — VIT Vellore, Team Zero Drift
 
-Samsung PRISM XR Hackathon 2026, Track 1 (Synthetic Eyes). Full project: https://github.com/akshat333-debug/TrueGaze
+Samsung PRISM XR Hackathon 2026, Track 1 (Synthetic Eyes). Full project: https://github.com/akshat333-debug/TrueGaze · Demo video: https://youtu.be/ydB1k3vBDyk
 
 | File | What it is |
 |---|---|
