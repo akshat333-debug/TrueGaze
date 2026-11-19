@@ -10,7 +10,7 @@
 
 *`render.py --input "Generate Motion"`. Every pixel comes from code in this repo: no hand-painted texture, no hand-edited `.blend`, no photo of a real person.*
 
-**Demo video (85 s):** *link added at submission*
+**Demo video (2 min 48 s, narrated, captioned):** *link added at submission*
 
 ---
 

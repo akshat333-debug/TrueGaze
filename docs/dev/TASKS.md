@@ -233,3 +233,8 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 - Done: reference video deleted; README rewritten lean (tagline, stat grid, vs-usual table, Samsung use cases, mermaid pipeline, hero GIF `docs/hero.gif`, main-sequence plot `docs/main_sequence.png` from `tools/plot_main_sequence.py`); detail moved to `docs/RESULTS.md`, `HOW_IT_WORKS.md`, `RUN.md`, `OUTPUTS.md`.
 - Moved dev-only files: `TASKS.md`, `DECISIONS.md`, plan, audits, research, organizer files -> `docs/dev/`; `CLAUDE.md` -> `.claude/CLAUDE.md` (Claude Code still loads it). Deck text tightened, limits slide now Results & Impact.
 - Next: demo link, repo public, form by 21 Nov.
+
+### Handoff 19 Nov (narrated demo)
+- Done: `tools/make_demo.py` rebuilt: 12 segments, Sarvam Bulbul v4-flash voice `shubh_en_ads` (en-IN), 37 captions snapped to speech pauses, chips naming each shot, annotated launch frames (label ring vs found-pupil dot), terminal shots replaying real runs of `render.py --input Left` and `wrapper/eyes.py --check`. 168 s, -16 LUFS. Every segment checked with Sarvam speech-to-text.
+- Gotchas: key via `SARVAM_API_KEY` env only, never committed; voice cached in `renders/tmp/voice/`. "saccade" is mispronounced mid-sentence; `SAY` map gives spoken spellings. Concat demuxer stops at a segment with different colour tags, so the final join uses the concat filter.
+- Next: upload `outputs/demo.mp4`, put link in README.

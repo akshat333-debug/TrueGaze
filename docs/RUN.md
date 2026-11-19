@@ -38,6 +38,14 @@ python3 tools/gazebase_compare.py path/to/GazeBase_v2_0.zip   # about 6 min
 python3 tools/plot_main_sequence.py
 ```
 
+## Demo video
+
+```bash
+SARVAM_API_KEY=... python3 tools/make_demo.py   # outputs/demo.mp4: narrated, captioned, under 3 min
+```
+
+The terminal shots replay real runs saved in `renders/tmp/capture/` (`check.txt`, `render.txt`).
+
 ## Docker
 
 ```bash
