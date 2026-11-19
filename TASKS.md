@@ -223,3 +223,8 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 - Result: saccade duration within 0-10 ms of human; our peak velocity 15-20% low; fixation dispersion median 0.124 vs 0.141 deg (our tail narrower); micro-saccades 0.9/s vs 2.6/s; blinks 13.3 vs 11.3/min.
 - Run: `python3 tools/gazebase_compare.py ~/datasets/GazeBase/GazeBase_v2_0.zip` (~6 min; data not in repo).
 - Open: tune or not (would need held-out subject split and a full video re-render).
+
+### Handoff 19 Nov (final render audit)
+- Done: frame-by-frame audit of all 6 videos (1,980 frames), 33 stills, 10 launch frames; 16 tests pass; zip builds (20 files, 71 MB); deck validates.
+- Known, accepted (team decision, no re-render): blink shape key lifts the cheek up to 3.4 mm, so with motion blur the lower face is soft for 1-2 frames per blink (most visible in the wire video, frames 25, 61).
+- Next: submission steps only (delete reference video, demo link, repo public, form by 21 Nov).
