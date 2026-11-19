@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Builds the submission deck from the organizers' template (docs/organizer/Submission_Final_forGithub.pptx).
+"""Builds the submission deck from the organizers' template (docs/dev/organizer/Submission_Final_forGithub.pptx).
 Slide order and headers are the template's; pictures come from docs/ and outputs/. Needs python-pptx, pillow, ffmpeg.
 
 Numbers on the slides are printed by: tools/evaluate_motion.py (kinematics), tools/seam_audit.py (seams),
@@ -31,7 +31,7 @@ assert all(LAUNCH["direction_check"].values()), "direction check failed: fix bef
 WHITE, TEXT, MUTED = RGBColor(0xFF, 0xFF, 0xFF), RGBColor(0xE8, 0xED, 0xF5), RGBColor(0x9A, 0xA8, 0xC0)
 CYAN, GREEN, AMBER, PANEL = RGBColor(0x00, 0xB4, 0xD8), RGBColor(0x00, 0xE5, 0xB0), RGBColor(0xF5, 0x9E, 0x0B), RGBColor(0x0D, 0x1B, 0x3E)
 
-prs = Presentation(ROOT / "docs" / "organizer" / "Submission_Final_forGithub.pptx")
+prs = Presentation(ROOT / "docs" / "dev" / "organizer" / "Submission_Final_forGithub.pptx")
 template = list(prs.slides)
 
 
@@ -153,16 +153,16 @@ for shape in s_title.shapes:
         runs[0].text, runs[1].text = "Team Zero Drift", "VIT Vellore"
     elif words == "Members Details":
         runs[0].text = "\n".join(MEMBERS)
-text(s_title, 0.55, 3.75, 7.5, 0.5, "Photoreal, animated eyes on Google's GNM head, built entirely by script", size=16, color=CYAN)
+text(s_title, 0.55, 3.75, 7.5, 0.5, "Synthetic eyes that pass for human, and ship with pixel-exact ground truth", size=16, color=CYAN)
 picture(s_title, ROOT / "docs" / "hero_sets.jpg", 0.55, 4.25, 7.4, crop=(0, 0, 1, 0.5))
 
 # 2 problem
 header(s_problem, "THE PROBLEM")
-headline(s_problem, "A bare head model has to pass for a living person, up close")
+headline(s_problem, "Gaze AI needs millions of labelled eyes. Real capture can't scale")
 text(s_problem, 0.4, 1.7, 5.3, 3.4, [
-    [("Nothing to look at. ", CYAN, True), ("Google's GNM head ships shape and a UV layout, but no skin and no iris texture. Every pixel of the face has to be made.", TEXT, False)],
-    [("Eyes give fakes away. ", CYAN, True), ("People read eyes first. Wrong saccade speed, a blink that opens as fast as it closes, or lids that ignore the eyeball all read as dead.", TEXT, False)],
-    [("It must travel. ", CYAN, True), ("Textures have to wrap onto any GNM head with no visible seam, and one script has to turn an input word into a finished video.", TEXT, False)],
+    [("Real eyes are costly. ", CYAN, True), ("Capture is slow, labels are manual, and eye images are biometric data.", TEXT, False)],
+    [("GNM ships bare. ", CYAN, True), ("Shape and UVs, no skin, no iris. Every pixel has to be made.", TEXT, False)],
+    [("Eyes give fakes away. ", CYAN, True), ("Wrong saccade speed or lids that ignore the eyeball read as dead.", TEXT, False)],
 ], size=13, gap=12)
 for i, (points, label) in enumerate(((60, "Texture photorealism"), (20, "Kinematic accuracy"), (20, "Code and UV portability"))):
     panel(s_problem, 6.1, 1.7 + i * 1.15, 3.5, 1.0)
@@ -173,15 +173,15 @@ text(s_problem, 2.95, 3.75, 2.7, 1.35, "The head with no texture: shape alone do
 
 # 3 solution
 header(s_solution, "SOLUTION")
-headline(s_solution, "Eight people, one command per video, every asset built by script")
+headline(s_solution, "Eight photoreal people, one command, every asset built by script")
 picture(s_solution, ROOT / "outputs" / "renders" / "01_hero.png", 0.4, 1.7, 4.6)
 text(s_solution, 0.4, 4.35, 4.6, 0.3, "Set 01, hero view. Rendered by tools/stills.py", size=10, color=MUTED)
 text(s_solution, 5.3, 1.7, 4.3, 3.5, [
-    [("Textures. ", GREEN, True), ("8 sets: 4K skin, roughness, relief and wrinkle maps, plus a 2K map per eye. Left and right irises always differ.", TEXT, False)],
-    [("Skin. ", GREEN, True), ("Public-domain MakeHuman skins, fitted onto GNM in 3D to a median 0.5 mm.", TEXT, False)],
-    [("Motion. ", GREEN, True), ("Saccades, vergence, blinks and lid-follow timed from published eye measurements.", TEXT, False)],
-    [("Soft tissue. ", GREEN, True), ("Lids lift over the cornea and skin drags with the eye. About 7,500 hair strands follow the lids.", TEXT, False)],
-    [("One script. ", GREEN, True), ("render.py --input Left | Right | \"Generate Motion\" writes the video.", TEXT, False)],
+    [("True 3D gaze. ", GREEN, True), ("Eyeballs rotate about their centres and converge on one point.", TEXT, False)],
+    [("8 skins. ", GREEN, True), ("4K skin, 2K irises; left and right never match.", TEXT, False)],
+    [("Real timing. ", GREEN, True), ("Saccades within 10 ms of 322 recorded people.", TEXT, False)],
+    [("Exact labels. ", GREEN, True), ("Pupil refracted by the cornea: 1.16 px from the pixels.", TEXT, False)],
+    [("One script. ", GREEN, True), ("render.py --input Left | Right | \"Generate Motion\".", TEXT, False)],
 ], size=12, gap=9)
 
 # 4 architecture
@@ -230,16 +230,16 @@ header(s_tex, "TRACK FINAL OUTPUT · TEXTURES")
 headline(s_tex, "Eight texture sets: light and dark skin, young to old, six eye colours")
 picture(s_tex, ROOT / "docs" / "texture_sets.jpg", 0.4, 1.65, 6.2)
 text(s_tex, 6.85, 1.65, 2.75, 3.6, [
-    [("Iris: ", CYAN, True), ("thick cords, crypts, collarette, freckles, limbal ring, under a cornea that refracts.", TEXT, False)],
-    [("White of the eye: ", CYAN, True), ("veins entering from the corners, yellowish patches, pink corners.", TEXT, False)],
-    [("Skin: ", CYAN, True), ("photo colour, pores and fine lines as relief, thin skin with faint veins round the eye.", TEXT, False)],
-    [("Lid edge: ", CYAN, True), ("wet pink margin with a tear line.", TEXT, False)],
+    [("Iris: ", CYAN, True), ("cords, crypts, collarette, limbal ring, under a refracting cornea.", TEXT, False)],
+    [("Sclera: ", CYAN, True), ("veins from the corners, pink corners.", TEXT, False)],
+    [("Skin: ", CYAN, True), ("photo colour, pores as relief.", TEXT, False)],
+    [("Seams: ", CYAN, True), ("step of 4 / 255 or less.", TEXT, False)],
     [("Left is never right: ", CYAN, True), ("each eye has its own pattern.", TEXT, False)],
 ], size=11, gap=7)
 
 # 7 kinematics
 header(s_kin, "TRACK FINAL OUTPUT · KINEMATICS")
-headline(s_kin, "Motion numbers sit inside published ranges for real eyes")
+headline(s_kin, "Moves like a real eye: checked against physiology and 322 people")
 table(s_kin, 0.4, 1.7, [3.0, 1.3, 1.9, 0.9], [
     ["Measured on our motion engine", "Ours", "Published range", ""],
     ["Saccade duration, 10 degrees", "44.5 ms", "40 to 57 ms", "in range"],
@@ -251,10 +251,10 @@ table(s_kin, 0.4, 1.7, [3.0, 1.3, 1.9, 0.9], [
     ["Vergence on a 35 cm target, per eye", "5.1 degrees", "5.06 degrees (geometry)", "in range"],
 ], size=10.5, row_h=0.31)
 card(s_kin, 7.75, 1.7, 1.85, 1.15, "5 of 5", "Left, Right, Up, Down, Reset, judged from the pupils found in the renders", accent=AMBER)
-card(s_kin, 7.75, 3.0, 1.85, 1.18, "4 fixed", "The check found four numbers off. All four were corrected", accent=AMBER)
+card(s_kin, 7.75, 3.0, 1.85, 1.18, "322 people", "Saccade timing within 10 ms of GazeBase recordings", accent=AMBER)
 text(s_kin, 0.4, 4.35, 9.2, 0.9, [
-    "Also in the motion: both eyes converge, upper lids follow vertical gaze, large gaze jumps trigger a blink, the eye never freezes (drift and micro-saccades), pupils fluctuate.",
-    [("Source: tools/evaluate_motion.py, which lists the papers. Direction check and pupil-label error: outputs/launch_spec/metadata.json", MUTED, False)],
+    "Also: vergence, lids follow gaze, blinks on big jumps, drift and micro-saccades, pupil hippus.",
+    [("Sources: tools/evaluate_motion.py, tools/gazebase_compare.py, outputs/launch_spec/metadata.json", MUTED, False)],
 ], size=11, gap=4)
 
 # 8 portability
@@ -272,12 +272,12 @@ text(s_port, 0.4, 4.7, 6.1, 0.5, "The seam audit caught two real regressions dur
 header(s_diff, "DIFFERENTIATION")
 headline(s_diff, "Measured where others would only claim")
 cards = [
-    ("Numbers, not adjectives", "Seams, saccades, blinks and the skin fit each have a script that prints the number and fails the build if it leaves its range."),
-    ("Controls inside GNM's own space", "Blink, lid and brow controls are solved as mixes of GNM's 200 unnamed eye components, so they work on any GNM face."),
-    ("Skin moved in 3D, not painted", "Public-domain skins are carried onto GNM by fitting one head to the other: median 0.5 mm, lids and lip line pinned."),
-    ("The eye pushes the face", "Fitted shapes lift the lid 1.6 mm over the cornea and drag nearby skin up to 2.7 mm as the eye turns. Lashes follow."),
-    ("Nothing hand-made", "No hand-edited .blend, no painted texture. Anyone can rebuild all of it from a clone."),
-    ("Licence-clean", "GNM is Apache 2.0, MakeHuman skins are CC0. No photo or scan of an identifiable person."),
+    ("3D gaze, not 2D", "Eyeballs rotate about their centres; the usual approach slides a pupil texture."),
+    ("Labels that match pixels", "Cornea-refracted pupil labels: 14 % lower error than a pinhole projection."),
+    ("Checked against humans", "Saccade timing within 10 ms of 40,539 recorded saccades."),
+    ("The eye pushes the face", "Lid lifts 1.6 mm over the cornea, skin drags 2.7 mm, lashes follow."),
+    ("Native to GNM", "Controls solved in GNM's own 200 eye components: any GNM face works."),
+    ("Ship-ready licence", "Apache 2.0 head, CC0 skins, no real person. FLAME-based rigs are research-only."),
 ]
 for i, (title, body) in enumerate(cards):
     card(s_diff, 0.4 + (i % 3) * 3.1, 1.7 + (i // 3) * 1.8, 2.95, 1.65, title, body, accent=GREEN, size=12)
@@ -332,23 +332,21 @@ picture(s_brownie2, video_frames("Generate_Motion_hero", (0.6, 1.0, 2.6, 5.2)), 
 text(s_brownie2, 0.4, 4.68, 5.9, 0.25, "Frames of outputs/videos/Generate_Motion_hero.mp4", size=10, color=MUTED)
 
 # 13 results and limits
-header(s_limits, "RESULTS & LIMITATIONS")
-headline(s_limits, "What works, and what a close look will still find")
+header(s_limits, "RESULTS & IMPACT")
+headline(s_limits, "Every number measured. Every frame a labelled training sample")
 card(s_limits, 0.4, 1.7, 4.5, 3.3, "Results", [
-    "All six required outputs, rebuilt by one script.",
-    "8 texture sets; seam step 4 of 255 or less on the face.",
-    "Every sourced motion check in range; direction check 5 of 5 from the pixels.",
-    f"Pupil labels refracted by the cornea: {LABEL_ERR['mean']} px mean, {LABEL_ERR['max']} px max from the pupil found in the image.",
-    "Textures wrap onto stock and random GNM heads.",
-    "Skin fit to the photo source: median 0.5 mm; 16 unit tests pass.",
+    "Direction check 5 / 5, judged from the pixels.",
+    f"Pupil labels {LABEL_ERR['mean']} px from the rendered pupil.",
+    "Saccades within 10 ms of 322 people.",
+    "Seam step 4 / 255 or less, all 8 skins.",
+    "All outputs from one command; 16 tests pass.",
 ], accent=GREEN, size=13)
-card(s_limits, 5.1, 1.7, 4.5, 3.3, "Limits", [
-    "Iris light pooling is a shader estimate, not traced caustics.",
-    "The upper lid creases in shading only; it does not fold into itself.",
-    "Skin wrinkles are drawn by rule, not sculpted.",
-    "Sheen on dark skin was tuned by eye, not measured.",
-    "The required videos use set 01; a fourth shows set 03; other sets are stills.",
-    "Motion is checked against published ranges, not our own eye recordings.",
+card(s_limits, 5.1, 1.7, 4.5, 3.3, "Impact for Samsung XR", [
+    "Train Galaxy XR eye tracking: rotation, pupil and camera labels on every frame.",
+    "Fairness tests across 8 skin tones and 6 eye colours.",
+    "Zero biometric capture: no consent or storage burden.",
+    "Unbounded variety on a laptop: seeds x skins x GNM identities.",
+    "Lifelike eyes for XR avatars.",
 ], accent=AMBER, size=13)
 
 # 14 thanks

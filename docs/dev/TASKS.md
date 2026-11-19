@@ -35,7 +35,7 @@ Third look batch, from the 16 Nov audit (`docs/SELF_AUDIT.md`: estimate 71.5 of 
 - [ ] Demo video: upload `outputs/demo.mp4` (voice-over optional), put the link on the deck's demo slide. Akshat: only once the project is final. **C**
 - [ ] Open the deck once in PowerPoint (only checked in LibreOffice). **C**
 - [ ] Watch "Flexpressions" (second reference video; not done, no local copy).
-- [ ] **Before the final submission:** delete the reference video `Eye Piece - Chris Jones (1080p, h264).mp4` and commit (Akshat, 18 Nov: delete, no history purge; it stays in old commits).
+- [x] **Done 19 Nov:** deleted the reference video `Eye Piece - Chris Jones (1080p, h264).mp4` and commit (Akshat, 18 Nov: delete, no history purge; it stays in old commits).
 - [ ] 21 Nov: regenerate from a clean clone, make repo public, submit the form (https://forms.gle/86xENrtqhx988hBt8). 22 Nov is buffer only.
 
 ## How to run
@@ -228,3 +228,8 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 - Done: frame-by-frame audit of all 6 videos (1,980 frames), 33 stills, 10 launch frames; 16 tests pass; zip builds (20 files, 71 MB); deck validates.
 - Known, accepted (team decision, no re-render): blink shape key lifts the cheek up to 3.4 mm, so with motion blur the lower face is soft for 1-2 frames per blink (most visible in the wire video, frames 25, 61).
 - Next: submission steps only (delete reference video, demo link, repo public, form by 21 Nov).
+
+### Handoff 19 Nov (presentation pass)
+- Done: reference video deleted; README rewritten lean (tagline, stat grid, vs-usual table, Samsung use cases, mermaid pipeline, hero GIF `docs/hero.gif`, main-sequence plot `docs/main_sequence.png` from `tools/plot_main_sequence.py`); detail moved to `docs/RESULTS.md`, `HOW_IT_WORKS.md`, `RUN.md`, `OUTPUTS.md`.
+- Moved dev-only files: `TASKS.md`, `DECISIONS.md`, plan, audits, research, organizer files -> `docs/dev/`; `CLAUDE.md` -> `.claude/CLAUDE.md` (Claude Code still loads it). Deck text tightened, limits slide now Results & Impact.
+- Next: demo link, repo public, form by 21 Nov.

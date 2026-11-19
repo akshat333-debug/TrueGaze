@@ -1,6 +1,6 @@
 # Architecture
 
-Status 13 Nov: every required output is produced by script. Head, fitted controls, soft tissue (socket, bulge, drag), hair, photo-based skin, irises, shaders, motion engine, front and hero views, clay/wire looks, launch-spec API, seam audit, motion evaluation and the one-command `reproduce.sh` all work. Open: final-quality videos (rendering), Dockerfile, deck, demo video.
+Every required output is produced by script; this file maps the modules and the conventions they share.
 
 ## Flow
 ```

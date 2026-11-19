@@ -2,12 +2,12 @@
 
 Samsung PRISM XR Hackathon 2026, **Track 1: Synthetic Eyes**. Team Zero Drift (VIT Vellore).
 Final submission **22 Nov 2026** via Google form; everything must be in this repo, made **public** before submitting.
-Rules and rubric: `docs/hackathondetails.md`. Plan: `docs/PLAN.md`. Design: `docs/ARCHITECTURE.md`. Assets: `docs/ASSETS.md`.
+Rules and rubric: `docs/dev/hackathondetails.md`. Plan: `docs/dev/PLAN.md`. Design: `docs/ARCHITECTURE.md`. Assets: `docs/ASSETS.md`.
 
 ## Before any work
 1. `git pull --rebase` on `main`.
-2. Read `TASKS.md` (Next up + latest handoff note), then `DECISIONS.md`. Don't contradict a logged decision without a new entry.
-3. Claim the task in `TASKS.md` (owner + `in progress`), commit and push the claim.
+2. Read `docs/dev/TASKS.md` (Next up + latest handoff note), then `docs/dev/DECISIONS.md`. Don't contradict a logged decision without a new entry.
+3. Claim the task in `docs/dev/TASKS.md` (owner + `in progress`), commit and push the claim.
 
 ## While working
 - Small branch per task, merged to `main` the same day. Never leave work unpushed overnight.
@@ -18,8 +18,8 @@ Rules and rubric: `docs/hackathondetails.md`. Plan: `docs/PLAN.md`. Design: `doc
 - Every claim in the deck/README must be reproducible from a script in this repo.
 
 ## After every unit of work (same commit)
-- Update `TASKS.md` with a handoff note (done / next / gotchas / how to run).
-- New decision → `DECISIONS.md`. Plan changed → `docs/PLAN.md`.
+- Update `docs/dev/TASKS.md` with a handoff note (done / next / gotchas / how to run).
+- New decision → `docs/dev/DECISIONS.md`. Plan changed → `docs/dev/PLAN.md`.
 - Commit message `<area>: <what>`. Push.
 
 ## Ownership (avoid merge conflicts)
