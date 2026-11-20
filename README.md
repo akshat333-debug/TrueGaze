@@ -35,6 +35,7 @@ Every number is printed by a script in this repo. Commands and full tables: **[d
 | Launch spec: `eyes.move / reset / render`, 10 frames, metadata | [`wrapper/eyes.py`](wrapper/eyes.py) · [`outputs/launch_spec/`](outputs/launch_spec/) · bundle: `python3 tools/make_launch_zip.py` |
 | Deck | [`VITVellore_ZeroDrift.pptx`](VITVellore_ZeroDrift.pptx) |
 | Demo video, ≤ 3 min | [youtu.be/ydB1k3vBDyk](https://youtu.be/ydB1k3vBDyk) |
+| AI disclosure | [docs/AI_DISCLOSURE.md](docs/AI_DISCLOSURE.md) |
 
 Where each one comes from and how to rebuild it: [docs/OUTPUTS.md](docs/OUTPUTS.md).
 

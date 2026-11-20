@@ -29,3 +29,4 @@
 | Deck named `CollegeName_TeamName` | `VITVellore_ZeroDrift.pptx`, built from the organizers' template by `tools/make_deck.py` |
 | Demo video, ≤ 3 min | `outputs/demo.mp4` (2 min 48 s, Indian English voice-over by Sarvam AI Bulbul, captions timed to the speech, built by `tools/make_demo.py`), on YouTube: https://youtu.be/ydB1k3vBDyk |
 | Launch-spec bundle | `python3 tools/make_launch_zip.py` writes `VITVellore_ZeroDrift.zip` with `scene.blend`, `wrapper/eyes.py`, `renders/`, `metadata.json`, `README.md` at the root. Passes 5 / 5 from a clean unzip |
+| AI disclosure | [AI_DISCLOSURE.md](AI_DISCLOSURE.md) |
