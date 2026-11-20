@@ -24,6 +24,7 @@ from pptx.util import Inches, Pt
 ROOT = Path(__file__).resolve().parent.parent
 MEMBERS = ["Akshat Agrawal (23MIC0079)", "Hemang Dubey (23MIC0069)", "Ishita Solanki (23MID0443)"]
 REPO = "github.com/akshat333-debug/TrueGaze"
+REPO_URL, DEMO_URL = "https://" + REPO, "https://youtu.be/ydB1k3vBDyk"
 LAUNCH = json.loads((ROOT / "outputs" / "launch_spec" / "metadata.json").read_text())
 LABEL_ERR = LAUNCH["label_error_px"]["refracted"]  # written by wrapper/eyes.py --sequence
 assert all(LAUNCH["direction_check"].values()), "direction check failed: fix before building the deck"
@@ -56,7 +57,7 @@ def header(slide, title):
 
 
 def text(slide, x, y, w, h, paragraphs, size=12, color=TEXT, bold=False, font="Calibri", anchor=MSO_ANCHOR.TOP, gap=4):
-    """paragraphs: a string, or a list of strings / lists of (text, colour, bold) runs."""
+    """paragraphs: a string, or a list of strings / lists of (text, colour, bold[, url]) runs."""
     box = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(w), Inches(h))
     tf = box.text_frame
     tf.word_wrap, tf.vertical_anchor = True, anchor
@@ -68,6 +69,8 @@ def text(slide, x, y, w, h, paragraphs, size=12, color=TEXT, bold=False, font="C
             r = p.add_run()
             r.text, r.font.size, r.font.name, r.font.bold = run[0], Pt(size), font, run[2]
             r.font.color.rgb = run[1]
+            if len(run) > 3:  # optional 4th item: a URL, so the run is a clickable link
+                r.hyperlink.address = run[3]
     return box
 
 
@@ -304,7 +307,7 @@ text(s_demo, 6.3, 1.7, 3.3, 2.8, [
     [("Time: ", CYAN, True), ("draft videos in about 40 minutes; final quality takes hours.", TEXT, False)],
     [("Videos: ", CYAN, True), ("outputs/videos/ in the repo.", TEXT, False)],
 ], size=12, gap=9)
-text(s_demo, 0.4, 4.7, 9.2, 0.4, [[("Repo: ", CYAN, True), (REPO, WHITE, True), ("     Demo: ", CYAN, True), ("youtu.be/ydB1k3vBDyk", WHITE, True)]], size=14)
+text(s_demo, 0.4, 4.7, 9.2, 0.4, [[("Repo: ", CYAN, True), (REPO, WHITE, True, REPO_URL), ("     Demo: ", CYAN, True), ("youtu.be/ydB1k3vBDyk", WHITE, True, DEMO_URL)]], size=14)
 
 # 11 brownie: soft tissue
 header(s_brownie, "BROWNIE SLIDES · SOFT TISSUE")
@@ -353,9 +356,29 @@ card(s_limits, 5.1, 1.7, 4.5, 3.3, "Impact for Samsung XR", [
 for shape in s_thanks.shapes:
     if shape.name == "Text 25":
         run = shape.text_frame.paragraphs[0].add_run()
-        run.text, run.font.size, run.font.name = f"Team Zero Drift · VIT Vellore · {REPO} · Demo: youtu.be/ydB1k3vBDyk", Pt(10), "Calibri"
+        run.text, run.font.size, run.font.name = "Team Zero Drift · VIT Vellore · ", Pt(10), "Calibri"
         run.font.color.rgb = WHITE
+        for label, url in ((REPO, REPO_URL), (" · Demo: ", None), ("youtu.be/ydB1k3vBDyk", DEMO_URL)):
+            part = shape.text_frame.paragraphs[0].add_run()
+            part.text, part.font.size, part.font.name = label, Pt(10), "Calibri"
+            part.font.color.rgb = WHITE
+            if url:
+                part.hyperlink.address = url
 
 out = ROOT / "VITVellore_ZeroDrift.pptx"
 prs.save(out)
+
+# link colour: the template's default blue vanishes on the dark slides, so use light cyan in every theme
+import re
+import shutil
+import zipfile
+tmp = out.with_suffix(".tmp")
+with zipfile.ZipFile(out) as zin, zipfile.ZipFile(tmp, "w", zipfile.ZIP_DEFLATED) as zout:
+    for item in zin.infolist():
+        data = zin.read(item.filename)
+        if item.filename.startswith("ppt/theme/theme"):
+            data = re.sub(rb"(<a:hlink>\s*<a:srgbClr val=\")[0-9A-Fa-f]{6}", rb"\g<1>7FE3F5", data)
+            data = re.sub(rb"(<a:folHlink>\s*<a:srgbClr val=\")[0-9A-Fa-f]{6}", rb"\g<1>7FE3F5", data)
+        zout.writestr(item, data)
+shutil.move(tmp, out)
 print("wrote", out, f"({len(order)} slides)")
