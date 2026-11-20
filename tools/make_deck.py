@@ -135,8 +135,8 @@ def video_frames(name, times):
 
 s_title, s_problem, s_solution, s_arch, s_output, s_diff, s_demo, s_brownie, s_thanks = template
 s_tex, s_kin, s_port = clone(s_output), clone(s_output), clone(s_output)
-s_brownie2, s_limits = clone(s_brownie), clone(s_diff)
-order = [s_title, s_problem, s_solution, s_arch, s_output, s_tex, s_kin, s_port, s_diff, s_demo, s_brownie, s_brownie2, s_limits, s_thanks]
+s_brownie2, s_limits, s_known = clone(s_brownie), clone(s_diff), clone(s_diff)
+order = [s_title, s_problem, s_solution, s_arch, s_output, s_tex, s_kin, s_port, s_diff, s_demo, s_brownie, s_brownie2, s_limits, s_known, s_thanks]
 ids = prs.slides._sldIdLst
 by_id = {el.get("id"): el for el in ids}
 for slide in order:
@@ -352,7 +352,24 @@ card(s_limits, 5.1, 1.7, 4.5, 3.3, "Impact for Samsung XR", [
     "Lifelike eyes for XR avatars.",
 ], accent=AMBER, size=13)
 
-# 14 thanks
+# 14 limitations
+header(s_known, "LIMITATIONS & NEXT STEPS")
+headline(s_known, "What a close look still finds, and what we would do next")
+card(s_known, 0.4, 1.7, 4.5, 3.3, "Limitations", [
+    "Peak saccade speed 15-20 % below GazeBase; fewer micro-saccades than humans.",
+    "Blinks lift the cheek slightly; with motion blur it softens for 1-2 frames.",
+    "Upper lid creases in shading only; it does not fold into itself.",
+    "Iris light pooling is a shader estimate, not traced caustics.",
+    "Required videos use set 01 (set 03 in a fourth); other sets are stills.",
+], accent=AMBER, size=12)
+card(s_known, 5.1, 1.7, 4.5, 3.3, "Next steps", [
+    "Fit saccade speed on half of GazeBase, test on the other half.",
+    "Confine the blink to the lids; add a real lid fold.",
+    "Render a labelled dataset across all 8 sets and GNM identities.",
+    "Train a gaze estimator on it and test on real eye images.",
+], accent=GREEN, size=12)
+
+# 15 thanks
 for shape in s_thanks.shapes:
     if shape.name == "Text 25":
         run = shape.text_frame.paragraphs[0].add_run()
