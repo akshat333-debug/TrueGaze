@@ -26,7 +26,7 @@ Most synthetic eye pipelines label the pupil with a plain pinhole projection. A 
 | Plain projection (`pupil_center_2D_unrefracted_*`) | 1.35 px | 3.52 px |
 | **Refracted by the cornea (`pupil_center_2D_*`)** | **1.16 px** | **2.92 px** |
 
-The error is measured by `find_pupil`, a darkest-blob detector that never sees the labels.
+The error is measured by `find_pupil`, a darkest-blob detector that never sees the labels, run on the final rendered image. This is a test against the pixels, not a self-consistency check of a projection against its own render pass, so it includes everything a real camera would see: cornea refraction, lid shadow and the iris texture around the pupil.
 
 ## Motion against real people
 

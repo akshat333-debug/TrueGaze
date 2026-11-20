@@ -18,7 +18,7 @@
 
 | | | |
 |:---:|:---:|:---:|
-| **5 / 5**<br>direction check, judged from the rendered pixels | **1.16 px**<br>mean pupil-label error over the 10 launch frames | **≤ 4 / 255**<br>seam step across all 8 skins |
+| **5 / 5**<br>direction check, judged from the rendered pixels | **1.16 px**<br>pupil label vs. the pupil detected in the final image: a test on pixels, not a projection self-check | **≤ 4 / 255**<br>seam step across all 8 skins |
 | **322 people**<br>saccade timing within 10 ms of recorded humans | **15 / 15**<br>motion measures inside their target ranges | **1 command**<br>fresh clone to every output |
 
 Every number is printed by a script in this repo. Commands and full tables: **[docs/RESULTS.md](docs/RESULTS.md)**.

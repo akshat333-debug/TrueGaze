@@ -183,7 +183,7 @@ text(s_solution, 5.3, 1.7, 4.3, 3.5, [
     [("True 3D gaze. ", GREEN, True), ("Eyeballs rotate about their centres and converge on one point.", TEXT, False)],
     [("8 skins. ", GREEN, True), ("4K skin, 2K irises; left and right never match.", TEXT, False)],
     [("Real timing. ", GREEN, True), ("Saccades within 10 ms of 322 recorded people.", TEXT, False)],
-    [("Exact labels. ", GREEN, True), ("Pupil refracted by the cornea: 1.16 px from the pixels.", TEXT, False)],
+    [("Exact labels. ", GREEN, True), ("Pupil refracted by the cornea: 1.16 px from the pupil detected in the render, not a projection self-check.", TEXT, False)],
     [("One script. ", GREEN, True), ("render.py --input Left | Right | \"Generate Motion\".", TEXT, False)],
 ], size=12, gap=9)
 
@@ -339,7 +339,7 @@ header(s_limits, "RESULTS & IMPACT")
 headline(s_limits, "Every number measured. Every frame a labelled training sample")
 card(s_limits, 0.4, 1.7, 4.5, 3.3, "Results", [
     "Direction check 5 / 5, judged from the pixels.",
-    f"Pupil labels {LABEL_ERR['mean']} px from the rendered pupil.",
+    f"Pupil labels {LABEL_ERR['mean']} px from the pupil detected in the render (a pixel test, not a projection self-check).",
     "Saccades within 10 ms of 322 people.",
     "Seam step 4 / 255 or less, all 8 skins.",
     "All outputs from one command; 16 tests pass.",
