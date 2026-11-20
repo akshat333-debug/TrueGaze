@@ -28,5 +28,5 @@
 | README with reproducible setup and Docker file | `README.md`, `reproduce.sh`, `Dockerfile`, [RUN.md](RUN.md) |
 | Deck named `CollegeName_TeamName` | `VITVellore_ZeroDrift.pptx`, built from the organizers' template by `tools/make_deck.py` |
 | Demo video, ≤ 3 min | `outputs/demo.mp4` (2 min 48 s, Indian English voice-over by Sarvam AI Bulbul, captions timed to the speech, built by `tools/make_demo.py`), on YouTube: https://youtu.be/ydB1k3vBDyk |
-| Launch-spec bundle | `python3 tools/make_launch_zip.py` writes `VITVellore_ZeroDrift.zip` with `scene.blend`, `wrapper/eyes.py`, `renders/`, `metadata.json`, `README.md` at the root. Passes 5 / 5 from a clean unzip |
+| Launch-spec bundle | `python3 tools/make_launch_zip.py` writes `VITVellore_ZeroDrift.zip` with `scene.blend`, `wrapper/eyes.py`, `renders/`, `metadata.json`, `README.md` at the root. Passes 5 / 5 from a clean unzip. Download: [release `submission`](https://github.com/akshat333-debug/TrueGaze/releases/tag/submission) |
 | AI disclosure | [AI_DISCLOSURE.md](AI_DISCLOSURE.md) |
