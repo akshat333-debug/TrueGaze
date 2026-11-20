@@ -243,3 +243,7 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 - Demo on YouTube, unlisted: https://youtu.be/ydB1k3vBDyk. Linked in README and docs/OUTPUTS.md.
 - Next: repo public, form by 21 Nov with VITVellore_ZeroDrift.zip.
 - Repo goes public 20 Nov (1 day before the 21 Nov submission), not earlier.
+
+### Handoff 21 Nov (submission prep)
+- Agent rules moved `.claude/CLAUDE.md` -> `docs/dev/AGENT_RULES.md` (no hidden folder at the root; Claude Code no longer auto-loads it, point your agent at it).
+- AI disclosure: `docs/AI_DISCLOSURE.md`. Launch-spec zip attached to GitHub release `submission`.

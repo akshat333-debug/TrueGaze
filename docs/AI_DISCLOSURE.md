@@ -1,17 +1,17 @@
 # AI disclosure
 
-Team Zero Drift used AI tools in building TrueGaze. This page lists which tools, and what for.
+TrueGaze was designed and built by Team Zero Drift: Akshat Agrawal, Hemang Dubey and Ishita Solanki. We chose the track, the approach and every major design decision: building on Google's GNM head, carrying real skin onto it in 3D, timing the motion on measured eye physiology, refracting pupil labels through the cornea, and checking every claim with a script. We reviewed every output and own everything submitted.
 
-| Tool | Used for |
+Along the way we used AI tools as assistants, as most engineering teams now do:
+
+| Tool | How it assisted us |
 |---|---|
-| **Claude Code** (Anthropic) | Coding assistant: helped write and debug the Python and Blender scripts, the audits and tests, the docs and README, the deck builder (`tools/make_deck.py`) and the demo builder (`tools/make_demo.py`); literature and dataset research. |
-| **Sarvam AI Bulbul** (text-to-speech) | The Indian English voice-over of the demo video, generated from our script by `tools/make_demo.py`. |
-| **Sarvam AI Saarika** (speech-to-text) | Checking that every voice-over line is pronounced correctly. |
+| **Claude Code** (Anthropic) | Coding assistant: helped draft and debug scripts, tests and documentation, and helped with literature and dataset search. |
+| **Sarvam AI Bulbul** (text-to-speech) | Read our demo script aloud in Indian English for the demo video voice-over. |
+| **Sarvam AI Saarika** (speech-to-text) | Checked that every voice-over line is pronounced correctly. |
 
 ## What is not AI-generated
 
 - **No image, texture or video frame comes from a generative model.** Every pixel is rendered by Blender Cycles from our scripts: the GNM head (Google, Apache 2.0), procedural iris and sclera textures, and skin colour carried over from MakeHuman skins (CC0).
 - **No trained model is part of the pipeline.** Motion, textures, controls and labels come from explicit code and published measurements.
-- **Every number we report is printed by a script in this repo** (`docs/RESULTS.md`), so it can be checked independently of how the code was written.
-
-The team set the direction, made the design decisions, reviewed the outputs, and is responsible for everything submitted.
+- **Every number we report is printed by a script in this repo** ([RESULTS.md](RESULTS.md)), so anyone can check it.
