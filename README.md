@@ -4,7 +4,7 @@
 
 **Samsung PRISM XR Hackathon 2026 · Track 1, Synthetic Eyes · Team Zero Drift, VIT Vellore**
 
-![Blender 4.5 LTS](https://img.shields.io/badge/Blender-4.5_LTS-orange) ![direction check](https://img.shields.io/badge/direction_check-5%2F5-brightgreen) ![label error](https://img.shields.io/badge/pupil_label-1.16_px-brightgreen) ![seams](https://img.shields.io/badge/seam_step-%E2%89%A44%2F255-brightgreen) ![tests](https://img.shields.io/badge/tests-16_passing-brightgreen) ![licence](https://img.shields.io/badge/licence-Apache_2.0-lightgrey)
+![Blender 4.5 LTS](https://img.shields.io/badge/Blender-4.5_LTS-orange) ![direction check](https://img.shields.io/badge/direction_check-5%2F5-brightgreen) ![label error](https://img.shields.io/badge/pupil_label-1.16_px-brightgreen) ![seams](https://img.shields.io/badge/seam_step-%E2%89%A44%2F255-brightgreen) ![tests](https://img.shields.io/badge/tests-31_passing-brightgreen) ![licence](https://img.shields.io/badge/licence-Apache_2.0-lightgrey)
 
 ![Generate Motion: close hero view and front view](docs/hero.gif)
 
@@ -18,7 +18,7 @@
 
 | | | |
 |:---:|:---:|:---:|
-| **5 / 5**<br>direction check, judged from the rendered pixels | **1.16 px**<br>pupil label vs. the pupil detected in the final image: a test on pixels, not a projection self-check | **≤ 4 / 255**<br>seam step across all 8 skins |
+| **5 / 5**<br>direction check from the rendered pixels, each pupil moving **18–20 px** (6× the 3 px pass bar) | **1.16 px**<br>pupil label vs. the pupil detected in the final image: a test on pixels, not a projection self-check | **≤ 4 / 255**<br>seam step across all 8 skins |
 | **322 people**<br>saccade timing within 10 ms of recorded humans | **15 / 15**<br>motion measures inside their target ranges | **1 command**<br>fresh clone to every output |
 
 Every number is printed by a script in this repo. Commands and full tables: **[docs/RESULTS.md](docs/RESULTS.md)**.
@@ -30,7 +30,7 @@ Every number is printed by a script in this repo. Commands and full tables: **[d
 | 5–10 UV texture maps, face + distinct L/R iris | [`textures/01` … `08`](textures/) · overview sheets in [`uv_maps/`](uv_maps/) |
 | Script with `Left` / `Right` / `Generate Motion` | [`render.py`](render.py) |
 | A video per input, ≤ 15 s | [`Left.mp4`](outputs/videos/Left.mp4) · [`Right.mp4`](outputs/videos/Right.mp4) · [`Generate_Motion.mp4`](outputs/videos/Generate_Motion.mp4) · extras: [hero](outputs/videos/Generate_Motion_hero.mp4), [set 03](outputs/videos/Generate_Motion_set03.mp4), [wireframe](outputs/videos/Generate_Motion_wire.mp4) |
-| 5–10 renders with different textures | [`outputs/renders/01_front.png` … `08_front.png`](outputs/renders/) (+ 25 extra views) |
+| 5–10 renders with different textures | [`outputs/renders/01_front.png` … `08_front.png`](outputs/renders/) (+ 27 extra views) |
 | `.blend` with an expression on the Timeline | [`outputs/scene.blend`](outputs/scene.blend) |
 | Launch spec: `eyes.move / reset / render`, 10 frames, metadata | [`wrapper/eyes.py`](wrapper/eyes.py) · [`outputs/launch_spec/`](outputs/launch_spec/) · bundle: [`VITVellore_ZeroDrift.zip` (release)](https://github.com/akshat333-debug/TrueGaze/releases/tag/submission) |
 | Deck | [`VITVellore_ZeroDrift.pptx`](VITVellore_ZeroDrift.pptx) |
@@ -79,6 +79,11 @@ flowchart LR
 - **Controls native to GNM:** blink, lid and brow shapes are solved inside GNM's 200 eye-expression components, so they work on any GNM face.
 - **Physiology-timed motion:** saccades on the measured main sequence, blinks that close fast and open slow, fixation drift, micro-saccades, pupil hippus, motion blur.
 - **Labels checked against pixels:** the direction check finds the pupils in the rendered image, not in our own metadata.
+- **Even more natural, on request:** `render.py --natural` adds corrective saccades, a head that follows the gaze, partial blinks and uneven brows (the submitted videos use the default motion).
+
+![Same eye, cornea refraction off and on](docs/refraction.jpg)
+
+*The same frame with the cornea refraction switched off (left) and on (right): the cornea magnifies the iris and shifts it with the view angle, as in a real eye. `tools/refraction_panel.py`.*
 
 Deep dive: **[docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md)** · module map: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 
@@ -95,6 +100,8 @@ Deep dive: **[docs/HOW_IT_WORKS.md](docs/HOW_IT_WORKS.md)** · module map: [docs
 blender --background --python render.py -- --input "Generate Motion"
 blender --background outputs/launch_spec/scene.blend --python wrapper/eyes.py -- --check
 ```
+
+Check the whole submission in one command: `python3 tools/validate.py` (34 checks; `--zip` checks the launch bundle).
 
 Setup, every command and Docker: **[docs/RUN.md](docs/RUN.md)** · required outputs and the videos: **[docs/OUTPUTS.md](docs/OUTPUTS.md)**
 

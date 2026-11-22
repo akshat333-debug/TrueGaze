@@ -85,3 +85,47 @@ def test_bulge_keys_match_gaze_direction():
     assert bulge("right", -BULGE_YAW, 0)["bulge_out_right"] == 1
     assert bulge("left", 0, 12)["bulge_up_left"] == pytest.approx(0.25) and bulge("left", 0, 0)["bulge_down_left"] == 0
     assert bulge("left", 0, 12)["drag_up_left"] == pytest.approx(0.5)  # drag is proportional, bulge is squared
+
+
+def test_natural_is_off_by_default_and_changes_nothing():
+    from truegaze.motion import preset, render_clip
+    a = render_clip(preset("Generate Motion", 0), 30)
+    b = render_clip(preset("Generate Motion", 0, natural=False), 30)
+    assert all(np.array_equal(a[k], b[k]) for k in a) and "brow_raise_left" not in a
+
+
+def test_natural_large_saccade_lands_short_then_corrects():
+    from truegaze.motion import Clip, _direction
+    c = Clip(2.0, seed=3, natural=True).look(0.2, 30, 0)
+    assert len(c.shifts) == 2
+    landing, correction = c.shifts
+    assert 0.88 * 30 <= landing[1] <= 0.94 * 30 and correction[1] == 30
+    assert 0.15 <= correction[0] - landing[0] <= 0.22
+    yaw_between = _direction(c, landing[0] + 0.12)[0]
+    assert yaw_between < 29  # still short before the corrective saccade
+    assert abs(_direction(c, 1.5)[0] - 30) < 0.5  # and on target after it
+
+
+def test_natural_small_saccade_has_no_correction():
+    from truegaze.motion import Clip
+    assert len(Clip(1.0, natural=True).look(0.2, 8, 0).shifts) == 1
+
+
+def test_natural_head_follows_gaze_and_eyes_still_hit_the_target():
+    from truegaze.motion import Clip, render_clip
+    plain = render_clip(Clip(3.0, seed=1).look(0.5, 25, 0), 30)
+    nat = render_clip(Clip(3.0, seed=1, natural=True).look(0.5, 25, 0), 30)
+    end = -1
+    assert nat["head_yaw"][end] - plain["head_yaw"][end] > 3  # head takes a share of the 25 deg shift
+    gaze_plain = (plain["left_yaw"] + plain["right_yaw"])[end] / 2 + plain["head_yaw"][end]
+    gaze_nat = (nat["left_yaw"] + nat["right_yaw"])[end] / 2 + nat["head_yaw"][end]
+    assert abs(gaze_nat - gaze_plain) < 1.5  # eye + head still points at the same place (drift differs by seed)
+
+
+def test_natural_brows_are_uneven_and_some_blinks_partial():
+    from truegaze.motion import Clip, render_clip
+    f = render_clip(Clip(8.0, seed=2, natural=True).look(1.0, 0, 20).look(4.0, 0, 0), 30)
+    left, right = f["brow_raise_left"], f["brow_raise_right"]
+    assert not np.allclose(left, right) and max(left.max(), right.max()) > 0
+    strengths = [s for seed in range(20) for _, s in Clip(60.0, seed=seed, natural=True).natural_blinks().blinks]
+    assert any(s < 1 for s in strengths) and any(s == 1 for s in strengths)

@@ -8,7 +8,8 @@ Options: --input Left|Right|"Generate Motion", --seed N, --frame screen|subject 
 --quality draft|final, --texture 01..08, --out path.mp4, --all (all three inputs),
 --blend path.blend (save the animated scene instead of rendering),
 --view front|hero (hero: one eye close up in the reference video's style),
---style textured|clay|wire (clay and wire are making-of looks: grey shape, and the mesh drawn on top)
+--style textured|clay|wire (clay and wire are making-of looks: grey shape, and the mesh drawn on top),
+--natural (opt-in extras: corrective saccades, head follows gaze, partial blinks, uneven brows; writes *_natural.mp4)
 """
 import argparse
 import hashlib
@@ -59,7 +60,7 @@ def keyframe(head, arm, frames):
                 keys[f"bulge_{where}_{side}"].keyframe_insert("value", frame=f + 1)
                 keys[f"drag_{where}_{side}"].keyframe_insert("value", frame=f + 1)
             for name in ("blink", "blink_mid", "upper_lid_up", "upper_lid_down", "lower_lid_up", "brow_raise", "brow_lower"):
-                keys[f"{name}_{side}"].value = frames[name][f]
+                keys[f"{name}_{side}"].value = frames.get(f"{name}_{side}", frames[name])[f]  # per-side when --natural
                 keys[f"{name}_{side}"].keyframe_insert("value", frame=f + 1)
         keys["pupil"].value = frames["pupil"][f]
         keys["pupil"].keyframe_insert("value", frame=f + 1)
@@ -77,6 +78,7 @@ def main(argv):
     ap.add_argument("--texture", default="01", help="texture set name in textures/")
     ap.add_argument("--view", default="front", choices=["front", "hero"], help="hero: one eye close up, reference-video style")
     ap.add_argument("--style", default="textured", choices=["textured", "clay", "wire"], help="clay and wire are making-of looks")
+    ap.add_argument("--natural", action="store_true", help="opt-in: corrective saccades, head follows gaze, partial blinks, uneven brows")
     ap.add_argument("--out")
     a = ap.parse_args(argv)
     if bool(a.all) == bool(a.input) or (a.all and (a.out or a.blend)):
@@ -90,7 +92,7 @@ def render(a):
     head, arm = scene.build(a.texture)
     if a.style != "textured":
         scene.breakdown(head, arm, wire=a.style == "wire")
-    n = keyframe(head, arm, motion.render_clip(motion.preset(a.input, a.seed, a.frame), FPS))
+    n = keyframe(head, arm, motion.render_clip(motion.preset(a.input, a.seed, a.frame, a.natural), FPS))
     sc = bpy.context.scene
     sc.frame_start, sc.frame_end, sc.render.fps = 1, n, FPS
     sc.camera.data.lens = 118  # both eyes and full brows from the 40 cm camera
@@ -121,7 +123,7 @@ def render(a):
         bpy.ops.wm.save_as_mainfile(filepath=str(Path(a.blend).resolve()), compress=True)
         print("WROTE", a.blend)
         return
-    suffix = ("" if a.view == "front" else "_hero") + ("" if a.style == "textured" else f"_{a.style}")
+    suffix = ("" if a.view == "front" else "_hero") + ("" if a.style == "textured" else f"_{a.style}") + ("_natural" if a.natural else "")
     out = Path(a.out or ROOT / "outputs" / "videos" / f"{a.input.replace(' ', '_')}{suffix}.mp4")
     out.parent.mkdir(parents=True, exist_ok=True)
     if a.quality == "final":
@@ -130,7 +132,7 @@ def render(a):
         # older look or motion are never picked up as "already there"
         look = hashlib.sha1(b"".join(f.read_bytes() for f in sorted([Path(__file__), ROOT / "assets" / "hair.npz", ROOT / "assets" / "controls.npz",
                             ROOT / "assets" / "bulge.npz", *(ROOT / "truegaze").glob("*.py"), *(ROOT / "textures" / a.texture).iterdir()]))).hexdigest()[:8]
-        frames = ROOT / "renders" / "tmp" / "final" / f"{out.stem}_{a.texture}_{a.seed}_{a.frame}_{a.style}_{look}"
+        frames = ROOT / "renders" / "tmp" / "final" / f"{out.stem}_{a.texture}_{a.seed}_{a.frame}_{a.style}_{look}"  # out.stem carries _natural
         sc.render.image_settings.file_format = "PNG"
         sc.render.use_overwrite = False
         sc.render.filepath = str(frames) + "/"

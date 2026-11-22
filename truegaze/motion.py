@@ -87,16 +87,24 @@ def soft_tissue(side, yaw, pitch):
 class Clip:
     """Timeline of gaze shifts and blinks. Times in seconds."""
 
-    def __init__(self, duration, seed=0):
+    def __init__(self, duration, seed=0, natural=False):
         self.duration = duration
         self.shifts = []   # (start time, yaw, pitch, distance)
         self.blinks = []   # (start time, strength 0..1)
         self.rng = np.random.default_rng(seed)
+        self.natural = natural  # opt-in extras: corrective saccades, head follows gaze, partial blinks, uneven brows
 
     def look(self, t, yaw, pitch, distance=DEFAULT_DISTANCE, blink_on_large=True):
-        self.shifts.append((t, yaw, pitch, distance))
-        prev = self.shifts[-2] if len(self.shifts) > 1 else (0, 0, 0, distance)
-        if blink_on_large and math.hypot(yaw - prev[1], pitch - prev[2]) > 20:
+        prev = self.shifts[-1] if self.shifts else (0, 0, 0, distance)
+        amp = math.hypot(yaw - prev[1], pitch - prev[2])
+        if self.natural and amp > 12:
+            # large saccades land 6-12 % short; a small corrective saccade follows 150-220 ms later
+            short = self.rng.uniform(0.88, 0.94)
+            self.shifts.append((t, prev[1] + short * (yaw - prev[1]), prev[2] + short * (pitch - prev[2]), distance))
+            self.shifts.append((t + self.rng.uniform(0.15, 0.22), yaw, pitch, distance))
+        else:
+            self.shifts.append((t, yaw, pitch, distance))
+        if blink_on_large and amp > 20:
             self.blink(t - 0.02)
         return self
 
@@ -109,7 +117,8 @@ class Clip:
         t = self.rng.uniform(0.6, 1.5)
         while t < self.duration - 0.4:
             if all(abs(t - b) > 0.8 for b, _ in self.blinks):
-                self.blink(t)
+                # natural: about one spontaneous blink in four stops short of full closure
+                self.blink(t, self.rng.uniform(0.6, 0.85) if self.natural and self.rng.random() < 0.25 else 1.0)
             t += self.rng.uniform(*every)
         return self
 
@@ -155,6 +164,17 @@ def render_clip(clip, fps=30):
     out["head_yaw"] = 1.2 * wave(0.11, 0) + 0.5 * wave(0.29, 1)
     out["head_pitch"] = 0.7 * wave(0.17, 2) + 0.3 * wave(0.25, 3)
     out["head_roll"] = 0.5 * wave(0.13, 4)
+    if clip.natural:
+        # the head follows large gaze shifts about 40 ms after the eyes and takes a share of them;
+        # the eyes counter-turn below, so the gaze still lands on the target
+        gaze = np.array([_direction(clip, ti)[:2] for ti in t])
+        late = np.stack([np.interp(t - 0.04, t, gaze[:, k]) for k in (0, 1)], 1)
+        follow = np.zeros_like(late)
+        alpha = 1 - math.exp(-1 / (fps * 0.15))  # head lags with a 150 ms time constant
+        for i in range(1, n):
+            follow[i] = follow[i - 1] + alpha * (late[i] - follow[i - 1])
+        out["head_yaw"] += 0.2 * follow[:, 0]
+        out["head_pitch"] += 0.15 * follow[:, 1]
     for i, ti in enumerate(t):
         yaw, pitch, dist = _direction(clip, ti)
         yaw, pitch = yaw + drift[i, 0] + micro[i, 0], pitch + drift[i, 1] + micro[i, 1]
@@ -174,20 +194,24 @@ def render_clip(clip, fps=30):
         out["lower_lid_up"][i] = min(out["lower_lid_up"][i] + 0.10 * closure, 0.4)
         out["pupil"][i] = PUPIL_REST + 0.2 * math.sin(2 * math.pi * 0.35 * ti) + 0.1 * math.sin(2 * math.pi * 0.9 * ti + 1)
     out["retract"] = 0.001 * out["blink"]  # m: the closing muscle pulls the eyeball about 1 mm back
+    if clip.natural:  # brows are not perfectly symmetric: one side rises a beat later and a little less
+        lead, lag = ("left", "right") if rng.random() < 0.5 else ("right", "left")
+        out[f"brow_raise_{lead}"] = out["brow_raise"].copy()
+        out[f"brow_raise_{lag}"] = 0.85 * np.interp(t - 0.06, t, out["brow_raise"])
     return out
 
 
 # The three required inputs. Directions: "Left" means toward the viewer's left by default (screen),
 # which is the character's right (negative yaw). frame="subject" uses the character's own left.
-def preset(name, seed=0, frame="screen"):
+def preset(name, seed=0, frame="screen", natural=False):
     side = -1 if frame == "screen" else 1
     if name == "Left":
-        return Clip(9.0, seed).look(1.0, 28 * side, 0).look(5.5, 0, 0).natural_blinks()
+        return Clip(9.0, seed, natural).look(1.0, 28 * side, 0).look(5.5, 0, 0).natural_blinks()
     if name == "Right":
-        return Clip(9.0, seed).look(1.0, -28 * side, 0).look(5.5, 0, 0).natural_blinks()
+        return Clip(9.0, seed, natural).look(1.0, -28 * side, 0).look(5.5, 0, 0).natural_blinks()
     if name == "Generate Motion":
         rng = np.random.default_rng(seed)
-        c = Clip(12.0, seed)
+        c = Clip(12.0, seed, natural)
         c.look(0.8, 25, 3).look(2.0, -25, -2).look(3.4, 0, 0)
         # eye roll: sweep the upper arc right to left in small steps
         for k, a in enumerate(np.linspace(-150, -30, 7)):
@@ -197,3 +221,4 @@ def preset(name, seed=0, frame="screen"):
         c.look(9.4, 0, 0, distance=0.35)  # back to the camera, converging closer
         return c.natural_blinks()
     raise ValueError(f"unknown input {name!r}; use Left, Right or Generate Motion")
+

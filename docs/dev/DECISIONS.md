@@ -169,3 +169,8 @@ From the 18 Nov deep research (`reports/Synthetic eyes research and upgrades.md`
 - **Skin orange peel:** pore bump 0.5 to 0.35, micro relief 0.35 to 0.2.
 - **Not done:** motion compared with recorded human data (GazeBase needs a licence check and a large download); downstream gaze-network test (out of scope, not claimed).
 - Every set changed: all stills, the launch frames and all videos are rendered again (`renders/tmp/chain5.sh`).
+
+## D-028 (22 Nov): deadline-day additions that need no re-render
+- **Why:** the competitor review showed rivals lead on lifelike motion details, interactive extras and self-checks. Re-rendering the videos (about 6.5 h, two crashes last time) was too risky on the last day.
+- **Done:** lens margin stated (pupils move 18-20 px, 6x the pass bar); `tools/validate.py` (34 repo checks, 11 zip checks); 15 new tests (31 total); refraction on/off panel (`tools/refraction_panel.py`, `docs/refraction.jpg`); `--natural` motion (corrective saccades, head follows gaze, partial blinks, uneven brows).
+- **Rule kept:** `--natural` is off by default and the default motion is byte-identical to the submitted videos (checked for 3 inputs x 3 seeds x 2 frames), so every video still matches the code.

@@ -5,7 +5,7 @@
 | 5–10 UV texture maps, face + distinct left/right iris | `textures/01` … `08`, one overview sheet each in `uv_maps/` | `python3 -m truegaze.textures` |
 | Python script with inputs `Left`, `Right`, `Generate Motion` | `render.py` | — |
 | A video for each input, ≤ 15 s | `outputs/videos/` (9, 9 and 12 s) | `render.py --all` |
-| 5–10 renders with different textures | **`outputs/renders/01_front.png` … `08_front.png`**, one per set; 25 extra views (close, hero, clay, wire, portability) | `tools/stills.py` |
+| 5–10 renders with different textures | **`outputs/renders/01_front.png` … `08_front.png`**, one per set; 27 extra views (close, hero, clay, wire, portability, refraction on/off) | `tools/stills.py` |
 | `.blend` with an expression on the Timeline | `outputs/scene.blend`: eyes, lids, brows and pupil keyed, textures packed | `render.py --input "Generate Motion" --blend outputs/scene.blend` |
 | Launch spec: `move(h, v)`, `reset()`, `render()`, 10 clockwise frames at 1024², per-frame JSON | `wrapper/eyes.py`, `outputs/launch_spec/` | `wrapper/eyes.py -- --sequence outputs/launch_spec` |
 

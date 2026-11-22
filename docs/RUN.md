@@ -23,6 +23,10 @@ python3 tools/make_launch_zip.py                            # VITVellore_ZeroDri
 python3 tools/seam_audit.py
 python3 tools/evaluate_motion.py
 python3 -m pytest tests -q
+python3 tools/validate.py                                   # the whole submission against the brief (34 checks)
+python3 tools/validate.py --zip VITVellore_ZeroDrift.zip    # the launch bundle from a clean unzip
+$BLENDER --background --python render.py -- --input "Generate Motion" --natural   # opt-in natural extras -> *_natural.mp4
+$BLENDER --background --python tools/refraction_panel.py -- 01 && python3 tools/refraction_panel.py   # docs/refraction.jpg
 ```
 
 `render.py` options: `--seed N` (different natural blinks and micro-movements), `--frame screen|subject` (whose left "Left" means; default the viewer's), `--quality draft|final`, `--texture 01..08`, `--view front|hero`, `--style textured|clay|wire`.

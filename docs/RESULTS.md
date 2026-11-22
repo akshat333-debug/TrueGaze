@@ -7,7 +7,7 @@ Every number here is printed by a script in this repo. Run the command and you g
 | What | Result | Command |
 |---|---|---|
 | Required outputs | **all 5**, plus the launch-spec API | [OUTPUTS.md](OUTPUTS.md) |
-| Launch-spec direction check | **5 / 5** (Left, Right, Up, Down, Reset), judged from pupils found in the rendered pixels | `blender -b outputs/launch_spec/scene.blend -P wrapper/eyes.py -- --check` |
+| Launch-spec direction check | **5 / 5** (Left, Right, Up, Down, Reset), judged from pupils found in the rendered pixels; every pupil moves **18.4–20.2 px**, Reset returns to **0.0 px** | `blender -b outputs/launch_spec/scene.blend -P wrapper/eyes.py -- --check` |
 | Pupil label vs. rendered pupil | **1.16 px** mean, 2.92 px max over the 10 frames | `outputs/launch_spec/metadata.json` → `label_error_px` |
 | Seams on the face | colour step **≤ 4 of 255**, all 8 sets, 142 seam edges | `python3 tools/seam_audit.py` |
 | Motion checks | **15 / 15** measures in range (14 from published physiology) | `python3 tools/evaluate_motion.py` |
@@ -15,7 +15,12 @@ Every number here is printed by a script in this repo. Run the command and you g
 | Skin fit onto GNM | **0.5 mm** median | `python3 tools/transfer_skin.py` |
 | Texture portability | wraps onto stock and random GNM identities with none of our rig | `blender -b -P apply_textures.py -- --texture 05 --identity 3` |
 | Rebuild | **one command** from a fresh clone, every download pinned by SHA-256 | `./reproduce.sh` |
-| Tests | **16 / 16** | `python3 -m pytest tests -q` |
+| Tests | **31 / 31**: motion, natural motion, hair, textures, pupil finder, cornea refraction, saccade detector, validator | `python3 -m pytest tests -q` |
+| Submission checker | **34 / 34** on the repo, **11 / 11** on a clean unzip of the launch bundle | `python3 tools/validate.py [--zip VITVellore_ZeroDrift.zip]` |
+
+## A camera framed for the check
+
+The brief fixes the camera at 40 cm but not its lens. At 40 cm the full ±5 cm gaze range turns each eye only about 8°, so a whole-face lens moves the pupil a few pixels: pixel shift scales with focal length, and our measured 18.4 px at 140 mm becomes about 6.6 px at 50 mm. We pick 140 mm, the longest lens that still frames both eyes and both brows, so every direction clears the 3 px pass bar six times over. Source: `direction_check_shift_px` in `outputs/launch_spec/metadata.json`.
 
 ## Labels that match the pixels
 

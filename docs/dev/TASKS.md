@@ -248,3 +248,8 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 - Agent rules moved `.claude/CLAUDE.md` -> `docs/dev/AGENT_RULES.md` (no hidden folder at the root; Claude Code no longer auto-loads it, point your agent at it).
 - AI disclosure: `docs/AI_DISCLOSURE.md`. Launch-spec zip attached to GitHub release `submission`.
 - Deck: slide 14 "Limitations & next steps" added (15 slides).
+
+### Handoff 22 Nov (D-028)
+- Done: validator, 31 tests, lens margin in docs/deck, refraction panel, opt-in `--natural` motion. Deck and launch zip rebuilt; release asset replaced.
+- Run: `python3 tools/validate.py`, `python3 -m pytest -q tests`.
+- Not done: no new videos rendered with `--natural` (optional, about 2.5 h per video).

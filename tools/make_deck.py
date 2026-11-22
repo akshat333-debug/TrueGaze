@@ -195,7 +195,7 @@ columns = [
     ("Fit once", GREEN, ["Lid and brow controls", "Socket, bulge, skin drag", "Lashes, brows, down", "Skin transfer in 3D"]),
     ("Generate", GREEN, ["8 texture sets\n(UDIM 1001, 1002, 1004)", "Motion engine\n(gaze, lids, blinks)"]),
     ("Build and render", AMBER, ["Scene from script\n(Blender 4.5, bpy)", "render.py\nCycles on Metal"]),
-    ("Outputs", AMBER, ["6 videos", "33 stills", "scene.blend", "Launch-spec frames\nand metadata"]),
+    ("Outputs", AMBER, ["6 videos", "35 stills", "scene.blend", "Launch-spec frames\nand metadata"]),
 ]
 for c, (name, accent, boxes) in enumerate(columns):
     x = 0.4 + c * 1.87
@@ -209,7 +209,7 @@ for c, (name, accent, boxes) in enumerate(columns):
         arrow.fill.fore_color.rgb = MUTED
         arrow.line.fill.background()
 text(s_arch, 0.4, 4.6, 9.2, 0.7, [
-    [("Checks on every build: ", CYAN, True), ("seam audit, motion evaluation against published ranges, 16 unit tests, direction check on the rendered pixels.", TEXT, False)],
+    [("Checks on every build: ", CYAN, True), ("seam audit, motion evaluation against published ranges, 31 unit tests, a one-command submission checker, direction check on the rendered pixels.", TEXT, False)],
     [("Stack: ", CYAN, True), ("Python 3, NumPy, SciPy, Pillow, Blender 4.5 LTS (bpy, Cycles), ffmpeg. No trained model, no GPU server.", TEXT, False)],
 ], size=11, gap=3)
 
@@ -253,7 +253,7 @@ table(s_kin, 0.4, 1.7, [3.0, 1.3, 1.9, 0.9], [
     ["Blink rate at rest", "16.7 per min", "10 to 20 per min", "in range"],
     ["Vergence on a 35 cm target, per eye", "5.1 degrees", "5.06 degrees (geometry)", "in range"],
 ], size=10.5, row_h=0.31)
-card(s_kin, 7.75, 1.7, 1.85, 1.15, "5 of 5", "Left, Right, Up, Down, Reset, judged from the pupils found in the renders", accent=AMBER)
+card(s_kin, 7.75, 1.7, 1.85, 1.15, "5 of 5", "Judged from the pixels; every pupil moves 18-20 px, 6x the pass bar", accent=AMBER)
 card(s_kin, 7.75, 3.0, 1.85, 1.18, "322 people", "Saccade timing within 10 ms of GazeBase recordings", accent=AMBER)
 text(s_kin, 0.4, 4.35, 9.2, 0.9, [
     "Also: vergence, lids follow gaze, blinks on big jumps, drift and micro-saccades, pupil hippus.",
@@ -342,7 +342,7 @@ card(s_limits, 0.4, 1.7, 4.5, 3.3, "Results", [
     f"Pupil labels {LABEL_ERR['mean']} px from the pupil detected in the render (a pixel test, not a projection self-check).",
     "Saccades within 10 ms of 322 people.",
     "Seam step 4 / 255 or less, all 8 skins.",
-    "All outputs from one command; 16 tests pass.",
+    "All outputs from one command; 31 tests and 34 submission checks pass.",
 ], accent=GREEN, size=13)
 card(s_limits, 5.1, 1.7, 4.5, 3.3, "Impact for Samsung XR", [
     "Train Galaxy XR eye tracking: rotation, pupil and camera labels on every frame.",

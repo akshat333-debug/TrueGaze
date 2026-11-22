@@ -19,6 +19,7 @@ Two open inputs, four one-time fits, one scene builder. Full module map and conv
 - Lids follow vertical gaze. Blinks close fast and open slowly, large gaze jumps trigger one, and the eyeball pulls back about 1 mm.
 - Fixation drifts with micro-saccades, pupils fluctuate, and the head sways while the eyes hold their target.
 - Motion blur at a 180° shutter, as a real 30 fps camera would record it.
+- **Opt-in `--natural`:** saccades over 12° land 6–12 % short and a corrective saccade follows 150–220 ms later; the head follows large shifts 40 ms late and takes about a fifth of them while the eyes keep the target; about one spontaneous blink in four stops short; one brow rises a beat later and a little less. Off by default, so the submitted videos are unchanged; covered by tests.
 
 ## Launch-spec API (`wrapper/eyes.py`)
 - `move(h, v)` puts one fixation point on a plane 35 cm out and turns each eyeball to it; `reset()`, `render(path)`.
