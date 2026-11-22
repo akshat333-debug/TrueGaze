@@ -32,6 +32,7 @@
     <button id="wander">Look around</button>
   </div>
   <div id="readout" aria-live="polite"></div>
+  <p>No headset? The Enter XR button only lights up in a WebXR browser such as the Meta Quest browser.</p>
   <p><a href="https://github.com/akshat333-debug/TrueGaze">Code</a> · <a href="https://youtu.be/ydB1k3vBDyk">Demo video</a></p>
 </div>
 <div id="status">Loading the head (17 MB)…</div>
@@ -58,10 +59,12 @@ document.body.appendChild(XRButton.createButton(renderer, { optionalFeatures: ["
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x05070c);
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
-scene.environmentIntensity = 0.35;
+scene.environmentIntensity = 0.22;
 const camera = new THREE.PerspectiveCamera(28, innerWidth / innerHeight, 0.01, 20);
-const key = new THREE.DirectionalLight(0xfff4e8, 2.4); key.position.set(0.32, 0.30, 0.38); scene.add(key);
-const fill = new THREE.DirectionalLight(0xdfe8ff, 0.5); fill.position.set(-0.45, 0.0, 0.40); scene.add(fill);
+// the studio of our renders: a warm key from the side and above, a weak cool fill, a rim to lift the head off black
+const key = new THREE.DirectionalLight(0xfff1e4, 3.2); key.position.set(0.40, 0.32, 0.30); scene.add(key);
+const fill = new THREE.DirectionalLight(0xdfe8ff, 0.35); fill.position.set(-0.45, -0.05, 0.40); scene.add(fill);
+const rim = new THREE.DirectionalLight(0xffffff, 1.2); rim.position.set(-0.3, 0.4, -0.5); scene.add(rim);
 
 const rig = new THREE.Group(); scene.add(rig);   // moves and turns the whole head
 const gaze = new Gaze();
@@ -74,7 +77,7 @@ new GLTFLoader().load("head.glb", (gltf) => {
       meshes.push(o);
       o.frustumCulled = false;
       const m = o.material, name = m.name.replace(/\.\d+$/, "");
-      if (name === "skin") o.material = new THREE.MeshPhysicalMaterial({ map: m.map, roughness: 0.55, sheen: 0.35, sheenRoughness: 0.45, sheenColor: new THREE.Color(0.8, 0.55, 0.5), name });
+      if (name === "skin") o.material = new THREE.MeshPhysicalMaterial({ map: m.map, roughness: 0.55, sheen: 0.25, sheenRoughness: 0.5, clearcoat: 0.08, clearcoatRoughness: 0.45, sheenColor: new THREE.Color(0.8, 0.55, 0.5), name });
       else if (name === "cornea") o.material = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.06, roughness: 0.03, clearcoat: 1, envMapIntensity: 4, depthWrite: false, name });
       else if (name.startsWith("eye")) { m.roughness = 0.35; }
       else if (name === "lashes") { m.roughness = 0.5; m.side = THREE.DoubleSide; }

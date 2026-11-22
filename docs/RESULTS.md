@@ -15,6 +15,7 @@ Every number here is printed by a script in this repo. Run the command and you g
 | Skin fit onto GNM | **0.5 mm** median | `python3 tools/transfer_skin.py` |
 | Texture portability | wraps onto stock and random GNM identities with none of our rig | `blender -b -P apply_textures.py -- --texture 05 --identity 3` |
 | Rebuild | **one command** from a fresh clone, every download pinned by SHA-256 | `./reproduce.sh` |
+| Continuous integration | tests, submission checker, motion evaluation and seam audit run on every push | [GitHub Actions](https://github.com/akshat333-debug/TrueGaze/actions/workflows/ci.yml) |
 | Tests | **31 / 31**: motion, natural motion, hair, textures, pupil finder, cornea refraction, saccade detector, validator | `python3 -m pytest tests -q` |
 | Submission checker | **34 / 34** on the repo, **11 / 11** on a clean unzip of the launch bundle | `python3 tools/validate.py [--zip VITVellore_ZeroDrift.zip]` |
 

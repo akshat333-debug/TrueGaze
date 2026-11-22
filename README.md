@@ -4,7 +4,7 @@
 
 **Samsung PRISM XR Hackathon 2026 · Track 1, Synthetic Eyes · Team Zero Drift, VIT Vellore**
 
-![Blender 4.5 LTS](https://img.shields.io/badge/Blender-4.5_LTS-orange) ![direction check](https://img.shields.io/badge/direction_check-5%2F5-brightgreen) ![label error](https://img.shields.io/badge/pupil_label-1.16_px-brightgreen) ![seams](https://img.shields.io/badge/seam_step-%E2%89%A44%2F255-brightgreen) ![tests](https://img.shields.io/badge/tests-31_passing-brightgreen) ![licence](https://img.shields.io/badge/licence-Apache_2.0-lightgrey)
+[![ci](https://github.com/akshat333-debug/TrueGaze/actions/workflows/ci.yml/badge.svg)](https://github.com/akshat333-debug/TrueGaze/actions/workflows/ci.yml) [![live demo](https://img.shields.io/badge/live-WebXR_demo-40c8e6)](https://akshat333-debug.github.io/TrueGaze/xr/) ![Blender 4.5 LTS](https://img.shields.io/badge/Blender-4.5_LTS-orange) ![direction check](https://img.shields.io/badge/direction_check-5%2F5-brightgreen) ![label error](https://img.shields.io/badge/pupil_label-1.16_px-brightgreen) ![seams](https://img.shields.io/badge/seam_step-%E2%89%A44%2F255-brightgreen) ![tests](https://img.shields.io/badge/tests-31_passing-brightgreen) ![licence](https://img.shields.io/badge/licence-Apache_2.0-lightgrey)
 
 ![Generate Motion: close hero view and front view](docs/hero.gif)
 
@@ -62,6 +62,12 @@ The brief's problem: gaze estimators need huge labelled datasets, and capturing 
 - **Zero privacy load:** no person is captured, so there is no consent, storage or deletion process to run.
 - **Scale on a laptop:** seeds × 8 texture sets × any GNM identity give unbounded variety. Everything here was built and rendered on an 8 GB M3, with no GPU server.
 - **Lifelike XR avatars:** the same motion engine gives avatars eyes that saccade, blink and converge like a person's.
+
+## Try it live
+
+[![TrueGaze live: the eyes follow your cursor, or look at you in a Meta Quest](docs/xr_live.jpg)](https://akshat333-debug.github.io/TrueGaze/xr/)
+
+*The same GNM head, textures and eye-motion engine in your browser (three.js). Move the cursor and the eyes follow with real saccades and blinks; on a Meta Quest press **Enter XR**. Source: [`docs/xr/`](docs/xr/).*
 
 ## How it works
 
