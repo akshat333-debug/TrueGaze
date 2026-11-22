@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrueGaze Live</title>
+<meta name="description" content="TrueGaze in the browser and in WebXR: the GNM head with our textures and the same eye-motion engine, looking at you.">
+<style>
+  :root { --bg: #0b1530; --text: #eef2fa; --muted: #96a5be; --accent: #40c8e6; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; }
+  canvas { display: block; }
+  #panel { position: fixed; left: 16px; bottom: 16px; max-width: min(360px, calc(100vw - 32px)); background: rgba(11, 21, 48, .78);
+           border: 1px solid rgba(64, 200, 230, .35); border-radius: 12px; padding: 14px 16px; backdrop-filter: blur(6px); }
+  h1 { font-size: 19px; margin: 0 0 4px; } h1 span { color: var(--accent); }
+  p { margin: 6px 0; color: var(--muted); } a { color: var(--accent); }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  button, label { font: inherit; color: var(--text); }
+  button { background: rgba(64, 200, 230, .15); border: 1px solid var(--accent); border-radius: 8px; padding: 6px 12px; cursor: pointer; }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #readout { font: 13px/1.4 ui-monospace, Menlo, monospace; color: var(--text); margin-top: 10px; min-height: 2.8em; }
+  #status { position: fixed; inset: 0; display: grid; place-items: center; color: var(--muted); pointer-events: none; }
+  @media (max-width: 600px) { #panel { font-size: 14px; } }
+</style>
+</head>
+<body>
+<div id="panel">
+  <h1>TrueGaze <span>Live</span></h1>
+  <p>The GNM head with texture set 01 and our eye-motion engine, running in your browser. Move your cursor (or touch): the eyes follow it with real saccades, blinks and lids that follow the eye. On a Meta Quest, press <b>Enter XR</b> and it looks at you.</p>
+  <div class="row">
+    <label><input type="checkbox" id="natural" checked> Natural extras</label>
+    <button id="blink">Blink</button>
+    <button id="wander">Look around</button>
+  </div>
+  <div id="readout" aria-live="polite"></div>
+  <p><a href="https://github.com/akshat333-debug/TrueGaze">Code</a> · <a href="https://youtu.be/ydB1k3vBDyk">Demo video</a></p>
+</div>
+<div id="status">Loading the head (17 MB)…</div>
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+               "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/" } }
+</script>
+<script type="module">
+import * as THREE from "three";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+import { XRButton } from "three/addons/webxr/XRButton.js";
+import { Gaze, weights } from "./gaze.js";
+
+const D = THREE.MathUtils.DEG2RAD, R = THREE.MathUtils.RAD2DEG;
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.toneMapping = THREE.AgXToneMapping;
+renderer.xr.enabled = true;
+document.body.appendChild(renderer.domElement);
+document.body.appendChild(XRButton.createButton(renderer, { optionalFeatures: ["local-floor"] }));
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x05070c);
+scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.35;
+const camera = new THREE.PerspectiveCamera(28, innerWidth / innerHeight, 0.01, 20);
+const key = new THREE.DirectionalLight(0xfff4e8, 2.4); key.position.set(0.32, 0.30, 0.38); scene.add(key);
+const fill = new THREE.DirectionalLight(0xdfe8ff, 0.5); fill.position.set(-0.45, 0.0, 0.40); scene.add(fill);
+
+const rig = new THREE.Group(); scene.add(rig);   // moves and turns the whole head
+const gaze = new Gaze();
+let meshes = [], eyes = {}, mid = new THREE.Vector3(), ready = false;
+
+new GLTFLoader().load("head.glb", (gltf) => {
+  const model = gltf.scene;
+  model.traverse((o) => {
+    if (o.isMesh) {
+      meshes.push(o);
+      o.frustumCulled = false;
+      const m = o.material, name = m.name.replace(/\.\d+$/, "");
+      if (name === "skin") o.material = new THREE.MeshPhysicalMaterial({ map: m.map, roughness: 0.55, sheen: 0.35, sheenRoughness: 0.45, sheenColor: new THREE.Color(0.8, 0.55, 0.5), name });
+      else if (name === "cornea") o.material = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.06, roughness: 0.03, clearcoat: 1, envMapIntensity: 4, depthWrite: false, name });
+      else if (name.startsWith("eye")) { m.roughness = 0.35; }
+      else if (name === "lashes") { m.roughness = 0.5; m.side = THREE.DoubleSide; }
+    }
+  });
+  rig.add(model);
+  model.updateMatrixWorld(true);
+  for (const side of ["left", "right"]) {
+    const bone = model.getObjectByName(`${side}_eye`);
+    const restWorld = bone.getWorldQuaternion(new THREE.Quaternion());
+    eyes[side] = { bone, restLocal: bone.quaternion.clone(), restWorld, centre: bone.getWorldPosition(new THREE.Vector3()) };
+  }
+  mid.addVectors(eyes.left.centre, eyes.right.centre).multiplyScalar(0.5);
+  model.position.sub(mid);           // eye midpoint at the rig origin
+  for (const side of ["left", "right"]) eyes[side].centre.sub(mid);
+  mid.set(0, 0, 0);
+  camera.position.set(0, -0.005, 0.40);  // desktop: 40 cm in front of the eyes, as in the launch spec
+  camera.fov = 16; camera.updateProjectionMatrix();
+  camera.lookAt(0, 0.005, 0);
+  ready = true;
+  document.getElementById("status").remove();
+}, (e) => { if (e.total) document.getElementById("status").textContent = `Loading the head… ${Math.round(100 * e.loaded / e.total)} %`; },
+   (err) => { document.getElementById("status").textContent = "Could not load head.glb: " + err.message; });
+
+// targets: the cursor (a point just in front of the camera), the XR headset, or a wander point
+const pointer = new THREE.Vector2();
+let lastMove = -10, wanderUntil = 0, wanderPoint = null, nextWander = 0;
+addEventListener("pointermove", (e) => { pointer.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); lastMove = gaze.now; wanderUntil = 0; });
+document.getElementById("blink").onclick = () => gaze.blink();
+document.getElementById("wander").onclick = () => { wanderUntil = gaze.now + 12; nextWander = 0; };
+document.getElementById("natural").onchange = (e) => { gaze.natural = e.target.checked; };
+
+function targetPoint() {
+  const xr = renderer.xr.isPresenting;
+  if (xr) return renderer.xr.getCamera().getWorldPosition(new THREE.Vector3());
+  const t = gaze.now;
+  if (t < wanderUntil || t - lastMove > 4) {     // idle: glance around, come back to the viewer
+    if (t > nextWander) {
+      wanderPoint = Math.random() < 0.35 ? null : new THREE.Vector3((Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.3, 0.45);
+      nextWander = t + 1.2 + 1.8 * Math.random();
+    }
+    if (wanderPoint) return rig.localToWorld(wanderPoint.clone());
+  }
+  // the cursor sets the gaze directly: screen edge = 25 degrees sideways, 18 degrees up or down
+  const yaw = pointer.x * 25 * D, pitch = pointer.y * 18 * D;
+  return rig.localToWorld(new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch)).multiplyScalar(0.45));
+}
+
+renderer.xr.addEventListener("sessionstart", () => {   // stand the head 60 cm in front of the viewer at eye height
+  const c = renderer.xr.getCamera().getWorldPosition(new THREE.Vector3());
+  rig.position.set(c.x, (c.y || 1.5) - 0.02, c.z - 0.6);
+});
+renderer.xr.addEventListener("sessionend", () => rig.position.set(0, 0, 0));
+
+const qYaw = new THREE.Quaternion(), qPitch = new THREE.Quaternion(), X = new THREE.Vector3(1, 0, 0), Y = new THREE.Vector3(0, 1, 0);
+let headYaw = 0, headPitch = 0, clock = new THREE.Clock();
+
+function angles(from, p) { const d = p.clone().sub(from); return [Math.atan2(d.x, d.z) * R, Math.atan2(d.y, Math.hypot(d.x, d.z)) * R]; }
+
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (ready) {
+    const t = gaze.now;
+    const local = rig.worldToLocal(targetPoint());            // target in the head's frame
+    const dist = Math.max(local.length(), 0.15);
+    const want = angles(mid, local);
+    const g = gaze.update(want, dt);
+    // head: slow sway, plus (natural) following large gaze shifts, ~20 % of them, 150 ms lag
+    const a = 1 - Math.exp(-dt / 0.15);
+    headYaw += a * ((gaze.natural ? 0.2 * gaze.goal[0] : 0) - headYaw);
+    headPitch += a * ((gaze.natural ? 0.15 * gaze.goal[1] : 0) - headPitch);
+    rig.rotation.set((headPitch * -1 + 0.7 * Math.sin(1.07 * t)) * D * 0.5, (headYaw + 1.2 * Math.sin(0.69 * t)) * D * 0.5, 0.5 * Math.sin(0.82 * t) * D * 0.3);
+    // eye-in-head: the gaze direction minus what the head already turned
+    const yaw = g.yaw - headYaw * 0.5, pitch = g.pitch + headPitch * 0.5;
+    const point = new THREE.Vector3(Math.sin(yaw * D) * Math.cos(pitch * D), Math.sin(pitch * D), Math.cos(yaw * D) * Math.cos(pitch * D)).multiplyScalar(dist);
+    const per = {};
+    for (const side of ["left", "right"]) {                    // both eyes aim at one point, so they converge
+      const e = eyes[side], [ey, ep] = angles(e.centre, point);
+      per[side] = [ey, ep];
+      qYaw.setFromAxisAngle(Y, ey * D); qPitch.setFromAxisAngle(X, -ep * D);
+      const delta = qYaw.multiply(qPitch);
+      e.bone.quaternion.copy(e.restLocal).multiply(e.restWorld.clone().invert().multiply(delta).multiply(e.restWorld));
+    }
+    const w = weights(yaw, pitch, g.closure, per, gaze.natural, t);
+    w.pupil = g.pupil;
+    for (const m of meshes) {
+      const dict = m.morphTargetDictionary;
+      if (!dict) continue;
+      for (const [k, v] of Object.entries(w)) if (k in dict) m.morphTargetInfluences[dict[k]] = v;
+    }
+    if (gaze.last) document.getElementById("readout").textContent =
+      `last saccade ${gaze.last.amp.toFixed(1)}° in ${gaze.last.ms.toFixed(0)} ms\ngaze ${yaw.toFixed(1)}°, ${pitch.toFixed(1)}°  lids ${(g.closure * 100).toFixed(0)} % closed`;
+  }
+  renderer.render(scene, camera);
+});
+
+addEventListener("resize", () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+</script>
+</body>
+</html>

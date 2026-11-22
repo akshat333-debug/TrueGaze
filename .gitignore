@@ -6,3 +6,4 @@ assets/cache/
 *.mp4
 !outputs/videos/*.mp4
 VITVellore_ZeroDrift.zip
+.claude/
