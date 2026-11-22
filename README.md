@@ -30,7 +30,7 @@ Every number is printed by a script in this repo. Commands and full tables: **[d
 |---|---|
 | 5–10 UV texture maps, face + distinct L/R iris | [`textures/01` … `08`](textures/) · overview sheets in [`uv_maps/`](uv_maps/) |
 | Script with `Left` / `Right` / `Generate Motion` | [`render.py`](render.py) |
-| A video per input, ≤ 15 s | [`Left.mp4`](outputs/videos/Left.mp4) · [`Right.mp4`](outputs/videos/Right.mp4) · [`Generate_Motion.mp4`](outputs/videos/Generate_Motion.mp4) · extras: [hero](outputs/videos/Generate_Motion_hero.mp4), [set 03](outputs/videos/Generate_Motion_set03.mp4), [wireframe](outputs/videos/Generate_Motion_wire.mp4) |
+| A video per input, ≤ 15 s | [`Left.mp4`](outputs/videos/Left.mp4) · [`Right.mp4`](outputs/videos/Right.mp4) · [`Generate_Motion.mp4`](outputs/videos/Generate_Motion.mp4) · extras: [hero](outputs/videos/Generate_Motion_hero.mp4), [set 03](outputs/videos/Generate_Motion_set03.mp4), [wireframe](outputs/videos/Generate_Motion_wire.mp4), [natural](outputs/videos/Generate_Motion_natural.mp4) |
 | 5–10 renders with different textures | [`outputs/renders/01_front.png` … `08_front.png`](outputs/renders/) (+ 27 extra views) |
 | `.blend` with an expression on the Timeline | [`outputs/scene.blend`](outputs/scene.blend) |
 | Launch spec: `eyes.move / reset / render`, 10 frames, metadata | [`wrapper/eyes.py`](wrapper/eyes.py) · [`outputs/launch_spec/`](outputs/launch_spec/) · bundle: [`VITVellore_ZeroDrift.zip` (release)](https://github.com/akshat333-debug/TrueGaze/releases/tag/submission) |
@@ -87,7 +87,7 @@ flowchart LR
 - **Controls native to GNM:** blink, lid and brow shapes are solved inside GNM's 200 eye-expression components, so they work on any GNM face.
 - **Physiology-timed motion:** saccades on the measured main sequence, blinks that close fast and open slow, fixation drift, micro-saccades, pupil hippus, motion blur.
 - **Labels checked against pixels:** the direction check finds the pupils in the rendered image, not in our own metadata.
-- **Even more natural, on request:** `render.py --natural` adds corrective saccades, a head that follows the gaze, partial blinks and uneven brows (the submitted videos use the default motion).
+- **Even more natural, on request:** `render.py --natural` adds corrective saccades, a head that follows the gaze, partial blinks and uneven brows (the submitted videos use the default motion). Sample: [`Generate_Motion_natural.mp4`](outputs/videos/Generate_Motion_natural.mp4).
 
 ![Same eye, cornea refraction off and on](docs/refraction.jpg)
 

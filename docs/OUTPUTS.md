@@ -19,6 +19,7 @@
 | `Generate Motion`, close hero view | [Generate_Motion_hero.mp4](../outputs/videos/Generate_Motion_hero.mp4) | 12 s |
 | `Generate Motion`, dark skin (set 03) | [Generate_Motion_set03.mp4](../outputs/videos/Generate_Motion_set03.mp4) | 12 s |
 | `Generate Motion`, mesh on top | [Generate_Motion_wire.mp4](../outputs/videos/Generate_Motion_wire.mp4) | 12 s |
+| `Generate Motion`, `--natural` extras | [Generate_Motion_natural.mp4](../outputs/videos/Generate_Motion_natural.mp4) | 12 s |
 
 ## Submission package
 
