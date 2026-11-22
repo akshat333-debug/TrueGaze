@@ -26,5 +26,10 @@ Two open inputs, four one-time fits, one scene builder. Full module map and conv
 - Per frame: `eye_rotation_L/R`, `pupil_center_2D_L/R` refracted by the cornea, `camera_matrix`.
 - The direction check renders each pose and finds the pupils in the pixels, so it tests the images, not our own labels. Bundle details: [launch_bundle_README.md](launch_bundle_README.md).
 
+## Live in the browser and in WebXR (`docs/xr/`)
+- `tools/export_web.py` exports the GNM head, its four-bone rig, lashes and all 33 shape keys to glTF (`docs/xr/head.glb`, texture set 01).
+- `docs/xr/gaze.js` is a real-time port of `truegaze/motion.py`: the same main-sequence saccades, blink profile, lid follow, bulge and drag keys, drift, micro-saccades and hippus, plus the natural extras.
+- `docs/xr/index.html` (three.js): the eyes follow your cursor; **Enter XR** on a Meta Quest stands the head 60 cm in front of you and it holds your gaze. Live: https://akshat333-debug.github.io/TrueGaze/xr/. The browser version is tested; the headset path uses the standard three.js WebXR button but was not tried on a headset.
+
 ## Where it sits
 Synthetic eyes for gaze research are an established line: SynthesEyes (ICCV 2015), UnityEyes (ETRA 2016), EyeRender (2014), RIT-Eyes (2020), NVGaze (CHI 2019), Microsoft Face Synthetics (ICCV 2021), GazeGene (CVPR 2025). TrueGaze brings that approach to an Apache-licensed head with controls in its own expression space, soft tissue that follows the eye, motion checked against recorded people, and labels checked against the pixels.

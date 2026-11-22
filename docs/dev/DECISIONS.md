@@ -174,3 +174,8 @@ From the 18 Nov deep research (`reports/Synthetic eyes research and upgrades.md`
 - **Why:** the competitor review showed rivals lead on lifelike motion details, interactive extras and self-checks. Re-rendering the videos (about 6.5 h, two crashes last time) was too risky on the last day.
 - **Done:** lens margin stated (pupils move 18-20 px, 6x the pass bar); `tools/validate.py` (34 repo checks, 11 zip checks); 15 new tests (31 total); refraction on/off panel (`tools/refraction_panel.py`, `docs/refraction.jpg`); `--natural` motion (corrective saccades, head follows gaze, partial blinks, uneven brows).
 - **Rule kept:** `--natural` is off by default and the default motion is byte-identical to the submitted videos (checked for 3 inputs x 3 seeds x 2 frames), so every video still matches the code.
+
+## D-029 (22 Nov): live browser / WebXR demo
+- **Why:** both leading rivals ship an interactive demo; ours was files and videos only.
+- **Done:** `tools/export_web.py` (GNM head, rig, lashes, 33 shape keys to glTF), `docs/xr/gaze.js` (real-time port of `motion.py`), `docs/xr/index.html` (three.js, cursor gaze, Enter XR). Published by GitHub Pages from `docs/`.
+- **Limits stated in the docs:** browser tested; the Quest path uses the stock three.js XR button and was not tried on a headset. Texture set 01 only; lighting and skin shading are simplified versus Cycles.

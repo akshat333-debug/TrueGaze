@@ -253,3 +253,7 @@ See README "Run it". Blender 4.5 LTS headless; on Akshat's Mac use `/Application
 - Done: validator, 31 tests, lens margin in docs/deck, refraction panel, opt-in `--natural` motion. Deck and launch zip rebuilt; release asset replaced.
 - Run: `python3 tools/validate.py`, `python3 -m pytest -q tests`.
 - Not done: no new videos rendered with `--natural` (optional, about 2.5 h per video).
+
+### Handoff 22 Nov (D-029)
+- Live demo: https://akshat333-debug.github.io/TrueGaze/xr/ (source docs/xr/). Rebuild head: `blender -b -P tools/export_web.py -- 01`.
+- Natural clip rendering in background (renders/tmp/natural.log), expected ~19:30.

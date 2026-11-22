@@ -52,6 +52,15 @@ SARVAM_API_KEY=... python3 tools/make_demo.py   # outputs/demo.mp4: narrated, ca
 
 The terminal shots replay real runs saved in `renders/tmp/capture/` (`check.txt`, `render.txt`).
 
+## Live demo
+
+```bash
+$BLENDER --background --python tools/export_web.py -- 01   # docs/xr/head.glb
+python3 -m http.server 8765 --directory docs/xr            # open http://localhost:8765
+```
+
+Published from `docs/` by GitHub Pages: https://akshat333-debug.github.io/TrueGaze/xr/
+
 ## Docker
 
 ```bash

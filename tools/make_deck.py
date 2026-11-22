@@ -307,7 +307,7 @@ text(s_demo, 6.3, 1.7, 3.3, 2.8, [
     [("Time: ", CYAN, True), ("draft videos in about 40 minutes; final quality takes hours.", TEXT, False)],
     [("Videos: ", CYAN, True), ("outputs/videos/ in the repo.", TEXT, False)],
 ], size=12, gap=9)
-text(s_demo, 0.4, 4.7, 9.2, 0.4, [[("Repo: ", CYAN, True), (REPO, WHITE, True, REPO_URL), ("     Demo: ", CYAN, True), ("youtu.be/ydB1k3vBDyk", WHITE, True, DEMO_URL)]], size=14)
+text(s_demo, 0.4, 4.7, 9.2, 0.4, [[("Repo: ", CYAN, True), (REPO, WHITE, True, REPO_URL), ("     Demo: ", CYAN, True), ("youtu.be/ydB1k3vBDyk", WHITE, True, DEMO_URL), ("     Live: ", CYAN, True), ("WebXR demo", WHITE, True, "https://akshat333-debug.github.io/TrueGaze/xr/")]], size=14)
 
 # 11 brownie: soft tissue
 header(s_brownie, "BROWNIE SLIDES · SOFT TISSUE")

@@ -10,7 +10,8 @@
 
 *`render.py --input "Generate Motion"`. Every pixel comes from code in this repo: no hand-painted texture, no hand-edited `.blend`, no photo of a real person.*
 
-**▶ Demo video (2 min 49 s, narrated, captioned): https://youtu.be/ydB1k3vBDyk**
+**▶ Demo video (2 min 49 s, narrated, captioned): https://youtu.be/ydB1k3vBDyk**  
+**👁 Try it live in your browser or on a Meta Quest: https://akshat333-debug.github.io/TrueGaze/xr/**
 
 ---
 
@@ -36,6 +37,7 @@ Every number is printed by a script in this repo. Commands and full tables: **[d
 | Deck | [`VITVellore_ZeroDrift.pptx`](VITVellore_ZeroDrift.pptx) |
 | Demo video, ≤ 3 min | [youtu.be/ydB1k3vBDyk](https://youtu.be/ydB1k3vBDyk) |
 | AI disclosure | [docs/AI_DISCLOSURE.md](docs/AI_DISCLOSURE.md) |
+| Bonus: live browser / WebXR demo | [akshat333-debug.github.io/TrueGaze/xr/](https://akshat333-debug.github.io/TrueGaze/xr/) · source [`docs/xr/`](docs/xr/) |
 
 Where each one comes from and how to rebuild it: [docs/OUTPUTS.md](docs/OUTPUTS.md).
 
