@@ -1,0 +1,21 @@
+name: ci
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: pip install -r requirements.txt
+      - name: Unit tests (motion, labels, refraction, textures, hair, validator)
+        run: python -m pytest -q tests
+      - name: Submission checker (Track 1 brief)
+        run: python tools/validate.py
+      - name: Motion against published physiology
+        run: python tools/evaluate_motion.py
+      - name: Seam audit on all texture sets
+        run: python tools/seam_audit.py
